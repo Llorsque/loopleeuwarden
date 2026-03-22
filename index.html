@@ -1,0 +1,978 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Regie</title>
+<link href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700;800&family=Barlow:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg:      #f0efe9;
+  --white:   #ffffff;
+  --navy:    #1e1c4a;
+  --yellow:  #ffd000;
+  --y-bg:    #fffadc;
+  --red:     #d63256;
+  --r-bg:    #fdf0f3;
+  --orange:  #d97000;
+  --o-bg:    #fff4e6;
+  --green:   #1a9f5a;
+  --g-bg:    #edf9f3;
+  --border:  #e2e1da;
+  --text:    #1a1930;
+  --t2:      #72708a;
+  --t3:      #b0aec5;
+  --sb-line: rgba(255,255,255,0.07);
+  --sh:      0 1px 3px rgba(26,25,48,.05), 0 4px 16px rgba(26,25,48,.05);
+  --r: 10px;
+  --ui: 'Barlow Condensed', sans-serif;
+  --body: 'Barlow', sans-serif;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
+html, body { height: 100%; overflow: hidden; }
+body { font-family: var(--body); font-weight: 400; background: var(--bg); color: var(--text); }
+.app { display: flex; height: 100vh; }
+
+/* ─── SIDEBAR ─── */
+.sidebar { width: 216px; flex-shrink: 0; background: var(--navy); display: flex; flex-direction: column; height: 100vh; }
+.sb-logo { padding: 26px 20px 20px; border-bottom: 1px solid var(--sb-line); }
+.sb-mark { font-family: var(--ui); font-weight: 700; font-size: 20px; letter-spacing: 4px; text-transform: uppercase; color: var(--yellow); }
+.sb-sub  { margin-top: 5px; font-size: 11px; color: rgba(255,255,255,.28); font-family: var(--ui); font-weight: 400; letter-spacing: .3px; line-height: 1.5; }
+.sb-nav  { padding: 14px 10px; flex: 1; overflow-y: auto; }
+.sb-lbl  { font-size: 9px; font-family: var(--ui); font-weight: 600; letter-spacing: 2px; text-transform: uppercase; color: rgba(255,255,255,.2); padding: 0 8px; margin-bottom: 4px; margin-top: 14px; }
+.sb-lbl:first-child { margin-top: 0; }
+.nv { display: flex; align-items: center; gap: 9px; padding: 9px 10px; border-radius: 7px; cursor: pointer; font-family: var(--ui); font-weight: 500; font-size: 13px; letter-spacing: .3px; text-transform: uppercase; color: rgba(255,255,255,.42); transition: all .14s; margin-bottom: 1px; }
+.nv:hover  { background: rgba(255,255,255,.06); color: rgba(255,255,255,.72); }
+.nv.active { background: var(--yellow); color: var(--navy); }
+.nv .ic    { font-size: 13px; width: 18px; text-align: center; flex-shrink: 0; }
+.bdg       { margin-left: auto; font-size: 10px; border-radius: 20px; padding: 1px 7px; font-weight: 500; font-family: var(--body); line-height: 1.4; }
+.bdg-r { background: var(--red);                   color: #fff; }
+.bdg-y { background: rgba(255,208,0,.18);           color: var(--yellow); }
+.sb-foot { padding: 14px 10px; border-top: 1px solid var(--sb-line); display: flex; flex-direction: column; gap: 6px; }
+.sb-btn  { display: block; width: 100%; padding: 9px 12px; background: transparent; border: 1px solid rgba(255,255,255,.1); border-radius: 7px; color: rgba(255,255,255,.3); font-family: var(--ui); font-weight: 500; font-size: 11px; letter-spacing: 1.5px; text-transform: uppercase; cursor: pointer; transition: all .14s; text-align: center; }
+.sb-btn:hover    { background: rgba(255,255,255,.05); color: rgba(255,255,255,.55); }
+.sb-btn.new-ev   { border-color: rgba(255,208,0,.3); color: rgba(255,208,0,.55); }
+.sb-btn.new-ev:hover { background: rgba(255,208,0,.07); color: var(--yellow); }
+
+/* ─── MAIN ─── */
+.main-area { flex: 1; display: flex; flex-direction: column; height: 100vh; overflow: hidden; min-width: 0; }
+.view { display: none; flex: 1; flex-direction: column; overflow: hidden; }
+.view.active { display: flex; }
+::-webkit-scrollbar { width: 5px; } ::-webkit-scrollbar-track { background: transparent; } ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 3px; }
+
+/* ─── PAGE HEADER ─── */
+.page-hd { padding: 24px 32px 20px; background: var(--bg); border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 12px; flex-shrink: 0; }
+.page-hd h1 { font-family: var(--ui); font-weight: 700; font-size: 24px; letter-spacing: 1px; text-transform: uppercase; line-height: 1; }
+.page-hd .ml { margin-left: auto; display: flex; gap: 8px; align-items: center; }
+
+/* ─── BUTTONS ─── */
+.btn     { font-family: var(--ui); font-weight: 600; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; padding: 9px 18px; border-radius: 7px; border: none; cursor: pointer; transition: all .13s; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+.btn-y   { background: var(--yellow); color: var(--navy); }
+.btn-y:hover   { background: #ffe033; }
+.btn-out { background: var(--white); color: var(--t2); border: 1.5px solid var(--border); }
+.btn-out:hover { border-color: var(--navy); color: var(--navy); }
+.btn-del { background: var(--r-bg); color: var(--red); border: 1px solid rgba(214,50,86,.1); }
+.btn-del:hover { background: #fce4ec; }
+.btn-sm  { padding: 7px 14px; font-size: 10px; }
+.btn-xs  { padding: 4px 10px; font-size: 10px; border-radius: 5px; }
+.ib      { width: 28px; height: 28px; border-radius: 6px; border: none; background: transparent; color: var(--t3); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; font-size: 12px; transition: all .12s; flex-shrink: 0; }
+.ib:hover      { background: var(--bg); color: var(--text); }
+.ib.del:hover  { background: var(--r-bg); color: var(--red); }
+
+/* ─── FORM FIELDS ─── */
+.fg  { display: flex; flex-direction: column; gap: 4px; }
+.fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+label { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--t3); }
+input[type=text], input[type=time], input[type=number], select, textarea { background: var(--bg); border: 1.5px solid var(--border); border-radius: 7px; color: var(--text); font-family: var(--body); font-size: 13px; font-weight: 400; padding: 8px 11px; width: 100%; transition: border .12s; }
+input:focus, select:focus, textarea:focus { outline: none; border-color: var(--navy); background: var(--white); }
+select option { background: #fff; }
+textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
+.tog-row { display: flex; align-items: center; gap: 10px; }
+.tog     { width: 36px; height: 20px; background: var(--border); border-radius: 10px; position: relative; cursor: pointer; transition: background .14s; flex-shrink: 0; }
+.tog.on  { background: var(--navy); }
+.tog::after { content: ''; position: absolute; width: 14px; height: 14px; background: var(--white); border-radius: 50%; top: 3px; left: 3px; transition: transform .14s; box-shadow: 0 1px 3px rgba(0,0,0,.12); }
+.tog.on::after { transform: translateX(16px); }
+.tog-lbl { font-size: 12px; color: var(--t2); font-weight: 400; }
+.chk     { width: 17px; height: 17px; border-radius: 4px; border: 1.5px solid var(--border); flex-shrink: 0; display: flex; align-items: center; justify-content: center; transition: all .12s; cursor: pointer; background: var(--white); }
+.chk.on  { background: var(--green); border-color: var(--green); }
+.chk.on::after { content: '✓'; color: #fff; font-size: 10px; font-weight: 600; }
+.cl-row  { display: flex; align-items: center; gap: 11px; padding: 10px 0; border-bottom: 1px solid var(--border); cursor: pointer; }
+.cl-row:last-child { border-bottom: none; }
+.cl-title { font-size: 13px; font-weight: 500; }
+.cl-sub   { font-size: 11px; color: var(--t3); margin-top: 1px; font-weight: 400; }
+
+/* ─── BACKOFFICE ─── */
+.bo-cols  { flex: 1; display: flex; overflow: hidden; }
+.bo-left  { flex: 1; overflow-y: auto; background: var(--bg); min-width: 0; }
+.bo-right { width: 360px; flex-shrink: 0; overflow-y: auto; background: var(--white); border-left: 1px solid var(--border); }
+.bo-sep-row  { display: flex; align-items: center; gap: 10px; padding: 18px 28px 7px; }
+.bo-sep-lbl  { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--t3); }
+.bo-sep-line { flex: 1; height: 1px; background: var(--border); }
+.bo-item     { display: flex; align-items: center; padding: 0 28px; border-bottom: 1px solid var(--border); cursor: pointer; transition: background .1s; background: var(--white); }
+.bo-item:hover { background: #fafaf8; }
+.bo-item.sel   { background: var(--y-bg); border-left: 3px solid var(--yellow); padding-left: 25px; }
+.bo-num  { width: 26px; font-family: var(--ui); font-weight: 500; font-size: 12px; color: var(--t3); flex-shrink: 0; }
+.bo-cell { flex: 1; padding: 12px 10px 12px 0; min-width: 0; }
+.bo-title { font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 7px; flex-wrap: wrap; }
+.bo-meta  { display: flex; align-items: center; gap: 9px; margin-top: 3px; flex-wrap: wrap; }
+.bo-meta span { font-size: 11px; color: var(--t3); font-weight: 400; }
+.bo-time  { font-family: var(--ui); font-weight: 600; font-size: 13px; color: var(--t2); white-space: nowrap; padding: 0 12px; }
+.fixed-tag { font-size: 8px; font-family: var(--ui); font-weight: 600; letter-spacing: .8px; color: var(--navy); border: 1.5px solid var(--navy); padding: 1px 5px; border-radius: 3px; text-transform: uppercase; }
+.warn-dot  { width: 6px; height: 6px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+.lpill     { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: .6px; text-transform: uppercase; padding: 2px 8px; border-radius: 20px; white-space: nowrap; }
+
+/* ─── FORM PANEL ─── */
+.fp-hint { display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 30px; text-align: center; }
+.fp-hint-icon { font-size: 26px; margin-bottom: 10px; opacity: .25; }
+.fp-hint p    { font-family: var(--ui); font-weight: 500; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--t3); line-height: 1.7; }
+.fp-hd        { padding: 20px 22px 0; border-bottom: 1px solid var(--border); }
+.fp-hd h3     { font-family: var(--ui); font-weight: 700; font-size: 16px; letter-spacing: .8px; text-transform: uppercase; margin-bottom: 14px; }
+.fp-tabs      { display: flex; margin: 0 -22px; padding: 0 22px; }
+.fp-tab       { background: none; border: none; color: var(--t3); font-family: var(--ui); font-weight: 600; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; padding: 0 10px 11px; cursor: pointer; border-bottom: 2px solid transparent; transition: all .12s; }
+.fp-tab:hover  { color: var(--t2); }
+.fp-tab.active { color: var(--navy); border-bottom-color: var(--yellow); }
+.fp-body  { padding: 18px 22px; display: flex; flex-direction: column; gap: 11px; }
+.fp-pane  { display: none; flex-direction: column; gap: 11px; }
+.fp-pane.active { display: flex; }
+.fp-foot  { padding: 12px 22px; border-top: 1px solid var(--border); display: flex; justify-content: flex-end; gap: 8px; background: var(--bg); }
+.fp-divider { background: var(--bg); border-top: 1px solid var(--border); padding: 18px 22px; }
+.fp-divider h4 { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--t3); margin-bottom: 9px; padding-bottom: 5px; border-bottom: 1px solid var(--border); }
+.pill-row { display: flex; align-items: center; gap: 8px; padding: 5px 6px; border-radius: 6px; }
+.pill-row:hover { background: var(--border); }
+.pill-row span  { flex: 1; font-size: 12px; color: var(--t2); font-weight: 400; }
+.cswatch  { width: 9px; height: 9px; border-radius: 50%; flex-shrink: 0; }
+.mini-add { display: flex; gap: 6px; margin-top: 7px; }
+.mini-add input { flex: 1; }
+.td-mini  { display: flex; align-items: center; gap: 8px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.td-mini:last-child { border-bottom: none; }
+.td-mini span { flex: 1; font-size: 12px; font-weight: 400; }
+.done-t   { text-decoration: line-through; color: var(--t3) !important; }
+
+/* ─── FINANCE FORM ─── */
+.fin-box     { background: var(--g-bg); border: 1px solid rgba(26,159,90,.15); border-radius: var(--r); padding: 14px 16px; }
+.fin-box-lbl { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--green); margin-bottom: 10px; }
+.fin-result  { display: flex; justify-content: space-between; align-items: baseline; margin-top: 10px; padding-top: 8px; border-top: 1px solid rgba(26,159,90,.15); }
+.fin-result-lbl { font-size: 11px; color: var(--t2); font-weight: 400; }
+.fin-result-val { font-family: var(--ui); font-weight: 700; font-size: 16px; color: var(--green); }
+
+/* ─── REGIEPAD ─── */
+.rp-body  { flex: 1; overflow-y: auto; padding: 24px 32px 60px; }
+.rp-stats { display: flex; gap: 12px; margin-bottom: 20px; }
+.rp-stat  { flex: 1; background: var(--white); border-radius: var(--r); box-shadow: var(--sh); padding: 18px 20px; }
+.rp-stat-lbl { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--t3); margin-bottom: 5px; }
+.rp-stat-val { font-family: var(--ui); font-weight: 700; font-size: 28px; line-height: 1; }
+.rp-stat-sub { font-size: 11px; color: var(--t3); margin-top: 3px; font-weight: 400; }
+.rp-bar      { height: 2px; background: var(--border); border-radius: 2px; margin-top: 8px; overflow: hidden; }
+.rp-bar-fill { height: 100%; background: var(--green); border-radius: 2px; transition: width .3s; }
+.cf-notice   { background: var(--o-bg); border: 1px solid rgba(217,112,0,.14); border-radius: var(--r); padding: 11px 16px; margin-bottom: 16px; }
+.cf-notice-title { font-family: var(--ui); font-weight: 700; font-size: 10px; letter-spacing: 1px; text-transform: uppercase; color: var(--orange); margin-bottom: 3px; }
+.cf-notice p { font-size: 11px; color: var(--t2); line-height: 1.6; font-weight: 400; }
+.rp-tcard { background: var(--white); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; }
+.rp-t     { width: 100%; border-collapse: collapse; }
+.rp-t th  { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--t3); padding: 11px 14px; text-align: left; white-space: nowrap; border-bottom: 1px solid var(--border); background: var(--bg); }
+.rp-t td  { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; font-weight: 400; }
+.rp-t tbody tr:last-child td { border-bottom: none; }
+.rp-row:hover td  { background: rgba(26,25,48,.015); }
+.rp-sep td        { background: var(--bg) !important; padding: 5px 14px !important; }
+.rp-sep-lbl       { font-family: var(--ui); font-weight: 600; font-size: 8px; letter-spacing: 2.5px; text-transform: uppercase; color: var(--t3); }
+.rp-num  { font-family: var(--ui); font-weight: 500; font-size: 11px; color: var(--t3); }
+.rp-ts   { font-family: var(--ui); font-weight: 700; font-size: 15px; color: var(--text); white-space: nowrap; }
+.rp-te   { font-family: var(--ui); font-size: 13px; color: var(--t3); }
+.rp-dur  { font-family: var(--ui); font-size: 12px; color: var(--t3); }
+.rp-ttl  { font-weight: 500; font-size: 13px; line-height: 1.35; }
+.rp-biz  { font-size: 11px; color: var(--t3); margin-top: 2px; font-weight: 400; }
+.rp-wie  { font-size: 12px; color: var(--t2); font-weight: 400; }
+.rp-loc  { font-size: 11px; color: var(--t3); font-weight: 400; }
+.ckd     { display: flex; gap: 3px; }
+.ckd-dot { width: 7px; height: 7px; border-radius: 50%; border: 1.5px solid var(--border); }
+.ckd-dot.on { background: var(--green); border-color: var(--green); }
+.rp-row.has-det { cursor: pointer; }
+.rp-det-row { display: none; }
+.rp-det-row.open { display: table-row; }
+.rp-det-row td   { background: var(--bg) !important; padding: 14px 28px 16px !important; }
+.rp-det-grid { display: grid; grid-template-columns: repeat(auto-fit,minmax(160px,1fr)); gap: 18px; }
+.rdg h5  { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--navy); margin-bottom: 5px; }
+.rdg p   { font-size: 12px; color: var(--t2); line-height: 1.6; font-weight: 400; }
+
+/* ─── TO-DO ─── */
+.td-body     { flex: 1; overflow-y: auto; padding: 24px 32px 60px; }
+.td-card     { background: var(--white); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; margin-bottom: 14px; }
+.td-card-hd  { padding: 14px 20px; border-bottom: 1px solid var(--border); font-family: var(--ui); font-weight: 600; font-size: 12px; letter-spacing: .8px; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+.td-card-items { padding: 2px 20px; }
+.td-item     { display: flex; align-items: center; gap: 10px; padding: 9px 0; border-bottom: 1px solid var(--border); }
+.td-item:last-child { border-bottom: none; }
+.td-item span { flex: 1; font-size: 13px; font-weight: 400; }
+.td-add      { display: flex; gap: 8px; padding: 10px 20px; border-top: 1px solid var(--border); }
+.td-add input { flex: 1; }
+
+/* ─── FINANCIEEL ─── */
+.fin-body    { flex: 1; overflow-y: auto; padding: 24px 32px 60px; }
+.fin-summary { display: flex; gap: 12px; margin-bottom: 24px; }
+.fin-card    { flex: 1; background: var(--white); border-radius: var(--r); box-shadow: var(--sh); padding: 18px 20px; }
+.fin-card-lbl { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--t3); margin-bottom: 5px; }
+.fin-card-val { font-family: var(--ui); font-weight: 700; font-size: 28px; line-height: 1; }
+.fin-card-val.green { color: var(--green); }
+.fin-card-val.red   { color: var(--red); }
+.fin-card-sub { font-size: 11px; color: var(--t3); margin-top: 3px; font-weight: 400; }
+.fin-tcard   { background: var(--white); border-radius: var(--r); box-shadow: var(--sh); overflow: hidden; }
+.fin-t       { width: 100%; border-collapse: collapse; }
+.fin-t th    { font-family: var(--ui); font-weight: 600; font-size: 9px; letter-spacing: 1.8px; text-transform: uppercase; color: var(--t3); padding: 11px 16px; text-align: left; border-bottom: 1px solid var(--border); background: var(--bg); }
+.fin-t th.r, .fin-t td.r { text-align: right; }
+.fin-t td    { padding: 12px 16px; border-bottom: 1px solid var(--border); font-size: 13px; font-weight: 400; }
+.fin-t tbody tr:last-child td { border-bottom: none; }
+.fin-t tr:hover td  { background: rgba(26,25,48,.012); }
+.fin-sep td          { background: var(--bg) !important; padding: 5px 16px !important; }
+.fin-sep-lbl         { font-family: var(--ui); font-weight: 600; font-size: 8px; letter-spacing: 2px; text-transform: uppercase; color: var(--t3); }
+.fin-amount  { font-family: var(--ui); font-weight: 600; font-size: 14px; text-align: right; white-space: nowrap; }
+.fin-disc    { font-size: 11px; color: var(--green); text-align: right; white-space: nowrap; }
+.fin-final   { font-family: var(--ui); font-weight: 700; font-size: 14px; color: var(--navy); text-align: right; }
+.fin-total-row td { border-top: 2px solid var(--border); background: var(--bg) !important; font-weight: 500; }
+.fin-empty   { text-align: center; padding: 50px 20px; }
+.fin-empty p { font-family: var(--ui); font-weight: 500; font-size: 11px; letter-spacing: 1.2px; text-transform: uppercase; color: var(--t3); line-height: 1.7; }
+
+/* ─── MODALS ─── */
+.ovl { display: none; position: fixed; inset: 0; background: rgba(9,7,58,.35); z-index: 300; align-items: center; justify-content: center; padding: 20px; }
+.ovl.open { display: flex; }
+.modal-box { background: var(--white); border-radius: 12px; width: 100%; max-width: 400px; box-shadow: 0 8px 40px rgba(9,7,58,.14); }
+.modal-hd  { padding: 24px 26px 0; }
+.modal-hd h3 { font-family: var(--ui); font-weight: 700; font-size: 18px; text-transform: uppercase; letter-spacing: .8px; }
+.modal-hd p  { font-size: 12px; color: var(--t2); line-height: 1.6; margin-top: 5px; font-weight: 400; }
+.modal-body  { padding: 20px 26px; display: flex; flex-direction: column; gap: 12px; }
+.modal-foot  { padding: 14px 26px 20px; display: flex; justify-content: flex-end; gap: 8px; }
+
+/* ─── NEW EVENT MODAL ─── */
+.new-event-hero { background: var(--navy); border-radius: 12px 12px 0 0; padding: 28px 26px 22px; }
+.new-event-hero .logo { font-family: var(--ui); font-weight: 700; font-size: 18px; letter-spacing: 3px; text-transform: uppercase; color: var(--yellow); margin-bottom: 6px; }
+.new-event-hero p { font-size: 12px; color: rgba(255,255,255,.45); font-weight: 400; line-height: 1.6; }
+.or-divider { display: flex; align-items: center; gap: 12px; margin: 4px 0; }
+.or-divider span { font-size: 10px; color: var(--t3); font-family: var(--ui); letter-spacing: 1px; text-transform: uppercase; }
+.or-divider::before, .or-divider::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+@media print {
+  .sidebar { display: none !important; }
+  body, html { overflow: visible; height: auto; }
+  .app { display: block; }
+  .main-area { height: auto; overflow: visible; }
+  .view { display: block !important; }
+  #view-td, #view-bo, #view-fin { display: none !important; }
+  .rp-body { overflow: visible; }
+  .rp-tcard, .rp-stat { box-shadow: none; border: 1px solid var(--border); }
+}
+</style>
+</head>
+<body>
+<div class="app">
+
+<!-- SIDEBAR -->
+<nav class="sidebar">
+  <div class="sb-logo">
+    <div class="sb-mark">Regie</div>
+    <div class="sb-sub" id="sb-en">Laden…</div>
+  </div>
+  <div class="sb-nav">
+    <div class="sb-lbl">Beheer</div>
+    <div class="nv active" id="ni-bo"  onclick="gv('bo',this)"><span class="ic">⚙</span> Backoffice</div>
+    <div class="nv"        id="ni-td"  onclick="gv('td',this)"><span class="ic">✓</span> To-do's   <span class="bdg bdg-y" id="nb-td"  style="display:none">0</span></div>
+    <div class="nv"        id="ni-fin" onclick="gv('fin',this)"><span class="ic">€</span> Financieel<span class="bdg bdg-y" id="nb-fin" style="display:none">0</span></div>
+    <div class="sb-lbl">Output</div>
+    <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad  <span class="bdg bdg-r" id="nb-cf"  style="display:none">0</span></div>
+  </div>
+  <div class="sb-foot">
+    <button class="sb-btn new-ev" onclick="openNewEventModal()">＋ Nieuw event</button>
+    <button class="sb-btn"        onclick="window.print()">🖨 Print regiepad</button>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<div class="main-area">
+
+  <!-- BACKOFFICE -->
+  <div class="view active" id="view-bo">
+    <div class="page-hd">
+      <h1>Backoffice</h1>
+      <div class="ml">
+        <button class="btn btn-out btn-sm" onclick="openSepModal()">+ Sectie</button>
+        <button class="btn btn-y   btn-sm" onclick="openNew()">+ Onderdeel</button>
+      </div>
+    </div>
+    <div class="bo-cols">
+      <div class="bo-left"  id="bo-list-wrap"></div>
+      <div class="bo-right" id="bo-right-panel"></div>
+    </div>
+  </div>
+
+  <!-- TO-DO -->
+  <div class="view" id="view-td">
+    <div class="page-hd"><h1>To-do's</h1></div>
+    <div class="td-body">
+      <div class="td-card">
+        <div class="td-card-hd">🌐 Algemeen</div>
+        <div class="td-card-items" id="gtd-list"></div>
+        <div class="td-add">
+          <input type="text" id="gtd-i" placeholder="Nieuwe to-do..." onkeydown="if(event.key==='Enter')addGTodo()">
+          <button class="btn btn-y btn-sm" onclick="addGTodo()">+</button>
+        </div>
+      </div>
+      <div id="itd-out"></div>
+    </div>
+  </div>
+
+  <!-- FINANCIEEL -->
+  <div class="view" id="view-fin">
+    <div class="page-hd">
+      <h1>Financieel</h1>
+      <div style="font-size:11px;color:var(--t3);font-weight:400;margin-left:4px">Alle bedragen excl. btw</div>
+    </div>
+    <div class="fin-body">
+      <div class="fin-summary">
+        <div class="fin-card"><div class="fin-card-lbl">Totaal (excl. btw)</div><div class="fin-card-val" id="fin-tot">€ 0</div></div>
+        <div class="fin-card"><div class="fin-card-lbl">Totaal kortingen</div><div class="fin-card-val red" id="fin-disc-tot">€ 0</div></div>
+        <div class="fin-card"><div class="fin-card-lbl">Te betalen (excl. btw)</div><div class="fin-card-val green" id="fin-net">€ 0</div><div class="fin-card-sub" id="fin-count">0 onderdelen</div></div>
+      </div>
+      <div class="fin-tcard">
+        <table class="fin-t">
+          <thead><tr>
+            <th>Onderdeel</th><th>Label</th>
+            <th class="r">Bedrag excl. btw</th>
+            <th class="r">Korting %</th>
+            <th class="r">Korting €</th>
+            <th class="r">Te betalen</th>
+          </tr></thead>
+          <tbody id="fin-tb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- REGIEPAD -->
+  <div class="view" id="view-rp">
+    <div class="page-hd">
+      <div>
+        <h1 id="rp-t">Regiepad</h1>
+        <div style="font-size:11px;color:var(--t3);font-family:var(--ui);font-weight:500;letter-spacing:.3px;margin-top:3px;text-transform:uppercase" id="rp-st"></div>
+      </div>
+      <div class="ml"><button class="btn btn-out btn-sm" onclick="window.print()">🖨 Print</button></div>
+    </div>
+    <div class="rp-body">
+      <div class="rp-stats">
+        <div class="rp-stat"><div class="rp-stat-lbl">Onderdelen</div><div class="rp-stat-val" id="rs-i">0</div></div>
+        <div class="rp-stat"><div class="rp-stat-lbl">Totale duur</div><div class="rp-stat-val" id="rs-d">—</div></div>
+        <div class="rp-stat">
+          <div class="rp-stat-lbl">Gereed</div><div class="rp-stat-val" id="rs-r">0%</div>
+          <div class="rp-bar"><div class="rp-bar-fill" id="rs-rb" style="width:0%"></div></div>
+        </div>
+        <div class="rp-stat"><div class="rp-stat-lbl">Conflicten</div><div class="rp-stat-val" id="rs-c">0</div><div class="rp-stat-sub" id="rs-cs">Alles in orde</div></div>
+      </div>
+      <div id="cf-wrap"></div>
+      <div class="rp-tcard">
+        <table class="rp-t">
+          <thead><tr>
+            <th style="width:26px">#</th>
+            <th style="width:76px">Start</th>
+            <th style="width:62px">Eind</th>
+            <th style="width:52px">Duur</th>
+            <th>Onderdeel</th>
+            <th style="width:115px">Wie</th>
+            <th style="width:92px">Locatie</th>
+            <th style="width:115px">Label</th>
+            <th style="width:56px">Gereed</th>
+          </tr></thead>
+          <tbody id="rp-tb"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+</div><!-- /main-area -->
+</div><!-- /app -->
+
+<!-- SEP MODAL -->
+<div class="ovl" id="sep-ovl">
+  <div class="modal-box">
+    <div class="modal-hd"><h3>Sectie</h3><p>Geef de sectie een naam, bijv. "Ochtendprogramma".</p></div>
+    <div class="modal-body"><div class="fg"><label>Naam</label><input type="text" id="sep-i" placeholder="OCHTENDPROGRAMMA" onkeydown="if(event.key==='Enter')saveSep()"></div></div>
+    <div class="modal-foot">
+      <button class="btn btn-out btn-sm" onclick="closeSepOvl()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="saveSep()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- NEW EVENT MODAL -->
+<div class="ovl" id="new-ev-ovl">
+  <div class="modal-box">
+    <div class="new-event-hero">
+      <div class="logo">Regie</div>
+      <p>Maak een nieuw event aan. Je huidige data wordt opgeslagen als back-up.</p>
+    </div>
+    <div class="modal-body">
+      <div class="fg"><label>Naam van het event *</label><input type="text" id="ne-name" placeholder="bijv. Loop Leeuwarden 2027"></div>
+      <div class="fg"><label>Datum</label><input type="text" id="ne-date" placeholder="bijv. 10 mei 2027"></div>
+      <div class="or-divider"><span>of</span></div>
+      <button class="btn btn-out btn-sm" style="width:100%;justify-content:center" onclick="loadDemoData()">📋 Laad voorbeelddata (Loop Leeuwarden)</button>
+    </div>
+    <div class="modal-foot">
+      <button class="btn btn-out btn-sm" onclick="closeNewEventModal()">Annuleren</button>
+      <button class="btn btn-del btn-sm" onclick="clearAllData()" style="margin-right:auto">🗑 Alles wissen</button>
+      <button class="btn btn-y   btn-sm" onclick="createNewEvent()">Nieuw event aanmaken</button>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ═══════════════════════════════════
+   STATE
+═══════════════════════════════════ */
+let S = {
+  event: { name: 'Nieuw Event', date: '' },
+  items: [], labels: [], persons: [],
+  todos: { global: [], items: {} },
+  nextId: 1
+};
+let editId = null, editSepId = null;
+let tmpCL = {}, tmpTodos = [], expanded = [];
+const STORAGE_KEY = 'regie_v3';
+
+/* ═══════════════════════════════════
+   BOOT
+═══════════════════════════════════ */
+function init() {
+  try { const r = localStorage.getItem(STORAGE_KEY); if (r) S = { ...S, ...JSON.parse(r) }; } catch(e) {}
+  if (!S.labels.length) seedLabels();
+  if (!S.items.length)  seedItems();
+  renderRightPanel();
+  renderBoList();
+  updateBadges();
+}
+
+function seedLabels() {
+  S.labels = [
+    { id:'l1', name:'WEDSTRIJD',    color:'#d63256' },
+    { id:'l2', name:'HULDIGING',    color:'#cc9900' },
+    { id:'l3', name:'ENTERTAINMENT',color:'#7c3aed' },
+    { id:'l4', name:'ACTIVATIE',    color:'#d97000' },
+    { id:'l5', name:'FINISH',       color:'#1a9f5a' },
+    { id:'l6', name:'OVERIGE',      color:'#3b82f6' },
+  ];
+  S.persons = ['Justin', 'Jan', 'Race Commentaar', 'Daniel', 'SHOW TEAM', 'Jan Dupon', 'Paul'];
+}
+
+function seedItems() {
+  const a = o => S.items.push({ id: S.nextId++, type: 'item', ...o });
+  const bl = { persoon:false, script:false, slide:false, techniek:false };
+  const nf = { bedrag:'', korting:'' };
+  S.event = { name: 'Loop Leeuwarden 2026', date: '10 mei 2026' };
+
+  S.items.push({ id: S.nextId++, type:'sep', name:'VOORBEREIDING' });
+  a({ omschrijving:'Aanwezig team', start:'08:30', eind:'09:00', wie:'SHOW TEAM', locatie:'Podium', label:'l6', fixed:false, bijzonderheden:'Iedereen aanwezig voor briefing', script:'', techniek:'', dj:'', checklist:{...bl}, fin:{...nf} });
+
+  S.items.push({ id: S.nextId++, type:'sep', name:'OCHTENDPROGRAMMA' });
+  a({ omschrijving:'Start 21km', start:'09:30', eind:'09:40', wie:'Race Commentaar', locatie:'Groeneweg', label:'l1', fixed:true, bijzonderheden:'', script:'Toepraten naar de start. Publiek begeleiden naar het startvak.', techniek:'SLIDE STARTVAK op LED', dj:'Background muziek faden', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Start Kids Run 1km & 2,5km', start:'09:45', eind:'10:15', wie:'Race Commentaar', locatie:'Groeneweg', label:'l1', fixed:true, bijzonderheden:'Paul bij Finish Kids Run', script:'', techniek:'SLIDE KIDSRUN', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Omroepen nieuwe winnaars #1', start:'10:00', eind:'10:05', wie:'Justin', locatie:'Plein', label:'l2', fixed:false, bijzonderheden:'Background muziek', script:'', techniek:'', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Finish 21km', start:'10:40', eind:'10:55', wie:'Race Commentaar', locatie:'Groeneweg', label:'l1', fixed:true, bijzonderheden:'Finish Mannen en Vrouwen', script:'', techniek:'SLIDE 21KM', dj:'', checklist:{...bl}, fin:{...nf} });
+
+  S.items.push({ id: S.nextId++, type:'sep', name:'MIDDAGPROGRAMMA' });
+  a({ omschrijving:'Huldiging 21km Mannen & Vrouwen', start:'11:15', eind:'11:30', wie:'Justin | Jan', locatie:'Podium', label:'l2', fixed:false, bijzonderheden:'Check procedure', script:'Aankondiging winnaars 21km. Uitreiken medailles en bloemen.', techniek:'CEREMONIE SLIDES', dj:'Winnaarsmuziek bij binnenkomst', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Omroepen nieuwe winnaars #2', start:'11:00', eind:'11:05', wie:'Justin', locatie:'Plein', label:'l2', fixed:false, bijzonderheden:'', script:'', techniek:'VIDEOLOOP', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Huldiging 21km Student & Business', start:'11:50', eind:'12:00', wie:'Justin | Jan', locatie:'Podium', label:'l2', fixed:false, bijzonderheden:'Check procedure', script:'', techniek:'CEREMONIE SLIDES', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Start 5km', start:'12:15', eind:'12:25', wie:'Race Commentaar', locatie:'Groeneweg', label:'l1', fixed:true, bijzonderheden:'', script:'', techniek:'SLIDE 5KM', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Uitreiking Cheque JFSC', start:'12:45', eind:'12:50', wie:'Justin | Jan', locatie:'Podium', label:'l4', fixed:false, bijzonderheden:'', script:'', techniek:'SLIDE JFSC', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Huldiging 5km Mannen & Vrouwen', start:'12:50', eind:'13:05', wie:'Justin | Jan', locatie:'Podium', label:'l2', fixed:false, bijzonderheden:'Check procedure', script:'', techniek:'CEREMONIE SLIDES', dj:'', checklist:{...bl}, fin:{...nf} });
+  a({ omschrijving:'Start 10km', start:'13:05', eind:'13:15', wie:'Race Commentaar', locatie:'Groeneweg', label:'l1', fixed:true, bijzonderheden:'', script:'', techniek:'SLIDE 10KM', dj:'', checklist:{...bl}, fin:{...nf} });
+
+  S.items.push({ id: S.nextId++, type:'sep', name:'NAMIDDAG' });
+  a({ omschrijving:'Dweilorkest Jan Dupon', start:'13:00', eind:'15:00', wie:'Jan Dupon', locatie:'Plein', label:'l3', fixed:false, bijzonderheden:'', script:'', techniek:'', dj:'', checklist:{...bl}, fin:{ bedrag:'1200', korting:'10' } });
+  a({ omschrijving:'Huldiging 10km Mannen & Vrouwen', start:'14:00', eind:'14:20', wie:'Justin | Jan', locatie:'Podium', label:'l2', fixed:false, bijzonderheden:'Check procedure', script:'', techniek:'CEREMONIE SLIDES', dj:'', checklist:{...bl}, fin:{...nf} });
+
+  S.items.push({ id: S.nextId++, type:'sep', name:'AFSLUITING' });
+  a({ omschrijving:'Einde dag / Afbouw', start:'15:30', eind:null, wie:'SHOW TEAM', locatie:'Podium', label:'l6', fixed:true, bijzonderheden:'', script:'', techniek:'', dj:'', checklist:{...bl}, fin:{...nf} });
+
+  S.todos.global = [
+    { id:1, text:'Procedure huldigingen bevestigen met organisatie', done:false },
+    { id:2, text:'Cheque JFSC: bedrag bevestigen en ophalen', done:false },
+    { id:3, text:'Briefing sturen naar Justin en Jan', done:false },
+    { id:4, text:'Ceremonie slides aanleveren bij LED operator', done:false },
+    { id:5, text:'Geluidscheck plannen met ForLive', done:false },
+    { id:6, text:'Runsheet delen met Paul (race commentaar)', done:false },
+  ];
+  save();
+}
+
+function save() {
+  try { localStorage.setItem(STORAGE_KEY, JSON.stringify(S)); } catch(e) {}
+}
+
+/* ═══════════════════════════════════
+   HELPERS
+═══════════════════════════════════ */
+const lbl   = id => S.labels.find(l => l.id === id);
+const t2m   = t => { if (!t) return 0; const [h,m] = t.split(':').map(Number); return h*60+m; };
+const euro  = v => '€\u202f' + v.toLocaleString('nl-NL', { minimumFractionDigits:2, maximumFractionDigits:2 });
+function durStr(s,e) { if (!s||!e) return '—'; const d=t2m(e)-t2m(s); if (d<=0) return '—'; if (d<60) return d+'m'; const h=Math.floor(d/60),m=d%60; return m?`${h}u${m}m`:`${h}u`; }
+function calcFin(fin) { const b=parseFloat((fin?.bedrag||'').replace(',','.'))||0; const k=parseFloat((fin?.korting||'').replace(',','.'))||0; const disc=b*(k/100); return {bedrag:b,korting:k,disc,netto:b-disc}; }
+
+function conflicts() {
+  const it = S.items.filter(i => i.type==='item' && i.start && i.eind), res = [];
+  for (let i=0; i<it.length; i++) for (let j=i+1; j<it.length; j++) {
+    const a=it[i], b=it[j];
+    if (t2m(a.start)<t2m(b.eind) && t2m(b.start)<t2m(a.eind)) {
+      if (a.wie && b.wie && a.wie===b.wie)
+        res.push({ msg:`"${a.wie}" tegelijk: "${a.omschrijving}" & "${b.omschrijving}"`, ids:[a.id,b.id] });
+      else
+        res.push({ msg:`Tijdoverlap: "${a.omschrijving}" (${a.start}–${a.eind}) ↔ "${b.omschrijving}"`, ids:[a.id,b.id] });
+    }
+  }
+  return res;
+}
+function readiness() {
+  const it = S.items.filter(i => i.type==='item');
+  if (!it.length) return 0;
+  let t=0, d=0;
+  it.forEach(i => { const c=i.checklist||{}; t+=4; d+=(c.persoon?1:0)+(c.script?1:0)+(c.slide?1:0)+(c.techniek?1:0); });
+  return Math.round(d/t*100);
+}
+
+/* ═══════════════════════════════════
+   NAVIGATION
+═══════════════════════════════════ */
+function gv(id, el) {
+  document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+  document.querySelectorAll('.nv').forEach(n => n.classList.remove('active'));
+  document.getElementById('view-'+id).classList.add('active');
+  if (el) el.classList.add('active');
+  if (id==='rp')  renderRP();
+  if (id==='td')  renderTDV();
+  if (id==='fin') renderFin();
+  if (id==='bo')  renderBoList();
+}
+
+function updateBadges() {
+  const cf = conflicts();
+  const nc = document.getElementById('nb-cf'); nc.textContent=cf.length; nc.style.display=cf.length?'inline':'none';
+  const all = [...(S.todos.global||[]), ...Object.values(S.todos.items||{}).flat()];
+  const p = all.filter(t => !t.done).length;
+  const nt = document.getElementById('nb-td'); nt.textContent=p; nt.style.display=p?'inline':'none';
+  const fi = S.items.filter(i => i.type==='item' && (parseFloat((i.fin?.bedrag||'').replace(',','.'))||0));
+  const nf = document.getElementById('nb-fin'); nf.textContent=fi.length; nf.style.display=fi.length?'inline':'none';
+  document.getElementById('sb-en').textContent = S.event.name || 'Geen naam';
+}
+
+/* ═══════════════════════════════════
+   NEW EVENT MODAL
+═══════════════════════════════════ */
+function openNewEventModal() {
+  document.getElementById('ne-name').value = '';
+  document.getElementById('ne-date').value = '';
+  document.getElementById('new-ev-ovl').classList.add('open');
+}
+function closeNewEventModal() {
+  document.getElementById('new-ev-ovl').classList.remove('open');
+}
+function createNewEvent() {
+  const name = document.getElementById('ne-name').value.trim();
+  if (!name) { alert('Vul een naam in voor het event.'); return; }
+  const date = document.getElementById('ne-date').value.trim();
+  S = {
+    event: { name, date },
+    items: [], labels: [], persons: [],
+    todos: { global: [], items: {} },
+    nextId: 1
+  };
+  seedLabels();
+  save();
+  editId = null; expanded = [];
+  closeNewEventModal();
+  renderRightPanel();
+  renderBoList();
+  updateBadges();
+  gv('bo', document.getElementById('ni-bo'));
+}
+function clearAllData() {
+  if (!confirm('Weet je zeker dat je ALLE data wilt wissen? Dit kan niet ongedaan worden gemaakt.')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  location.reload();
+}
+function loadDemoData() {
+  S = {
+    event: { name:'', date:'' },
+    items: [], labels: [], persons: [],
+    todos: { global: [], items: {} },
+    nextId: 1
+  };
+  seedLabels();
+  seedItems();
+  save();
+  editId = null; expanded = [];
+  closeNewEventModal();
+  renderRightPanel();
+  renderBoList();
+  updateBadges();
+  gv('bo', document.getElementById('ni-bo'));
+}
+
+/* ═══════════════════════════════════
+   BACKOFFICE LIST
+═══════════════════════════════════ */
+function renderBoList() {
+  const cf = conflicts(), cfIds = new Set(cf.flatMap(c => c.ids));
+  const el = document.getElementById('bo-list-wrap'); el.innerHTML = '';
+  let num = 1;
+  S.items.forEach(item => {
+    if (item.type === 'sep') {
+      const d = document.createElement('div'); d.className = 'bo-sep-row';
+      d.innerHTML = `<div class="bo-sep-lbl">${item.name}</div><div class="bo-sep-line"></div>
+        <button class="ib" onclick="openRenameSep(${item.id})" title="Hernamen">✏</button>
+        <button class="ib del" onclick="delItem(${item.id})" title="Verwijder sectie">✕</button>`;
+      el.appendChild(d); return;
+    }
+    const L = lbl(item.label), c = item.checklist||{};
+    const done = [c.persoon,c.script,c.slide,c.techniek].filter(Boolean).length;
+    const hasFin = parseFloat((item.fin?.bedrag||'').replace(',','.'))||0;
+    const d = document.createElement('div');
+    d.className = 'bo-item' + (editId===item.id ? ' sel' : '');
+    d.onclick = e => { if (!e.target.closest('button')) openEdit(item.id); };
+    d.innerHTML = `
+      <div class="bo-num">${num++}</div>
+      <div class="bo-cell">
+        <div class="bo-title">
+          ${cfIds.has(item.id) ? '<span class="warn-dot" title="Conflict"></span>' : ''}
+          ${item.omschrijving || '—'}
+          ${item.fixed ? '<span class="fixed-tag">FIXED</span>' : ''}
+          ${hasFin ? '<span style="font-size:10px;color:var(--green);font-family:var(--ui);font-weight:600">€</span>' : ''}
+        </div>
+        <div class="bo-meta">
+          ${L ? `<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>` : ''}
+          ${item.wie     ? `<span>👤 ${item.wie}</span>` : ''}
+          ${item.locatie ? `<span>📍 ${item.locatie}</span>` : ''}
+          <span style="color:${done===4?'var(--green)':'var(--t3)'}">✓ ${done}/4</span>
+        </div>
+      </div>
+      <div class="bo-time">${item.start||'—'}${item.eind?' – '+item.eind:''}</div>
+      <button class="ib del" onclick="delItem(${item.id})" title="Verwijder">✕</button>`;
+    el.appendChild(d);
+  });
+  updateBadges();
+}
+
+/* ═══════════════════════════════════
+   RIGHT PANEL
+═══════════════════════════════════ */
+function settingsHTML() {
+  return `
+  <div class="fp-divider">
+    <h4>Labels</h4>
+    <div id="lbl-list"></div>
+    <div class="mini-add">
+      <input type="color" id="nl-c" value="#ffd000" style="width:30px;height:30px;border:none;background:none;cursor:pointer;padding:0;border-radius:5px;flex-shrink:0">
+      <input type="text" id="nl-n" placeholder="Label naam..." onkeydown="if(event.key==='Enter')addLabel()">
+      <button class="btn btn-out btn-xs" onclick="addLabel()">+</button>
+    </div>
+  </div>
+  <div class="fp-divider" style="padding-top:16px">
+    <h4>Personen</h4>
+    <div id="pers-list"></div>
+    <div class="mini-add">
+      <input type="text" id="np-n" placeholder="Naam of rol..." onkeydown="if(event.key==='Enter')addPerson()">
+      <button class="btn btn-out btn-xs" onclick="addPerson()">+</button>
+    </div>
+  </div>
+  <div class="fp-divider" style="padding-top:16px">
+    <h4>Event</h4>
+    <div style="display:flex;flex-direction:column;gap:9px">
+      <div class="fg"><label>Naam</label><input type="text" id="ev-n" oninput="updEv()"></div>
+      <div class="fg"><label>Datum</label><input type="text" id="ev-d" oninput="updEv()"></div>
+    </div>
+  </div>`;
+}
+
+function wireSettings() {
+  renderLblList(); renderPersList();
+  const en = document.getElementById('ev-n'); if (en) en.value = S.event.name||'';
+  const ed = document.getElementById('ev-d'); if (ed) ed.value = S.event.date||'';
+}
+function renderLblList()  { const el=document.getElementById('lbl-list');  if (!el) return; el.innerHTML=S.labels.map((l,i)=>`<div class="pill-row"><div class="cswatch" style="background:${l.color}"></div><span>${l.name}</span><button class="ib del" onclick="rmLabel(${i})">✕</button></div>`).join(''); }
+function renderPersList() { const el=document.getElementById('pers-list'); if (!el) return; el.innerHTML=S.persons.map((p,i)=>`<div class="pill-row"><span>${p}</span><button class="ib del" onclick="rmPerson(${i})">✕</button></div>`).join(''); }
+function addLabel()  { const n=document.getElementById('nl-n').value.trim().toUpperCase(), c=document.getElementById('nl-c').value; if (!n) return; S.labels.push({id:'l'+Date.now(),name:n,color:c}); document.getElementById('nl-n').value=''; save(); renderLblList(); fillLS(); }
+function rmLabel(i)  { S.labels.splice(i,1); save(); renderLblList(); fillLS(); }
+function addPerson() { const n=document.getElementById('np-n').value.trim(); if (!n) return; S.persons.push(n); document.getElementById('np-n').value=''; save(); renderPersList(); fillPDL(); }
+function rmPerson(i) { S.persons.splice(i,1); save(); renderPersList(); fillPDL(); }
+function updEv()     { S.event.name=document.getElementById('ev-n').value; S.event.date=document.getElementById('ev-d').value; save(); updateBadges(); }
+
+function formHTML(title) {
+  return `
+  <div class="fp-hd">
+    <h3>${title}</h3>
+    <div class="fp-tabs">
+      <button class="fp-tab active" onclick="fpT('basis',this)">Basis</button>
+      <button class="fp-tab" onclick="fpT('draai',this)">Draaiboek</button>
+      <button class="fp-tab" onclick="fpT('check',this)">Checklist</button>
+      <button class="fp-tab" onclick="fpT('fin',this)">Financieel</button>
+      <button class="fp-tab" onclick="fpT('todos',this)">To-do's</button>
+    </div>
+  </div>
+  <div class="fp-body">
+    <div class="fp-pane active" id="fpp-basis">
+      <div class="fg"><label>Omschrijving *</label><input type="text" id="f-o" placeholder="Wat is dit onderdeel?"></div>
+      <div class="fg2">
+        <div class="fg"><label>Start</label><input type="time" id="f-s"></div>
+        <div class="fg"><label>Eind</label><input type="time" id="f-e"></div>
+      </div>
+      <div class="fg"><label>Wie</label><input type="text" id="f-w" list="fp-pdl" placeholder="Naam of rol"><datalist id="fp-pdl"></datalist></div>
+      <div class="fg"><label>Locatie</label><input type="text" id="f-l" placeholder="Podium, Plein, Regie…"></div>
+      <div class="fg"><label>Label</label><select id="f-lb"></select></div>
+      <div class="fg">
+        <label>Fixed tijdstip</label>
+        <div class="tog-row"><div class="tog" id="f-ft" onclick="togFix()"></div><span class="tog-lbl" id="f-ftl">Nee — mag verschuiven</span><input type="hidden" id="f-fv" value="false"></div>
+      </div>
+      <div class="fg"><label>Bijzonderheden</label><textarea id="f-biz" placeholder="Aandachtspunten, opmerkingen…"></textarea></div>
+    </div>
+    <div class="fp-pane" id="fpp-draai">
+      <div class="fg"><label>📝 Script / spreektekst</label><textarea id="f-sc" style="min-height:86px" placeholder="Spreektekst, aankondiging…"></textarea></div>
+      <div class="fg"><label>🔊 Technische instructies</label><textarea id="f-tc" placeholder="Geluid, LED, licht, mic, slides…"></textarea></div>
+      <div class="fg"><label>🎵 DJ instructies</label><textarea id="f-dj" placeholder="Nummers, cues, fade in/out…"></textarea></div>
+    </div>
+    <div class="fp-pane" id="fpp-check">
+      <div class="cl-row" onclick="tCL('persoon')"><div class="chk" id="ck-p"></div><div><div class="cl-title">Persoon gebrieft</div><div class="cl-sub">Iedereen is op de hoogte en bevestigd</div></div></div>
+      <div class="cl-row" onclick="tCL('script')"><div class="chk" id="ck-s"></div><div><div class="cl-title">Script / tekst klaar</div><div class="cl-sub">Uitgewerkt en gecontroleerd</div></div></div>
+      <div class="cl-row" onclick="tCL('slide')"><div class="chk" id="ck-sl"></div><div><div class="cl-title">Slide / video gereed</div><div class="cl-sub">LED content aangeleverd bij operator</div></div></div>
+      <div class="cl-row" onclick="tCL('techniek')"><div class="chk" id="ck-t"></div><div><div class="cl-title">Techniek getest</div><div class="cl-sub">Geluid, LED en licht zijn getest</div></div></div>
+    </div>
+    <div class="fp-pane" id="fpp-fin">
+      <div class="fg2">
+        <div class="fg"><label>Bedrag excl. btw (€)</label><input type="number" id="f-bed" placeholder="0.00" step="0.01" min="0" oninput="updFinCalc()"></div>
+        <div class="fg"><label>Korting %</label><input type="number" id="f-kor" placeholder="0" step="0.1" min="0" max="100" oninput="updFinCalc()"></div>
+      </div>
+      <div class="fin-box" id="fin-calc-box" style="display:none">
+        <div class="fin-box-lbl">Berekening (excl. btw)</div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--t2);margin-bottom:4px"><span>Bedrag</span><span id="fc-bed">€ 0,00</span></div>
+        <div style="display:flex;justify-content:space-between;font-size:12px;color:var(--red);margin-bottom:4px"><span id="fc-disc-lbl">Korting (0%)</span><span id="fc-disc">– € 0,00</span></div>
+        <div class="fin-result"><span class="fin-result-lbl">Te betalen</span><span class="fin-result-val" id="fc-net">€ 0,00</span></div>
+      </div>
+    </div>
+    <div class="fp-pane" id="fpp-todos">
+      <div id="ftd-l"></div>
+      <div style="display:flex;gap:7px;margin-top:4px">
+        <input type="text" id="ftd-i" placeholder="To-do voor dit onderdeel…" onkeydown="if(event.key==='Enter')addFTodo()">
+        <button class="btn btn-out btn-sm" onclick="addFTodo()">+</button>
+      </div>
+    </div>
+  </div>
+  <div class="fp-foot">
+    <button class="btn btn-out btn-sm" onclick="cancelEdit()">Annuleren</button>
+    <button class="btn btn-y   btn-sm" onclick="saveItem()">Opslaan</button>
+  </div>`;
+}
+
+function updFinCalc() {
+  const b = parseFloat(document.getElementById('f-bed').value)||0;
+  const k = parseFloat(document.getElementById('f-kor').value)||0;
+  const box = document.getElementById('fin-calc-box');
+  if (!b) { box.style.display='none'; return; }
+  box.style.display = 'block';
+  const disc = b*(k/100), net = b-disc;
+  document.getElementById('fc-bed').textContent = euro(b);
+  document.getElementById('fc-disc-lbl').textContent = `Korting (${k}%)`;
+  document.getElementById('fc-disc').textContent = '– ' + euro(disc);
+  document.getElementById('fc-net').textContent  = euro(net);
+}
+
+function renderRightPanel() {
+  const panel = document.getElementById('bo-right-panel');
+  if (editId === null) {
+    panel.innerHTML = `<div class="fp-hint"><div class="fp-hint-icon">✏️</div><p>Klik een onderdeel<br>om te bewerken</p></div>${settingsHTML()}`;
+    wireSettings(); return;
+  }
+  const item = S.items.find(i => i.id===editId);
+  if (!item) { editId=null; renderRightPanel(); return; }
+  panel.innerHTML = formHTML('Bewerken') + settingsHTML();
+  fillLS(); fillPDL(); updateCLUI(); renderFTD(); wireSettings();
+  document.getElementById('f-o').value   = item.omschrijving||'';
+  document.getElementById('f-s').value   = item.start||'';
+  document.getElementById('f-e').value   = item.eind||'';
+  document.getElementById('f-w').value   = item.wie||'';
+  document.getElementById('f-l').value   = item.locatie||'';
+  document.getElementById('f-lb').value  = item.label||'';
+  document.getElementById('f-biz').value = item.bijzonderheden||'';
+  document.getElementById('f-sc').value  = item.script||'';
+  document.getElementById('f-tc').value  = item.techniek||'';
+  document.getElementById('f-dj').value  = item.dj||'';
+  document.getElementById('f-bed').value = item.fin?.bedrag||'';
+  document.getElementById('f-kor').value = item.fin?.korting||'';
+  updFinCalc();
+  const fx = item.fixed||false;
+  document.getElementById('f-fv').value = fx?'true':'false';
+  document.getElementById('f-ft').classList.toggle('on', fx);
+  document.getElementById('f-ftl').textContent = fx ? 'Ja — vast tijdstip' : 'Nee — mag verschuiven';
+}
+function renderNewForm() {
+  const panel = document.getElementById('bo-right-panel');
+  panel.innerHTML = formHTML('Nieuw onderdeel') + settingsHTML();
+  fillLS(); fillPDL(); updateCLUI(); renderFTD(); wireSettings();
+}
+
+function fpT(id,btn) { document.querySelectorAll('.fp-pane').forEach(p=>p.classList.remove('active')); document.querySelectorAll('.fp-tab').forEach(b=>b.classList.remove('active')); document.getElementById('fpp-'+id).classList.add('active'); if(btn)btn.classList.add('active'); }
+function fillLS()  { const el=document.getElementById('f-lb'); if(!el)return; const v=el.value; el.innerHTML='<option value="">— Geen —</option>'+S.labels.map(l=>`<option value="${l.id}">${l.name}</option>`).join(''); el.value=v; }
+function fillPDL() { const el=document.getElementById('fp-pdl'); if(!el)return; el.innerHTML=S.persons.map(p=>`<option value="${p}">`).join(''); }
+function togFix()  { const c=document.getElementById('f-fv').value==='true', n=!c; document.getElementById('f-fv').value=n?'true':'false'; document.getElementById('f-ft').classList.toggle('on',n); document.getElementById('f-ftl').textContent=n?'Ja — vast tijdstip':'Nee — mag verschuiven'; }
+function tCL(k)    { tmpCL[k]=!tmpCL[k]; updateCLUI(); }
+function updateCLUI() { [['persoon','ck-p'],['script','ck-s'],['slide','ck-sl'],['techniek','ck-t']].forEach(([k,id])=>{ const el=document.getElementById(id); if(el) el.className='chk'+(tmpCL[k]?' on':''); }); }
+function renderFTD() { const el=document.getElementById('ftd-l'); if(!el)return; el.innerHTML=tmpTodos.length?tmpTodos.map((t,i)=>`<div class="td-mini"><div class="chk ${t.done?'on':''}" onclick="tFT(${i})"></div><span class="${t.done?'done-t':''}">${t.text}</span><button class="ib del" onclick="rmFT(${i})">✕</button></div>`).join(''):'<p style="font-size:11px;color:var(--t3);margin-bottom:6px">Nog geen to-do\'s.</p>'; }
+function addFTodo() { const i=document.getElementById('ftd-i'), t=i.value.trim(); if(!t)return; tmpTodos.push({id:Date.now(),text:t,done:false}); i.value=''; renderFTD(); }
+function tFT(i) { tmpTodos[i].done=!tmpTodos[i].done; renderFTD(); }
+function rmFT(i) { tmpTodos.splice(i,1); renderFTD(); }
+
+/* ═══════════════════════════════════
+   CRUD
+═══════════════════════════════════ */
+function openNew()   { editId=null; tmpCL={persoon:false,script:false,slide:false,techniek:false}; tmpTodos=[]; renderNewForm(); renderBoList(); }
+function openEdit(id){ const item=S.items.find(i=>i.id===id); if(!item||item.type==='sep') return; editId=id; tmpCL={...(item.checklist||{})}; tmpTodos=[...(S.todos.items[id]||[])]; renderRightPanel(); renderBoList(); }
+function cancelEdit(){ editId=null; renderRightPanel(); renderBoList(); }
+function saveItem() {
+  const o = document.getElementById('f-o').value.trim(); if (!o) { alert('Vul een omschrijving in.'); return; }
+  const data = { type:'item', omschrijving:o, start:document.getElementById('f-s').value, eind:document.getElementById('f-e').value, wie:document.getElementById('f-w').value, locatie:document.getElementById('f-l').value, label:document.getElementById('f-lb').value, bijzonderheden:document.getElementById('f-biz').value, script:document.getElementById('f-sc').value, techniek:document.getElementById('f-tc').value, dj:document.getElementById('f-dj').value, fixed:document.getElementById('f-fv').value==='true', checklist:{...tmpCL}, fin:{bedrag:document.getElementById('f-bed').value, korting:document.getElementById('f-kor').value} };
+  if (editId!==null) { const i=S.items.findIndex(x=>x.id===editId); if(i!==-1) S.items[i]={...S.items[i],...data}; S.todos.items[editId]=tmpTodos; }
+  else { const id=S.nextId++; S.items.push({id,...data}); S.todos.items[id]=tmpTodos; }
+  editId=null; save(); renderRightPanel(); renderBoList();
+}
+function delItem(id) { if (!confirm('Verwijder dit onderdeel?')) return; S.items=S.items.filter(i=>i.id!==id); if(editId===id) editId=null; save(); renderRightPanel(); renderBoList(); }
+
+/* SEP */
+function openSepModal()   { editSepId=null; document.getElementById('sep-i').value=''; document.getElementById('sep-ovl').classList.add('open'); setTimeout(()=>document.getElementById('sep-i').focus(),80); }
+function openRenameSep(id){ editSepId=id; const it=S.items.find(i=>i.id===id); document.getElementById('sep-i').value=it?it.name:''; document.getElementById('sep-ovl').classList.add('open'); }
+function closeSepOvl()    { document.getElementById('sep-ovl').classList.remove('open'); }
+function saveSep()        { const n=document.getElementById('sep-i').value.trim().toUpperCase(); if(!n)return; if(editSepId!==null){const i=S.items.findIndex(x=>x.id===editSepId);if(i!==-1)S.items[i].name=n;}else S.items.push({id:S.nextId++,type:'sep',name:n}); save(); closeSepOvl(); renderBoList(); }
+
+/* ═══════════════════════════════════
+   TO-DO VIEW
+═══════════════════════════════════ */
+function renderTDV() {
+  const gl = document.getElementById('gtd-list');
+  gl.innerHTML = (S.todos.global||[]).map((t,i)=>`<div class="td-item"><div class="chk ${t.done?'on':''}" onclick="tGTD(${i})"></div><span class="${t.done?'done-t':''}">${t.text}</span><button class="ib del" onclick="rmGTD(${i})">✕</button></div>`).join('') || '<p style="font-size:12px;color:var(--t3);padding:9px 0">Geen items.</p>';
+  let html = '';
+  S.items.filter(i=>i.type==='item').forEach(item => {
+    const td = S.todos.items[item.id]||[]; if (!td.length) return;
+    const L = lbl(item.label);
+    html += `<div class="td-card"><div class="td-card-hd">${item.omschrijving}${L?` <span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:''}</div><div class="td-card-items">${td.map((t,i)=>`<div class="td-item"><div class="chk ${t.done?'on':''}" onclick="tITD(${item.id},${i})"></div><span class="${t.done?'done-t':''}">${t.text}</span><button class="ib del" onclick="rmITD(${item.id},${i})">✕</button></div>`).join('')}</div></div>`;
+  });
+  document.getElementById('itd-out').innerHTML = html;
+  updateBadges();
+}
+function addGTodo() { const i=document.getElementById('gtd-i'), t=i.value.trim(); if(!t)return; S.todos.global.push({id:Date.now(),text:t,done:false}); i.value=''; save(); renderTDV(); }
+function tGTD(i)    { S.todos.global[i].done=!S.todos.global[i].done; save(); renderTDV(); }
+function rmGTD(i)   { S.todos.global.splice(i,1); save(); renderTDV(); }
+function tITD(id,i) { S.todos.items[id][i].done=!S.todos.items[id][i].done; save(); renderTDV(); }
+function rmITD(id,i){ S.todos.items[id].splice(i,1); save(); renderTDV(); }
+
+/* ═══════════════════════════════════
+   FINANCIEEL VIEW
+═══════════════════════════════════ */
+function renderFin() {
+  const tb = document.getElementById('fin-tb'); tb.innerHTML = '';
+  let totB=0, totD=0, totN=0, count=0;
+  let currentSep = null;
+
+  S.items.forEach(item => {
+    if (item.type==='sep') { currentSep=item.name; return; }
+    const f = calcFin(item.fin);
+    if (!f.bedrag) return;
+    count++; totB+=f.bedrag; totD+=f.disc; totN+=f.netto;
+    const L = lbl(item.label);
+    if (currentSep) {
+      const sr = document.createElement('tr'); sr.className='fin-sep';
+      sr.innerHTML = `<td colspan="6"><span class="fin-sep-lbl">▸ ${currentSep}</span></td>`;
+      tb.appendChild(sr); currentSep=null;
+    }
+    const tr = document.createElement('tr');
+    tr.innerHTML = `
+      <td><div style="font-size:13px;font-weight:500">${item.omschrijving}</div>${item.wie?`<div style="font-size:11px;color:var(--t3);margin-top:2px">👤 ${item.wie}</div>`:''}</td>
+      <td>${L?`<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:'—'}</td>
+      <td class="r fin-amount">${euro(f.bedrag)}</td>
+      <td class="r">${f.korting?`<span style="font-size:12px;color:var(--t2)">${f.korting}%</span>`:'<span style="color:var(--t3)">—</span>'}</td>
+      <td class="r">${f.disc?`<span style="color:var(--red);font-size:12px">– ${euro(f.disc)}</span>`:'<span style="color:var(--t3)">—</span>'}</td>
+      <td class="r fin-final">${euro(f.netto)}</td>`;
+    tb.appendChild(tr);
+  });
+
+  if (!count) {
+    tb.innerHTML = `<tr><td colspan="6"><div class="fin-empty"><p>Nog geen kosten ingevoerd.<br>Voeg kosten toe via Backoffice → tab Financieel.</p></div></td></tr>`;
+  } else {
+    const tr = document.createElement('tr'); tr.className='fin-total-row';
+    tr.innerHTML = `
+      <td colspan="2" style="font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)">Totaal (${count} onderdeel${count!==1?'en':''})</td>
+      <td class="r fin-amount">${euro(totB)}</td>
+      <td class="r"></td>
+      <td class="r"><span style="color:var(--red)">– ${euro(totD)}</span></td>
+      <td class="r fin-final" style="font-size:16px;color:var(--green)">${euro(totN)}</td>`;
+    tb.appendChild(tr);
+  }
+  document.getElementById('fin-tot').textContent      = euro(totB);
+  document.getElementById('fin-disc-tot').textContent = euro(totD);
+  document.getElementById('fin-net').textContent      = euro(totN);
+  document.getElementById('fin-count').textContent    = `${count} onderdeel${count!==1?'en':''} met kosten`;
+}
+
+/* ═══════════════════════════════════
+   REGIEPAD
+═══════════════════════════════════ */
+function renderRP() {
+  const cf = conflicts(), cfIds = new Set(cf.flatMap(c => c.ids));
+  document.getElementById('rp-t').textContent  = S.event.name;
+  document.getElementById('rp-st').textContent = S.event.date;
+  const ri = S.items.filter(i => i.type==='item');
+  document.getElementById('rs-i').textContent = ri.length;
+  const pct = readiness();
+  document.getElementById('rs-r').textContent    = pct+'%';
+  document.getElementById('rs-rb').style.width   = pct+'%';
+  const cEl = document.getElementById('rs-c'); cEl.textContent=cf.length; cEl.style.color=cf.length?'var(--red)':'var(--text)';
+  document.getElementById('rs-cs').textContent   = cf.length ? 'Controleer regiepad' : 'Alles lijkt in orde';
+  let tot=0; ri.forEach(i => { if(i.start&&i.eind){const d=t2m(i.eind)-t2m(i.start);if(d>0)tot+=d;} });
+  const h=Math.floor(tot/60), m=tot%60;
+  document.getElementById('rs-d').textContent = m ? `${h}u ${m}m` : `${h}u`;
+  document.getElementById('cf-wrap').innerHTML = cf.length ? `<div class="cf-notice"><div class="cf-notice-title">⚠ ${cf.length} conflict${cf.length>1?'en':''}</div>${cf.map(c=>`<p>• ${c.msg}</p>`).join('')}</div>` : '';
+
+  const tb = document.getElementById('rp-tb'); tb.innerHTML=''; let num=1;
+  S.items.forEach(item => {
+    if (item.type==='sep') { const tr=document.createElement('tr'); tr.className='rp-sep'; tr.innerHTML=`<td colspan="9"><span class="rp-sep-lbl">▸ ${item.name}</span></td>`; tb.appendChild(tr); return; }
+    const c=item.checklist||{}, L=lbl(item.label), exp=expanded.includes(item.id), hasDet=item.script||item.techniek||item.dj;
+    const tr=document.createElement('tr'); tr.className='rp-row'+(hasDet?' has-det':'');
+    if (hasDet) tr.onclick=()=>{ const ix=expanded.indexOf(item.id); if(ix===-1)expanded.push(item.id); else expanded.splice(ix,1); renderRP(); };
+    tr.innerHTML=`
+      <td><span class="rp-num">${num++}</span></td>
+      <td><span class="rp-ts">${item.start||'—'}</span></td>
+      <td><span class="rp-te">${item.eind||'—'}</span></td>
+      <td><span class="rp-dur">${durStr(item.start,item.eind)}</span></td>
+      <td>
+        <div style="display:flex;align-items:center;gap:8px">
+          ${cfIds.has(item.id)?'<span style="color:var(--orange);font-size:11px">⚠</span>':''}
+          <div>
+            <div class="rp-ttl">${item.omschrijving||'—'}${item.fixed?` <span class="fixed-tag">FIXED</span>`:''}</div>
+            ${item.bijzonderheden?`<div class="rp-biz">${item.bijzonderheden}</div>`:''}
+          </div>
+          ${hasDet?`<span style="font-size:9px;color:var(--t3);margin-left:2px">${exp?'▲':'▼'}</span>`:''}
+        </div>
+      </td>
+      <td><span class="rp-wie">${item.wie||'—'}</span></td>
+      <td><span class="rp-loc">${item.locatie||'—'}</span></td>
+      <td>${L?`<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:'—'}</td>
+      <td><div class="ckd"><div class="ckd-dot ${c.persoon?'on':''}"></div><div class="ckd-dot ${c.script?'on':''}"></div><div class="ckd-dot ${c.slide?'on':''}"></div><div class="ckd-dot ${c.techniek?'on':''}"></div></div></td>`;
+    tb.appendChild(tr);
+    if (exp && hasDet) {
+      const dr=document.createElement('tr'); dr.className='rp-det-row open';
+      dr.innerHTML=`<td colspan="9"><div class="rp-det-grid">
+        ${item.script  ? `<div class="rdg"><h5>📝 Script</h5><p>${item.script.replace(/\n/g,'<br>')}</p></div>` : ''}
+        ${item.techniek? `<div class="rdg"><h5>🔊 Techniek</h5><p>${item.techniek.replace(/\n/g,'<br>')}</p></div>` : ''}
+        ${item.dj      ? `<div class="rdg"><h5>🎵 DJ</h5><p>${item.dj.replace(/\n/g,'<br>')}</p></div>` : ''}
+      </div></td>`;
+      tb.appendChild(dr);
+    }
+  });
+}
+
+/* ═══════════════════════════════════
+   START
+═══════════════════════════════════ */
+init();
+</script>
+</body>
+</html>
