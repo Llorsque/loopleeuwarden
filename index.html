@@ -654,7 +654,7 @@ function gv(id,el){
   document.querySelectorAll('.nv').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   if(el)el.classList.add('active');
-  if(id==='rp')renderRP();
+  if(id==='rp'){if(rpView==='timeline')renderRPTimeline();else renderRPTable();}
   if(id==='td')renderTDV();
   if(id==='fin')renderFin();
   if(id==='bo')renderBoList();
@@ -1180,13 +1180,6 @@ function renderRPTimeline(){
       </div>`;
     rowsEl.appendChild(row);ic++;
   });
-}
-
-/* Koppel gv zodat regiepad correct initialiseert */
-const _origGv=gv;
-function gv(id,el){
-  _origGv(id,el);
-  if(id==='rp'){renderRPTable();}
 }
 
 init();
