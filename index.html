@@ -348,21 +348,76 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
 .modal-foot   { display: flex; justify-content: flex-end; gap: 8px; margin-top: 14px; }
 
 
-/* ── LIBRARY MODULES ── */
+/* ── TOOLBAR & REGIEPAD NAV ── */
+.rp-toolbar{padding:14px 32px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg);flex-wrap:wrap;}
+.rp-view-tabs{display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:8px;overflow:hidden;}
+.rvt{font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:7px 15px;background:none;border:none;color:var(--t3);cursor:pointer;transition:all .12s;}
+.rvt.active{background:var(--navy);color:var(--white);}
+.auto-btn{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2);transition:all .14s;white-space:nowrap;}
+.auto-btn:hover{border-color:var(--navy);color:var(--navy);}
+.auto-btn.on{background:var(--y-bg);border-color:var(--yellow);color:var(--navy);}
+.live-dot{width:7px;height:7px;border-radius:50%;background:var(--t3);flex-shrink:0;}
+.auto-btn.on .live-dot{background:var(--green);animation:livepulse 1.4s ease-in-out infinite;}
+@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
+.live-time{font-size:10px;font-family:var(--body);font-weight:500;color:var(--t3);}
+.auto-btn.on .live-time{color:var(--navy);}
+.key-hint{font-size:10px;color:var(--t3);font-family:var(--ui);letter-spacing:.3px;}
+.rp-row.kbd-sel td{background:rgba(30,28,74,.04)!important;}
+.rp-row.kbd-sel td:first-child{border-left:3px solid var(--navy);padding-left:10px;}
+.rp-row.now-active td{background:rgba(255,208,0,.06)!important;}
+.rp-row.now-active td:first-child{border-left:3px solid var(--yellow);padding-left:10px;}
+.now-badge{font-family:var(--ui);font-weight:700;font-size:8px;letter-spacing:.8px;text-transform:uppercase;background:var(--yellow);color:var(--navy);padding:1px 5px;border-radius:3px;margin-left:5px;}
+/* ── TIMELINE ── */
+.tl-outer{overflow:auto;}
+.tl-inner{min-width:560px;position:relative;}
+.tl-ruler{display:flex;align-items:stretch;background:var(--bg);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10;}
+.tl-ruler-lpad{width:200px;flex-shrink:0;padding:0 12px 6px 32px;display:flex;align-items:flex-end;font-family:var(--ui);font-weight:600;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);}
+.tl-ruler-marks{flex:1;position:relative;height:34px;margin-right:20px;}
+.tl-h-mark{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;}
+.tl-h-tick{width:1px;height:8px;background:var(--border);}
+.tl-h-lbl{font-family:var(--ui);font-weight:600;font-size:9px;color:var(--t3);transform:translateX(-50%);margin-bottom:2px;white-space:nowrap;}
+.tl-half{position:absolute;bottom:0;width:1px;height:4px;background:var(--border);}
+.tl-row-tl{display:flex;align-items:center;border-bottom:1px solid var(--border);min-height:34px;cursor:pointer;transition:background .1s;}
+.tl-row-tl:hover{background:rgba(26,25,48,.012);}
+.tl-row-tl.tl-sep-row{background:var(--bg);cursor:default;min-height:22px;}
+.tl-row-tl.tl-now-row{background:rgba(255,208,0,.05);}
+.tl-row-tl.tl-kbd{background:rgba(30,28,74,.04);}
+.tl-lbl-col{width:200px;flex-shrink:0;padding:0 10px 0 32px;}
+.tl-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tl-timelbl{font-family:var(--ui);font-weight:500;font-size:10px;color:var(--t3);white-space:nowrap;}
+.tl-sep-lbl{font-family:var(--ui);font-weight:700;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);}
+.tl-bars-col{flex:1;position:relative;height:34px;margin-right:20px;}
+.tl-bar{position:absolute;top:7px;height:20px;border-radius:5px;display:flex;align-items:center;padding:0 6px;min-width:3px;overflow:hidden;}
+.tl-bar-txt{font-family:var(--ui);font-weight:600;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.tl-bar-fixed{box-shadow:0 0 0 2px rgba(30,28,74,.22);}
+.tl-now-sticky{position:sticky;top:34px;height:0;overflow:visible;pointer-events:none;z-index:9;}
+.tl-now-inner{margin-left:200px;margin-right:20px;position:relative;height:0;}
+.tl-now-line{position:absolute;top:0;width:2px;background:var(--red);opacity:.72;transform:translateX(-50%);}
+.tl-now-pill{position:absolute;top:-24px;transform:translateX(-50%);background:var(--red);color:#fff;font-family:var(--ui);font-weight:700;font-size:9px;padding:2px 6px;border-radius:4px;white-space:nowrap;}
+/* ── LIBRARY PANEL (inside timeline) ── */
+.tl-lib-panel{width:220px;flex-shrink:0;background:var(--white);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
+.tl-lib-hd{padding:10px 14px;border-bottom:1px solid var(--border);font-family:var(--ui);font-weight:700;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);}
+.tl-lib-sect{padding:8px 14px 3px;font-family:var(--ui);font-weight:700;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);}
+.tl-lib-item{margin:0 8px 5px;padding:8px 10px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg);cursor:grab;transition:all .12s;display:flex;align-items:center;gap:8px;}
+.tl-lib-item:hover{border-color:var(--navy);background:var(--white);}
+.tl-lib-item.dragging{opacity:.4;}
+.tl-lib-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
+.tl-lib-name{font-size:11px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+.tl-lib-sub{font-size:9px;color:var(--t3);font-weight:400;margin-top:1px;}
+/* ── LIBRARY VIEWS (ent/hul) ── */
 .lib-body{flex:1;overflow-y:auto;padding:22px 28px 60px;}
 .lib-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:14px;}
-.lib-card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;cursor:grab;transition:box-shadow .14s,transform .12s;}
+.lib-card{background:var(--white);border-radius:var(--r);box-shadow:var(--sh);overflow:hidden;transition:box-shadow .14s,transform .12s;}
 .lib-card:hover{box-shadow:0 4px 20px rgba(26,25,48,.10);transform:translateY(-1px);}
-.lib-card.dragging{opacity:.45;transform:scale(.97);}
 .lib-card-head{padding:14px 16px 10px;display:flex;align-items:flex-start;gap:10px;}
 .lib-card-icon{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0;}
 .lib-card-title{font-family:var(--ui);font-weight:700;font-size:14px;letter-spacing:.3px;flex:1;line-height:1.2;}
 .lib-card-sub{font-size:11px;color:var(--t2);font-weight:400;margin-top:2px;}
 .lib-card-body{padding:0 16px 10px;display:flex;flex-direction:column;gap:5px;}
 .lib-row{display:flex;align-items:baseline;gap:7px;font-size:11px;color:var(--t2);}
-.lib-row-lbl{font-family:var(--ui);font-weight:600;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);width:90px;flex-shrink:0;}
+.lib-row-lbl{font-family:var(--ui);font-weight:600;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);width:88px;flex-shrink:0;}
 .lib-card-foot{padding:9px 16px;border-top:1px solid var(--border);display:flex;align-items:center;gap:8px;background:var(--bg);}
-.lib-add-btn{font-family:var(--ui);font-weight:600;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;transition:all .12s;display:inline-flex;align-items:center;gap:5px;}
+.lib-add-btn{font-family:var(--ui);font-weight:600;font-size:9px;letter-spacing:1px;text-transform:uppercase;padding:5px 10px;border-radius:5px;border:none;cursor:pointer;transition:all .12s;}
 .lib-add-ent{background:rgba(124,58,237,.1);color:#7c3aed;}
 .lib-add-ent:hover{background:rgba(124,58,237,.18);}
 .lib-add-hul{background:rgba(204,153,0,.1);color:#cc9900;}
@@ -371,11 +426,11 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
 .status-bevestigd{background:var(--g-bg);color:var(--green);}
 .status-optie{background:var(--o-bg);color:var(--orange);}
 .status-aangevraagd{background:rgba(180,180,180,.12);color:var(--t3);}
-.lib-empty{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:10px;}
+.lib-empty{display:flex;flex-direction:column;align-items:center;padding:60px 20px;gap:10px;text-align:center;}
 .lib-empty-icon{font-size:26px;opacity:.2;}
-.lib-empty p{font-family:var(--ui);font-weight:500;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);line-height:1.7;text-align:center;}
+.lib-empty p{font-family:var(--ui);font-weight:500;font-size:11px;letter-spacing:1.2px;text-transform:uppercase;color:var(--t3);line-height:1.7;}
 /* lib modal */
-.lib-modal-box{background:var(--white);border-radius:12px;width:100%;max-width:520px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(9,7,58,.14);}
+.lib-modal-box{background:var(--white);border-radius:12px;width:100%;max-width:510px;max-height:88vh;overflow-y:auto;box-shadow:0 8px 40px rgba(9,7,58,.14);}
 .lib-modal-hd{padding:20px 22px 0;border-bottom:1px solid var(--border);}
 .lib-modal-hd h3{font-family:var(--ui);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.8px;margin-bottom:12px;}
 .lib-modal-tabs{display:flex;}
@@ -391,63 +446,6 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
 .ats-modal-hd h3{font-family:var(--ui);font-weight:700;font-size:15px;text-transform:uppercase;letter-spacing:.8px;}
 .ats-modal-body{padding:16px 22px;display:flex;flex-direction:column;gap:10px;}
 .ats-modal-foot{padding:11px 22px 16px;border-top:1px solid var(--border);display:flex;justify-content:flex-end;gap:8px;background:var(--bg);}
-/* timeline + library sidebar */
-.tl-outer{flex:1;overflow:auto;}
-.tl-inner{min-width:600px;position:relative;}
-.tl-ruler{display:flex;align-items:stretch;background:var(--bg);border-bottom:2px solid var(--border);position:sticky;top:0;z-index:10;}
-.tl-ruler-lpad{width:200px;flex-shrink:0;padding:0 12px 6px 32px;display:flex;align-items:flex-end;font-family:var(--ui);font-weight:600;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);}
-.tl-ruler-marks{flex:1;position:relative;height:34px;margin-right:24px;}
-.tl-h-mark{position:absolute;bottom:0;display:flex;flex-direction:column;align-items:center;}
-.tl-h-tick{width:1px;height:8px;background:var(--border);}
-.tl-h-lbl{font-family:var(--ui);font-weight:600;font-size:9px;color:var(--t3);transform:translateX(-50%);margin-bottom:2px;white-space:nowrap;}
-.tl-half{position:absolute;bottom:0;width:1px;height:4px;background:var(--border);}
-.tl-row-tl{display:flex;align-items:center;border-bottom:1px solid var(--border);min-height:34px;cursor:pointer;transition:background .1s;}
-.tl-row-tl:hover{background:rgba(26,25,48,.012);}
-.tl-row-tl.tl-sep-row{background:var(--bg);cursor:default;min-height:22px;}
-.tl-row-tl.tl-now-row{background:rgba(255,208,0,.05);}
-.tl-row-tl.tl-kbd{background:rgba(30,28,74,.04);}
-.tl-label{width:200px;flex-shrink:0;padding:0 10px 0 32px;}
-.tl-name{font-size:12px;font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tl-time-lbl{font-family:var(--ui);font-weight:500;font-size:10px;color:var(--t3);white-space:nowrap;}
-.tl-sep-lbl-tl{font-family:var(--ui);font-weight:700;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);}
-.tl-bars{flex:1;position:relative;height:34px;margin-right:24px;}
-.tl-bar{position:absolute;top:7px;height:20px;border-radius:5px;display:flex;align-items:center;padding:0 6px;min-width:3px;overflow:hidden;}
-.tl-bar-txt{font-family:var(--ui);font-weight:600;font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
-.tl-bar-fixed{box-shadow:0 0 0 2px rgba(30,28,74,.22);}
-.tl-now-sticky{position:sticky;top:34px;height:0;overflow:visible;pointer-events:none;z-index:9;}
-.tl-now-inner{margin-left:200px;margin-right:24px;position:relative;height:0;}
-.tl-now-line{position:absolute;top:0;width:2px;background:var(--red);opacity:.72;transform:translateX(-50%);}
-.tl-now-pill{position:absolute;top:-24px;transform:translateX(-50%);background:var(--red);color:#fff;font-family:var(--ui);font-weight:700;font-size:9px;padding:2px 6px;border-radius:4px;white-space:nowrap;}
-/* keyboard/auto */
-.rp-row.kbd-sel td{background:rgba(30,28,74,.04)!important;}
-.rp-row.kbd-sel td:first-child{border-left:3px solid var(--navy);padding-left:10px;}
-.rp-row.now-active td{background:rgba(255,208,0,.06)!important;}
-.rp-row.now-active td:first-child{border-left:3px solid var(--yellow);padding-left:10px;}
-.now-badge{display:inline-flex;align-items:center;font-family:var(--ui);font-weight:700;font-size:8px;letter-spacing:.8px;text-transform:uppercase;background:var(--yellow);color:var(--navy);padding:1px 5px;border-radius:3px;margin-left:5px;}
-.rp-toolbar{padding:14px 32px;display:flex;align-items:center;gap:10px;border-bottom:1px solid var(--border);flex-shrink:0;background:var(--bg);flex-wrap:wrap;}
-.rp-view-tabs{display:flex;background:var(--white);border:1.5px solid var(--border);border-radius:8px;overflow:hidden;}
-.rvt{font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;padding:7px 15px;background:none;border:none;color:var(--t3);cursor:pointer;transition:all .12s;}
-.rvt.active{background:var(--navy);color:var(--white);}
-.auto-btn{display:flex;align-items:center;gap:7px;padding:7px 13px;border-radius:8px;border:1.5px solid var(--border);background:var(--white);cursor:pointer;font-family:var(--ui);font-weight:600;font-size:10px;letter-spacing:1px;text-transform:uppercase;color:var(--t2);transition:all .14s;white-space:nowrap;}
-.auto-btn:hover{border-color:var(--navy);color:var(--navy);}
-.auto-btn.on{background:var(--y-bg);border-color:var(--yellow);color:var(--navy);}
-.live-dot{width:7px;height:7px;border-radius:50%;background:var(--t3);flex-shrink:0;transition:background .2s;}
-.auto-btn.on .live-dot{background:var(--green);animation:livepulse 1.4s ease-in-out infinite;}
-@keyframes livepulse{0%,100%{opacity:1}50%{opacity:.35}}
-.live-time{font-size:10px;font-family:var(--body);font-weight:500;color:var(--t3);}
-.auto-btn.on .live-time{color:var(--navy);}
-.key-hint{font-size:10px;color:var(--t3);font-family:var(--ui);letter-spacing:.3px;}
-/* tl library panel */
-.tl-lib-panel{width:230px;flex-shrink:0;background:var(--white);border-left:1px solid var(--border);overflow-y:auto;display:flex;flex-direction:column;}
-.tl-lib-hd{padding:11px 14px;border-bottom:1px solid var(--border);font-family:var(--ui);font-weight:700;font-size:9px;letter-spacing:1.5px;text-transform:uppercase;color:var(--t3);flex-shrink:0;}
-.tl-lib-sect{padding:8px 14px 3px;font-family:var(--ui);font-weight:700;font-size:8px;letter-spacing:2px;text-transform:uppercase;color:var(--t3);}
-.tl-lib-item{margin:0 8px 5px;padding:8px 10px;border-radius:7px;border:1.5px solid var(--border);background:var(--bg);cursor:grab;transition:all .12s;display:flex;align-items:center;gap:8px;}
-.tl-lib-item:hover{border-color:var(--navy);background:var(--white);}
-.tl-lib-item:active{cursor:grabbing;}
-.tl-lib-item.dragging{opacity:.45;}
-.tl-lib-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0;}
-.tl-lib-name{font-size:11px;font-weight:500;flex:1;min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-.tl-lib-sub{font-size:9px;color:var(--t3);font-weight:400;margin-top:1px;}
 
 @media print {
   .sidebar { display: none !important; }
@@ -475,8 +473,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
     <div class="nv"        id="ni-td"  onclick="gv('td',this)"><span class="ic">✓</span> To-do's <span class="bdg bdg-y" id="nb-td" style="display:none">0</span></div>
     <div class="nv"        id="ni-fin" onclick="gv('fin',this)"><span class="ic">€</span> Financieel <span class="bdg bdg-y" id="nb-fin" style="display:none">0</span></div>
     <div class="sb-lbl">Bibliotheek</div>
-    <div class="nv"        id="ni-ent" onclick="gv('ent',this)"><span class="ic">🎭</span> Entertainment <span class="bdg bdg-y" id="nb-ent" style="display:none">0</span></div>
-    <div class="nv"        id="ni-hul" onclick="gv('hul',this)"><span class="ic">🏆</span> Huldigingen <span class="bdg bdg-y" id="nb-hul" style="display:none">0</span></div>
+    <div class="nv" id="ni-ent" onclick="gv('ent',this)"><span class="ic">🎭</span> Entertainment <span class="bdg bdg-y" id="nb-ent" style="display:none">0</span></div>
+    <div class="nv" id="ni-hul" onclick="gv('hul',this)"><span class="ic">🏆</span> Huldigingen <span class="bdg bdg-y" id="nb-hul" style="display:none">0</span></div>
     <div class="sb-lbl">Output</div>
     <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad <span class="bdg bdg-r" id="nb-cf" style="display:none">0</span></div>
   </div>
@@ -546,7 +544,6 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
 
   <!-- REGIEPAD -->
   <div class="view" id="view-rp">
-    <!-- toolbar -->
     <div class="rp-toolbar">
       <div>
         <div style="font-family:var(--ui);font-weight:700;font-size:18px;letter-spacing:1px;text-transform:uppercase" id="rp-t">Regiepad</div>
@@ -557,55 +554,42 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
         <button class="rvt"        id="rvt-timeline" onclick="setRpView('timeline')">Tijdlijn</button>
       </div>
       <button class="auto-btn" id="auto-btn" onclick="toggleAuto()">
-        <span class="live-dot"></span>
-        <span id="auto-lbl">Auto</span>
-        <span class="live-time" id="live-time"></span>
+        <span class="live-dot"></span><span id="auto-lbl">Auto</span><span class="live-time" id="live-time"></span>
       </button>
       <span class="key-hint">↑ ↓ navigeren &nbsp;·&nbsp; Enter = detail</span>
       <div style="flex:1"></div>
       <button class="btn btn-out btn-sm" onclick="window.print()">🖨 Print</button>
     </div>
-    <!-- stats -->
     <div class="rp-stats" style="padding:14px 32px 16px;margin:0;flex-shrink:0">
       <div class="rp-stat"><div class="rp-stat-lbl">Onderdelen</div><div class="rp-stat-val" id="rs-i">0</div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Totale duur</div><div class="rp-stat-val" id="rs-d">—</div></div>
-      <div class="rp-stat">
-        <div class="rp-stat-lbl">Gereed</div><div class="rp-stat-val" id="rs-r">0%</div>
-        <div class="rp-bar"><div class="rp-bar-fill" id="rs-rb" style="width:0%"></div></div>
-      </div>
+      <div class="rp-stat"><div class="rp-stat-lbl">Gereed</div><div class="rp-stat-val" id="rs-r">0%</div><div class="rp-bar"><div class="rp-bar-fill" id="rs-rb" style="width:0%"></div></div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Conflicten</div><div class="rp-stat-val" id="rs-c">0</div><div class="rp-stat-sub" id="rs-cs">Alles in orde</div></div>
     </div>
     <div id="cf-wrap" style="flex-shrink:0;padding:0 32px"></div>
-    <!-- TABLE VIEW -->
+    <!-- TABLE -->
     <div id="rp-table-div" style="flex:1;overflow-y:auto;padding:0 32px 60px">
       <div class="rp-tcard">
         <table class="rp-t">
           <thead><tr>
-            <th style="width:26px">#</th>
-            <th style="width:76px">Start</th>
-            <th style="width:62px">Eind</th>
-            <th style="width:52px">Duur</th>
-            <th>Onderdeel</th>
-            <th style="width:115px">Wie</th>
-            <th style="width:92px">Locatie</th>
-            <th style="width:115px">Label</th>
-            <th style="width:56px">Gereed</th>
+            <th style="width:26px">#</th><th style="width:76px">Start</th><th style="width:62px">Eind</th><th style="width:52px">Duur</th>
+            <th>Onderdeel</th><th style="width:115px">Wie</th><th style="width:92px">Locatie</th><th style="width:115px">Label</th><th style="width:56px">Gereed</th>
           </tr></thead>
           <tbody id="rp-tb"></tbody>
         </table>
       </div>
     </div>
-    <!-- TIMELINE VIEW -->
+    <!-- TIMELINE -->
     <div id="rp-tl-div" style="display:none;flex:1;overflow:hidden;flex-direction:column">
       <div style="display:flex;flex:1;overflow:hidden">
-        <div class="tl-outer" id="tl-outer-scroll" style="flex:1;overflow:auto">
+        <div class="tl-outer" id="tl-outer-scroll" style="flex:1">
           <div class="tl-inner" id="tl-inner">
             <div class="tl-ruler">
               <div class="tl-ruler-lpad">Tijdlijn</div>
               <div class="tl-ruler-marks" id="tl-marks"></div>
             </div>
             <div class="tl-now-sticky" id="tl-now-sticky" style="display:none">
-              <div class="tl-now-inner" id="tl-now-inner">
+              <div class="tl-now-inner">
                 <div class="tl-now-pill" id="tl-now-pill"></div>
                 <div class="tl-now-line" id="tl-now-line"></div>
               </div>
@@ -613,8 +597,7 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
             <div id="tl-rows"></div>
           </div>
         </div>
-        <!-- Library sidebar -->
-        <div class="tl-lib-panel" id="tl-lib-panel">
+        <div class="tl-lib-panel">
           <div class="tl-lib-hd">📚 Sleep naar tijdlijn</div>
           <div id="tl-lib-content"></div>
         </div>
@@ -622,27 +605,15 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
     </div>
   </div>
 
-  <!-- ENTERTAINMENT LIBRARY -->
+  <!-- ENTERTAINMENT -->
   <div class="view" id="view-ent">
-    <div class="page-hd">
-      <h1>Entertainment</h1>
-      <div class="ml">
-        <span style="font-size:11px;color:var(--t3);font-weight:400">Sleep acts naar de tijdlijn om in te plannen</span>
-        <button class="btn btn-y btn-sm" onclick="openLibModal('ent')">+ Act toevoegen</button>
-      </div>
-    </div>
+    <div class="page-hd"><h1>Entertainment</h1><div class="ml"><button class="btn btn-y btn-sm" onclick="openLibModal('ent')">+ Act toevoegen</button></div></div>
     <div class="lib-body"><div class="lib-grid" id="ent-grid"></div></div>
   </div>
 
-  <!-- HULDIGINGEN LIBRARY -->
+  <!-- HULDIGINGEN -->
   <div class="view" id="view-hul">
-    <div class="page-hd">
-      <h1>Huldigingen</h1>
-      <div class="ml">
-        <span style="font-size:11px;color:var(--t3);font-weight:400">Sleep huldigingen naar de tijdlijn om in te plannen</span>
-        <button class="btn btn-y btn-sm" onclick="openLibModal('hul')">+ Huldiging toevoegen</button>
-      </div>
-    </div>
+    <div class="page-hd"><h1>Huldigingen</h1><div class="ml"><button class="btn btn-y btn-sm" onclick="openLibModal('hul')">+ Huldiging toevoegen</button></div></div>
     <div class="lib-body"><div class="lib-grid" id="hul-grid"></div></div>
   </div>
 
@@ -741,10 +712,12 @@ function gv(id,el){
   document.querySelectorAll('.nv').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   if(el)el.classList.add('active');
-  if(id==='rp'){if(typeof rpView!=='undefined'&&rpView==='timeline')renderRPTimeline();else renderRPTable();}
+  if(id==='rp'){if(rpView==='timeline')renderRPTimeline();else renderRPTable();}
   if(id==='td')renderTDV();
   if(id==='fin')renderFin();
   if(id==='bo')renderBoList();
+  if(id==='ent')renderLib('ent');
+  if(id==='hul')renderLib('hul');
 }
 function updateBadges(){
   const cf=conflicts();
@@ -755,6 +728,8 @@ function updateBadges(){
   const finItems=S.items.filter(i=>i.type==='item'&&parseFloat((i.fin?.bedrag||'').replace(',','.'))||0);
   const nf=document.getElementById('nb-fin');nf.textContent=finItems.length;nf.style.display=finItems.length?'inline':'none';
   document.getElementById('sb-en').textContent=S.event.name;
+  const neEl=document.getElementById('nb-ent');if(neEl){neEl.textContent=(S.entertainment||[]).length;neEl.style.display=(S.entertainment||[]).length?'inline':'none';}
+  const nhEl=document.getElementById('nb-hul');if(nhEl){nhEl.textContent=(S.huldigingen||[]).length;nhEl.style.display=(S.huldigingen||[]).length?'inline':'none';}
 }
 
 /* ═══ BO LIST ═══ */
@@ -1043,204 +1018,135 @@ function renderFin(){
   document.getElementById('fin-count').textContent=`${count} onderdeel${count!==1?'en':''} met kosten`;
 }
 
-/* ═══ REGIEPAD ═══ */
-function renderRP(){
-  const cf=conflicts(),cfIds=new Set(cf.flatMap(c=>c.ids));
-  document.getElementById('rp-t').textContent=S.event.name;
-  document.getElementById('rp-st').textContent=S.event.date;
-  const ri=S.items.filter(i=>i.type==='item');
-  document.getElementById('rs-i').textContent=ri.length;
-  const pct=readiness();
-  document.getElementById('rs-r').textContent=pct+'%';
-  document.getElementById('rs-rb').style.width=pct+'%';
+/* ═══ REGIEPAD — NAVIGATIE, AUTO, TABEL, TIJDLIJN ═══ */
+let rpView='table',rpIdx=-1,rpItemIds=[],rpAutoOn=false,rpAutoTimer=null;
+
+function getAmsTime(){
+  try{return new Date().toLocaleString('nl-NL',{timeZone:'Europe/Amsterdam',hour:'2-digit',minute:'2-digit',hour12:false}).replace(',','').trim();}
+  catch(e){const n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}
+}
+function findNowIdx(items){
+  const now=t2m(getAmsTime());let best=-1;
+  for(let i=0;i<items.length;i++){const it=items[i];if(!it.start)continue;const s=t2m(it.start),e=it.eind?t2m(it.eind):s+1;if(now>=s&&now<e)return i;if(now>=s)best=i;}
+  return best;
+}
+function toggleAuto(){
+  rpAutoOn=!rpAutoOn;
+  const btn=document.getElementById('auto-btn'),lbl=document.getElementById('auto-lbl'),t=document.getElementById('live-time');
+  if(rpAutoOn){btn.classList.add('on');lbl.textContent='Auto aan';doAutoFollow();rpAutoTimer=setInterval(doAutoFollow,20000);}
+  else{btn.classList.remove('on');lbl.textContent='Auto';t.textContent='';clearInterval(rpAutoTimer);if(rpView==='timeline')renderRPTimeline();else renderRPTable();}
+}
+function doAutoFollow(){
+  const t=getAmsTime();document.getElementById('live-time').textContent=t;
+  const items=S.items.filter(i=>i.type==='item');const idx=findNowIdx(items);
+  if(idx!==-1)rpIdx=idx;
+  if(rpView==='table'){renderRPTable();if(idx!==-1)scrollToRpId(items[idx].id);}else renderRPTimeline();
+}
+function setRpView(v){
+  rpView=v;
+  document.getElementById('rvt-table').classList.toggle('active',v==='table');
+  document.getElementById('rvt-timeline').classList.toggle('active',v==='timeline');
+  document.getElementById('rp-table-div').style.display=v==='table'?'block':'none';
+  document.getElementById('rp-tl-div').style.display=v==='timeline'?'flex':'none';
+  if(v==='table')renderRPTable();else renderRPTimeline();
+}
+document.addEventListener('keydown',e=>{
+  if(!document.getElementById('view-rp').classList.contains('active'))return;
+  if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;
+  if(e.key==='ArrowDown'){e.preventDefault();moveRpIdx(1);}
+  else if(e.key==='ArrowUp'){e.preventDefault();moveRpIdx(-1);}
+  else if(e.key==='Enter'||e.key===' '){
+    e.preventDefault();
+    if(rpIdx>=0&&rpIdx<rpItemIds.length){
+      const id=rpItemIds[rpIdx],item=S.items.find(i=>i.id===id);
+      if(item&&(item.script||item.techniek||item.dj)){const ix=expanded.indexOf(id);if(ix===-1)expanded.push(id);else expanded.splice(ix,1);if(rpView==='table')renderRPTable();}
+    }
+  }
+});
+function moveRpIdx(dir){
+  rpItemIds=S.items.filter(i=>i.type==='item').map(i=>i.id);if(!rpItemIds.length)return;
+  if(rpIdx<0)rpIdx=0;else rpIdx=Math.max(0,Math.min(rpItemIds.length-1,rpIdx+dir));
+  if(rpView==='table'){renderRPTable();scrollToRpId(rpItemIds[rpIdx]);}else renderRPTimeline();
+}
+function scrollToRpId(id){setTimeout(()=>{const r=document.querySelector(`tr[data-rpid="${id}"]`);if(r)r.scrollIntoView({block:'nearest',behavior:'smooth'});},40);}
+
+function rpStats(){
+  const cf=conflicts();
+  document.getElementById('rp-t').textContent=S.event.name;document.getElementById('rp-st').textContent=S.event.date;
+  const ri=S.items.filter(i=>i.type==='item');document.getElementById('rs-i').textContent=ri.length;
+  const pct=readiness();document.getElementById('rs-r').textContent=pct+'%';document.getElementById('rs-rb').style.width=pct+'%';
   const cEl=document.getElementById('rs-c');cEl.textContent=cf.length;cEl.style.color=cf.length?'var(--red)':'var(--text)';
-  document.getElementById('rs-cs').textContent=cf.length?'Controleer regiepad':'Alles lijkt in orde';
+  document.getElementById('rs-cs').textContent=cf.length?'Controleer regiepad':'Alles in orde';
   let tot=0;ri.forEach(i=>{if(i.start&&i.eind){const d=t2m(i.eind)-t2m(i.start);if(d>0)tot+=d;}});
-  const h=Math.floor(tot/60),m=tot%60;
-  document.getElementById('rs-d').textContent=m?`${h}u ${m}m`:`${h}u`;
-  document.getElementById('cf-wrap').innerHTML=cf.length?`<div class="cf-notice"><div class="cf-notice-title">⚠ ${cf.length} conflict${cf.length>1?'en':''}</div>${cf.map(c=>`<p>• ${c.msg}</p>`).join('')}</div>`:'';
-  const tb=document.getElementById('rp-tb');tb.innerHTML='';let num=1;
+  const h=Math.floor(tot/60),m=tot%60;document.getElementById('rs-d').textContent=m?`${h}u ${m}m`:`${h}u`;
+  document.getElementById('cf-wrap').innerHTML=cf.length?`<div class="cf-notice" style="margin-bottom:12px"><div class="cf-notice-title">⚠ ${cf.length} conflict${cf.length>1?'en':''}</div>${cf.map(c=>`<p>• ${c.msg}</p>`).join('')}</div>`:'';
+}
+
+function renderRPTable(){
+  rpStats();
+  const cf=conflicts(),cfIds=new Set(cf.flatMap(c=>c.ids));
+  const allItems=S.items.filter(i=>i.type==='item');
+  rpItemIds=allItems.map(i=>i.id);
+  const nowIdx=rpAutoOn?findNowIdx(allItems):-1;
+  const tb=document.getElementById('rp-tb');tb.innerHTML='';let num=1,ic=0;
   S.items.forEach(item=>{
     if(item.type==='sep'){const tr=document.createElement('tr');tr.className='rp-sep';tr.innerHTML=`<td colspan="9"><span class="rp-sep-lbl">▸ ${item.name}</span></td>`;tb.appendChild(tr);return;}
     const c=item.checklist||{},L=lbl(item.label),exp=expanded.includes(item.id),hasDet=item.script||item.techniek||item.dj;
-    const tr=document.createElement('tr');tr.className='rp-row'+(hasDet?' has-det':'');
-    if(hasDet)tr.onclick=()=>{const ix=expanded.indexOf(item.id);if(ix===-1)expanded.push(item.id);else expanded.splice(ix,1);renderRP();};
-    tr.innerHTML=`
-      <td><span class="rp-num">${num++}</span></td>
-      <td><span class="rp-ts">${item.start||'—'}</span></td>
-      <td><span class="rp-te">${item.eind||'—'}</span></td>
-      <td><span class="rp-dur">${durStr(item.start,item.eind)}</span></td>
-      <td>
-        <div style="display:flex;align-items:center;gap:8px">
-          ${cfIds.has(item.id)?'<span style="color:var(--orange);font-size:11px">⚠</span>':''}
-          <div>
-            <div class="rp-ttl">${item.omschrijving||'—'}${item.fixed?` <span class="fixed-tag">FIXED</span>`:''}</div>
-            ${item.bijzonderheden?`<div class="rp-biz">${item.bijzonderheden}</div>`:''}
-          </div>
-          ${hasDet?`<span style="font-size:9px;color:var(--t3);margin-left:2px">${exp?'▲':'▼'}</span>`:''}
-        </div>
-      </td>
-      <td><span class="rp-wie">${item.wie||'—'}</span></td>
-      <td><span class="rp-loc">${item.locatie||'—'}</span></td>
+    const isKbd=rpIdx===ic,isNow=rpAutoOn&&nowIdx===ic;
+    const tr=document.createElement('tr');
+    tr.className='rp-row'+(hasDet?' has-det':'')+(isKbd?' kbd-sel':'')+(isNow?' now-active':'');
+    tr.dataset.rpid=item.id;
+    const ic2=ic;tr.onclick=()=>{rpIdx=ic2;if(hasDet){const ix=expanded.indexOf(item.id);if(ix===-1)expanded.push(item.id);else expanded.splice(ix,1);}renderRPTable();};
+    tr.innerHTML=`<td><span class="rp-num">${num++}</span></td><td><span class="rp-ts">${item.start||'—'}</span></td><td><span class="rp-te">${item.eind||'—'}</span></td><td><span class="rp-dur">${durStr(item.start,item.eind)}</span></td>
+      <td><div style="display:flex;align-items:center;gap:8px">${cfIds.has(item.id)?'<span style="color:var(--orange);font-size:11px">⚠</span>':''}
+        <div><div class="rp-ttl">${item.omschrijving||'—'}${item.fixed?' <span class="fixed-tag">FIXED</span>':''}${isNow?' <span class="now-badge">▶ nu</span>':''}</div>${item.bijzonderheden?`<div class="rp-biz">${item.bijzonderheden}</div>`:''}</div>
+        ${hasDet?`<span style="font-size:9px;color:var(--t3);margin-left:2px">${exp?'▲':'▼'}</span>`:''}</div></td>
+      <td><span class="rp-wie">${item.wie||'—'}</span></td><td><span class="rp-loc">${item.locatie||'—'}</span></td>
       <td>${L?`<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:'—'}</td>
       <td><div class="ckd"><div class="ckd-dot ${c.persoon?'on':''}"></div><div class="ckd-dot ${c.script?'on':''}"></div><div class="ckd-dot ${c.slide?'on':''}"></div><div class="ckd-dot ${c.techniek?'on':''}"></div></div></td>`;
     tb.appendChild(tr);
-    if(exp&&hasDet){
-      const dr=document.createElement('tr');dr.className='rp-det-row open';
-      dr.innerHTML=`<td colspan="9"><div class="rp-det-grid">
-        ${item.script?`<div class="rdg"><h5>📝 Script</h5><p>${item.script.replace(/\n/g,'<br>')}</p></div>`:''}
-        ${item.techniek?`<div class="rdg"><h5>🔊 Techniek</h5><p>${item.techniek.replace(/\n/g,'<br>')}</p></div>`:''}
-        ${item.dj?`<div class="rdg"><h5>🎵 DJ</h5><p>${item.dj.replace(/\n/g,'<br>')}</p></div>`:''}
-      </div></td>`;
-      tb.appendChild(dr);
-    }
-  });
-}
-
-
-/* ── REGIEPAD NAV & AUTO ── */
-var rpView='table',rpIdx=-1,rpItemIds=[],rpAutoOn=false,rpAutoTimer=null;
-function getAmsTime(){try{return new Date().toLocaleString('nl-NL',{timeZone:'Europe/Amsterdam',hour:'2-digit',minute:'2-digit',hour12:false}).replace(',','').trim();}catch(e){var n=new Date();return String(n.getHours()).padStart(2,'0')+':'+String(n.getMinutes()).padStart(2,'0');}}
-function findNowIdx(items){var now=t2m(getAmsTime()),best=-1;for(var i=0;i<items.length;i++){var it=items[i];if(!it.start)continue;var s=t2m(it.start),e=it.eind?t2m(it.eind):s+1;if(now>=s&&now<e)return i;if(now>=s)best=i;}return best;}
-function toggleAuto(){rpAutoOn=!rpAutoOn;var btn=document.getElementById('auto-btn'),lbl=document.getElementById('auto-lbl'),t=document.getElementById('live-time');if(rpAutoOn){btn.classList.add('on');lbl.textContent='Auto aan';doAutoFollow();rpAutoTimer=setInterval(doAutoFollow,20000);}else{btn.classList.remove('on');lbl.textContent='Auto';t.textContent='';clearInterval(rpAutoTimer);if(rpView==='timeline')renderRPTimeline();else renderRPTable();}}
-function doAutoFollow(){var t=getAmsTime();document.getElementById('live-time').textContent=t;var items=S.items.filter(function(i){return i.type==='item';});var idx=findNowIdx(items);if(idx!==-1)rpIdx=idx;if(rpView==='table'){renderRPTable();if(idx!==-1)scrollToRpId(items[idx].id);}else renderRPTimeline();}
-function setRpView(v){rpView=v;document.getElementById('rvt-table').classList.toggle('active',v==='table');document.getElementById('rvt-timeline').classList.toggle('active',v==='timeline');document.getElementById('rp-table-div').style.display=v==='table'?'block':'none';document.getElementById('rp-tl-div').style.display=v==='timeline'?'flex':'none';if(v==='table')renderRPTable();else renderRPTimeline();}
-document.addEventListener('keydown',function(e){if(!document.getElementById('view-rp').classList.contains('active'))return;if(['INPUT','TEXTAREA','SELECT'].includes(e.target.tagName))return;if(e.key==='ArrowDown'){e.preventDefault();moveRpIdx(1);}else if(e.key==='ArrowUp'){e.preventDefault();moveRpIdx(-1);}else if(e.key==='Enter'||e.key===' '){e.preventDefault();if(rpIdx>=0&&rpIdx<rpItemIds.length){var id=rpItemIds[rpIdx];var item=S.items.find(function(i){return i.id===id;});if(item&&(item.script||item.techniek||item.dj)){var ix=expanded.indexOf(id);if(ix===-1)expanded.push(id);else expanded.splice(ix,1);if(rpView==='table')renderRPTable();}}}});
-function moveRpIdx(dir){rpItemIds=S.items.filter(function(i){return i.type==='item';}).map(function(i){return i.id;});if(!rpItemIds.length)return;if(rpIdx<0)rpIdx=0;else rpIdx=Math.max(0,Math.min(rpItemIds.length-1,rpIdx+dir));if(rpView==='table'){renderRPTable();scrollToRpId(rpItemIds[rpIdx]);}else renderRPTimeline();}
-function scrollToRpId(id){setTimeout(function(){var r=document.querySelector('tr[data-rpid="'+id+'"]');if(r)r.scrollIntoView({block:'nearest',behavior:'smooth'});},40);}
-
-/* ── RENDER TABLE ── */
-function renderRPTable(){
-  var cf=conflicts(),cfIds=new Set(cf.flatMap(function(c){return c.ids;}));
-  document.getElementById('rp-t').textContent=S.event.name;document.getElementById('rp-st').textContent=S.event.date;
-  var ri=S.items.filter(function(i){return i.type==='item';});document.getElementById('rs-i').textContent=ri.length;
-  var pct=readiness();document.getElementById('rs-r').textContent=pct+'%';document.getElementById('rs-rb').style.width=pct+'%';
-  var cEl=document.getElementById('rs-c');cEl.textContent=cf.length;cEl.style.color=cf.length?'var(--red)':'var(--text)';
-  document.getElementById('rs-cs').textContent=cf.length?'Controleer regiepad':'Alles in orde';
-  var tot=0;ri.forEach(function(i){if(i.start&&i.eind){var d=t2m(i.eind)-t2m(i.start);if(d>0)tot+=d;}});
-  var h=Math.floor(tot/60),m=tot%60;document.getElementById('rs-d').textContent=m?h+'u '+m+'m':h+'u';
-  document.getElementById('cf-wrap').innerHTML=cf.length?'<div class="cf-notice" style="margin-bottom:12px"><div class="cf-notice-title">⚠ '+cf.length+' conflict'+(cf.length>1?'en':'')+'</div>'+cf.map(function(c){return '<p>• '+c.msg+'</p>';}).join('')+'</div>':'';
-  rpItemIds=S.items.filter(function(i){return i.type==='item';}).map(function(i){return i.id;});
-  var nowIdx=-1;if(rpAutoOn)nowIdx=findNowIdx(S.items.filter(function(i){return i.type==='item';}));
-  var tb=document.getElementById('rp-tb');tb.innerHTML='';var num=1,ic=0;
-  S.items.forEach(function(item){
-    if(item.type==='sep'){var tr=document.createElement('tr');tr.className='rp-sep';tr.innerHTML='<td colspan="9"><span class="rp-sep-lbl">▸ '+item.name+'</span></td>';tb.appendChild(tr);return;}
-    var c=item.checklist||{},L=lbl(item.label),exp=expanded.includes(item.id),hasDet=item.script||item.techniek||item.dj;
-    var isKbd=rpIdx===ic,isNow=rpAutoOn&&nowIdx===ic;
-    var tr=document.createElement('tr');
-    tr.className='rp-row'+(hasDet?' has-det':'')+(isKbd?' kbd-sel':'')+(isNow?' now-active':'');
-    tr.dataset.rpid=item.id;
-    (function(ic2,itemId,hasDet2){tr.onclick=function(){rpIdx=ic2;if(hasDet2){var ix=expanded.indexOf(itemId);if(ix===-1)expanded.push(itemId);else expanded.splice(ix,1);}renderRPTable();};})(ic,item.id,hasDet);
-    tr.innerHTML='<td><span class="rp-num">'+num+'</span></td>'+
-      '<td><span class="rp-ts">'+(item.start||'—')+'</span></td>'+
-      '<td><span class="rp-te">'+(item.eind||'—')+'</span></td>'+
-      '<td><span class="rp-dur">'+durStr(item.start,item.eind)+'</span></td>'+
-      '<td><div style="display:flex;align-items:center;gap:8px">'+
-        (cfIds.has(item.id)?'<span style="color:var(--orange);font-size:11px">⚠</span>':'')+
-        '<div><div class="rp-ttl">'+(item.omschrijving||'—')+(item.fixed?' <span class="fixed-tag">FIXED</span>':'')+(isNow?' <span class="now-badge">▶ nu</span>':'')+'</div>'+
-        (item.bijzonderheden?'<div class="rp-biz">'+item.bijzonderheden+'</div>':'')+
-        '</div>'+(hasDet?'<span style="font-size:9px;color:var(--t3);margin-left:2px">'+(exp?'▲':'▼')+'</span>':'')+
-      '</div></td>'+
-      '<td><span class="rp-wie">'+(item.wie||'—')+'</span></td>'+
-      '<td><span class="rp-loc">'+(item.locatie||'—')+'</span></td>'+
-      '<td>'+(L?'<span class="lpill" style="background:'+L.color+'18;color:'+L.color+'">'+L.name+'</span>':'—')+'</td>'+
-      '<td><div class="ckd"><div class="ckd-dot '+(c.persoon?'on':'')+'"></div><div class="ckd-dot '+(c.script?'on':'')+'"></div><div class="ckd-dot '+(c.slide?'on':'')+'"></div><div class="ckd-dot '+(c.techniek?'on':'')+'"></div></div></td>';
-    num++;tb.appendChild(tr);
-    if(exp&&hasDet){var dr=document.createElement('tr');dr.className='rp-det-row open';dr.innerHTML='<td colspan="9"><div class="rp-det-grid">'+(item.script?'<div class="rdg"><h5>📝 Script</h5><p>'+item.script.replace(/\n/g,'<br>')+'</p></div>':'')+(item.techniek?'<div class="rdg"><h5>🔊 Techniek</h5><p>'+item.techniek.replace(/\n/g,'<br>')+'</p></div>':'')+(item.dj?'<div class="rdg"><h5>🎵 DJ</h5><p>'+item.dj.replace(/\n/g,'<br>')+'</p></div>':'')+'</div></td>';tb.appendChild(dr);}
+    if(exp&&hasDet){const dr=document.createElement('tr');dr.className='rp-det-row open';dr.innerHTML=`<td colspan="9"><div class="rp-det-grid">${item.script?`<div class="rdg"><h5>📝 Script</h5><p>${item.script.replace(/\n/g,'<br>')}</p></div>`:''}${item.techniek?`<div class="rdg"><h5>🔊 Techniek</h5><p>${item.techniek.replace(/\n/g,'<br>')}</p></div>`:''}${item.dj?`<div class="rdg"><h5>🎵 DJ</h5><p>${item.dj.replace(/\n/g,'<br>')}</p></div>`:''}</div></td>`;tb.appendChild(dr);}
     ic++;
   });
 }
 
-/* ── RENDER TIMELINE ── */
 function renderRPTimeline(){
-  document.getElementById('rp-t').textContent=S.event.name;document.getElementById('rp-st').textContent=S.event.date;
-  var cf=conflicts();
-  var ri=S.items.filter(function(i){return i.type==='item';});document.getElementById('rs-i').textContent=ri.length;
-  var pct=readiness();document.getElementById('rs-r').textContent=pct+'%';document.getElementById('rs-rb').style.width=pct+'%';
-  var cEl=document.getElementById('rs-c');cEl.textContent=cf.length;cEl.style.color=cf.length?'var(--red)':'var(--text)';
-  document.getElementById('rs-cs').textContent=cf.length?'Controleer regiepad':'Alles in orde';
-  var tot=0;ri.forEach(function(i){if(i.start&&i.eind){var d=t2m(i.eind)-t2m(i.start);if(d>0)tot+=d;}});
-  var h=Math.floor(tot/60),m=tot%60;document.getElementById('rs-d').textContent=m?h+'u '+m+'m':h+'u';
-  document.getElementById('cf-wrap').innerHTML='';
-  var allItems=S.items.filter(function(i){return i.type==='item'&&i.start;});
-  rpItemIds=allItems.map(function(i){return i.id;});
-  if(!allItems.length){document.getElementById('tl-rows').innerHTML='<div style="padding:32px;color:var(--t3);font-family:var(--ui);font-size:11px;letter-spacing:1px;text-transform:uppercase">Geen onderdelen met tijden</div>';renderTlLibPanel();setupTlDrop();return;}
-  var starts=allItems.map(function(i){return t2m(i.start);});
-  var ends=allItems.filter(function(i){return i.eind;}).map(function(i){return t2m(i.eind);});
-  var minT=Math.floor((Math.min.apply(null,starts)-15)/60)*60;
-  var maxT=Math.ceil((Math.max.apply(null,ends.concat(starts))+30)/60)*60;
-  var span=maxT-minT;
-  function toP(min){return((min-minT)/span*100).toFixed(3)+'%';}
-  var marks=document.getElementById('tl-marks');marks.innerHTML='';
-  for(var t=minT;t<=maxT;t+=60){var mk=document.createElement('div');mk.className='tl-h-mark';mk.style.left=toP(t);mk.innerHTML='<div class="tl-h-lbl">'+String(Math.floor(t/60)).padStart(2,'0')+':00</div><div class="tl-h-tick"></div>';marks.appendChild(mk);}
-  for(var t2=minT+30;t2<maxT;t2+=60){var tk=document.createElement('div');tk.className='tl-half';tk.style.left=toP(t2);marks.appendChild(tk);}
-  var nowMin=t2m(getAmsTime()),showNow=rpAutoOn&&nowMin>=minT&&nowMin<=maxT;
-  var nowSticky=document.getElementById('tl-now-sticky');nowSticky.style.display=showNow?'block':'none';
-  if(showNow){document.getElementById('tl-now-line').style.left=toP(nowMin);document.getElementById('tl-now-pill').style.left=toP(nowMin);document.getElementById('tl-now-pill').textContent=getAmsTime();document.getElementById('tl-now-line').style.height=(S.items.length*34+80)+'px';}
-  var nowIdx=-1;if(rpAutoOn)nowIdx=findNowIdx(allItems);
-  var rowsEl=document.getElementById('tl-rows');rowsEl.innerHTML='';
-  var ic=0;
-  S.items.forEach(function(item){
-    var row=document.createElement('div');
-    if(item.type==='sep'){row.className='tl-row-tl tl-sep-row';row.innerHTML='<div class="tl-label"><span class="tl-sep-lbl-tl">▸ '+item.name+'</span></div><div style="flex:1"></div>';rowsEl.appendChild(row);return;}
+  rpStats();
+  const allItems=S.items.filter(i=>i.type==='item'&&i.start);
+  rpItemIds=allItems.map(i=>i.id);
+  if(!allItems.length){document.getElementById('tl-rows').innerHTML='<div style="padding:32px;color:var(--t3);font-family:var(--ui);font-size:11px;letter-spacing:1px;text-transform:uppercase">Geen onderdelen met tijden</div>';renderTlLibPanel();return;}
+  const starts=allItems.map(i=>t2m(i.start));
+  const ends=allItems.filter(i=>i.eind).map(i=>t2m(i.eind));
+  const minT=Math.floor((Math.min(...starts)-15)/60)*60;
+  const maxT=Math.ceil((Math.max(...ends,...starts)+30)/60)*60;
+  const span=maxT-minT;
+  const toP=m=>((m-minT)/span*100).toFixed(3)+'%';
+  const marks=document.getElementById('tl-marks');marks.innerHTML='';
+  for(let t=minT;t<=maxT;t+=60){const mk=document.createElement('div');mk.className='tl-h-mark';mk.style.left=toP(t);mk.innerHTML=`<div class="tl-h-lbl">${String(Math.floor(t/60)).padStart(2,'0')}:00</div><div class="tl-h-tick"></div>`;marks.appendChild(mk);}
+  for(let t=minT+30;t<maxT;t+=60){const tk=document.createElement('div');tk.className='tl-half';tk.style.left=toP(t);marks.appendChild(tk);}
+  const nowMin=t2m(getAmsTime()),showNow=rpAutoOn&&nowMin>=minT&&nowMin<=maxT;
+  const ns=document.getElementById('tl-now-sticky');ns.style.display=showNow?'block':'none';
+  if(showNow){document.getElementById('tl-now-line').style.cssText=`left:${toP(nowMin)};height:${S.items.length*34+80}px`;document.getElementById('tl-now-pill').style.left=toP(nowMin);document.getElementById('tl-now-pill').textContent=getAmsTime();}
+  const nowIdx=rpAutoOn?findNowIdx(allItems):-1;
+  const rowsEl=document.getElementById('tl-rows');rowsEl.innerHTML='';let ic=0;
+  S.items.forEach(item=>{
+    const row=document.createElement('div');
+    if(item.type==='sep'){row.className='tl-row-tl tl-sep-row';row.innerHTML=`<div class="tl-lbl-col"><span class="tl-sep-lbl">▸ ${item.name}</span></div><div style="flex:1"></div>`;rowsEl.appendChild(row);return;}
     if(!item.start){ic++;return;}
-    var isKbd=rpIdx===ic,isNow=rpAutoOn&&nowIdx===ic;
+    const isKbd=rpIdx===ic,isNow=rpAutoOn&&nowIdx===ic;
     row.className='tl-row-tl'+(isNow?' tl-now-row':'')+(isKbd?' tl-kbd':'');
-    (function(ic2){row.onclick=function(){rpIdx=ic2;renderRPTimeline();};})(ic);
-    var L=lbl(item.label),col=L?L.color:'#b0aec5';
-    var sM=t2m(item.start),eM=item.eind?t2m(item.eind):sM+20;
-    row.innerHTML='<div class="tl-label"><div class="tl-name">'+(isNow?'▶ ':'')+item.omschrijving+'</div><div class="tl-time-lbl">'+item.start+(item.eind?' – '+item.eind:'')+'</div></div>'+
-      '<div class="tl-bars"><div class="tl-bar'+(item.fixed?' tl-bar-fixed':'')+'" style="left:'+toP(sM)+';width:'+((eM-sM)/span*100).toFixed(3)+'%;background:'+col+'22;border:1.5px solid '+col+'99" title="'+item.omschrijving+(item.wie?' — '+item.wie:'')+'"><span class="tl-bar-txt" style="color:'+col+'dd">'+(item.wie||'')+'</span></div></div>';
+    const ic2=ic;row.onclick=()=>{rpIdx=ic2;renderRPTimeline();};
+    const L=lbl(item.label),col=L?L.color:'#b0aec5';
+    const sM=t2m(item.start),eM=item.eind?t2m(item.eind):sM+20;
+    row.innerHTML=`<div class="tl-lbl-col"><div class="tl-name">${isNow?'▶ ':''}<b style="font-weight:500">${item.omschrijving||'—'}</b></div><div class="tl-timelbl">${item.start}${item.eind?' – '+item.eind:''}</div></div>
+      <div class="tl-bars-col"><div class="tl-bar${item.fixed?' tl-bar-fixed':''}" style="left:${toP(sM)};width:${((eM-sM)/span*100).toFixed(3)}%;background:${col}22;border:1.5px solid ${col}99" title="${item.omschrijving}${item.wie?' — '+item.wie:''}"><span class="tl-bar-txt" style="color:${col}dd">${item.wie||''}</span></div></div>`;
     rowsEl.appendChild(row);ic++;
   });
-  renderTlLibPanel();setupTlDrop();
+  renderTlLibPanel();
+  setupTlDrop();
 }
 
-init();
-</script>
-
-<!-- LIBRARY FORM MODAL -->
-<div class="ovl" id="lib-ovl">
-  <div class="lib-modal-box">
-    <div class="lib-modal-hd">
-      <h3 id="lib-modal-title">Toevoegen</h3>
-      <div class="lib-modal-tabs" id="lib-modal-tabs"></div>
-    </div>
-    <div class="lib-modal-body" id="lib-modal-body"></div>
-    <div class="lib-modal-foot">
-      <button class="btn btn-del btn-sm" id="lib-del-btn" style="display:none;margin-right:auto" onclick="delLibItem()">Verwijder</button>
-      <button class="btn btn-out btn-sm" onclick="closeLibModal()">Annuleren</button>
-      <button class="btn btn-y   btn-sm" onclick="saveLibItem()">Opslaan</button>
-    </div>
-  </div>
-</div>
-
-<!-- INPLANNEN MODAL -->
-<div class="ovl" id="ats-ovl">
-  <div class="ats-modal">
-    <div class="ats-modal-hd">
-      <h3 id="ats-title">Inplannen</h3>
-      <p id="ats-sub" style="font-size:12px;color:var(--t2);margin-top:4px"></p>
-    </div>
-    <div class="ats-modal-body">
-      <div class="fg2">
-        <div class="fg"><label>Starttijd</label><input type="time" id="ats-start"></div>
-        <div class="fg"><label>Eindtijd</label><input type="time" id="ats-end"></div>
-      </div>
-      <div class="fg2">
-        <div class="fg"><label>Toevoegen aan sectie</label><select id="ats-sec"></select></div>
-        <div class="fg"><label>Locatie</label><input type="text" id="ats-loc" placeholder="Podium, Plein…"></div>
-      </div>
-      <div class="fg"><label>Bijzonderheden (optioneel)</label><textarea id="ats-biz" style="min-height:52px" placeholder="Extra info voor het regiepad…"></textarea></div>
-    </div>
-    <div class="ats-modal-foot">
-      <button class="btn btn-out btn-sm" onclick="closeAtsModal()">Annuleren</button>
-      <button class="btn btn-y   btn-sm" onclick="confirmAts()">▶ Toevoegen aan regiepad</button>
-    </div>
-  </div>
-</div>
-
-<script>
+/* ─── ENTERTAINMENT & HULDIGINGEN ─── */
 /* ═══════════════════════════════
    ENTERTAINMENT & HULDIGINGEN
 ═══════════════════════════════ */
@@ -1578,30 +1484,35 @@ function setupTlDrop(){
   });
 }
 
-/* PATCH renderRPTimeline to add lib panel */
-const _origRPTL=renderRPTimeline;
-function renderRPTimeline(){
-  _origRPTL();
-  renderTlLibPanel();
-  setupTlDrop();
-}
-
-/* PATCH gv for ent/hul */
-const _origGv2=gv;
-function gv(id,el){
-  _origGv2(id,el);
-  if(id==="ent")renderLib("ent");
-  if(id==="hul")renderLib("hul");
-}
-
-/* PATCH updateBadges */
-const _origUB=updateBadges;
-function updateBadges(){
-  _origUB();
-  const ne=document.getElementById("nb-ent");if(ne){ne.textContent=(S.entertainment||[]).length;ne.style.display=(S.entertainment||[]).length?"inline":"none";}
-  const nh=document.getElementById("nb-hul");if(nh){nh.textContent=(S.huldigingen||[]).length;nh.style.display=(S.huldigingen||[]).length?"inline":"none";}
-}
-
+init();
 </script>
+
+<!-- LIBRARY FORM MODAL -->
+<div class="ovl" id="lib-ovl">
+  <div class="lib-modal-box">
+    <div class="lib-modal-hd"><h3 id="lib-modal-title">Toevoegen</h3><div class="lib-modal-tabs" id="lib-modal-tabs"></div></div>
+    <div class="lib-modal-body" id="lib-modal-body"></div>
+    <div class="lib-modal-foot">
+      <button class="btn btn-del btn-sm" id="lib-del-btn" style="display:none;margin-right:auto" onclick="delLibItem()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeLibModal()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="saveLibItem()">Opslaan</button>
+    </div>
+  </div>
+</div>
+<!-- INPLANNEN MODAL -->
+<div class="ovl" id="ats-ovl">
+  <div class="ats-modal">
+    <div class="ats-modal-hd"><h3 id="ats-title">Inplannen</h3><p id="ats-sub" style="font-size:12px;color:var(--t2);margin-top:4px"></p></div>
+    <div class="ats-modal-body">
+      <div class="fg2"><div class="fg"><label>Starttijd</label><input type="time" id="ats-start"></div><div class="fg"><label>Eindtijd</label><input type="time" id="ats-end"></div></div>
+      <div class="fg2"><div class="fg"><label>Toevoegen na sectie</label><select id="ats-sec"></select></div><div class="fg"><label>Locatie</label><input type="text" id="ats-loc" placeholder="Podium, Plein…"></div></div>
+      <div class="fg"><label>Bijzonderheden (optioneel)</label><textarea id="ats-biz" style="min-height:52px"></textarea></div>
+    </div>
+    <div class="ats-modal-foot">
+      <button class="btn btn-out btn-sm" onclick="closeAtsModal()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="confirmAts()">▶ Toevoegen aan regiepad</button>
+    </div>
+  </div>
+</div>
 </body>
 </html>
