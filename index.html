@@ -421,6 +421,19 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 /* ═══════════════════
    PRINT
 ═══════════════════ */
+
+/* CSV import */
+.csv-ok   { color: var(--green); font-size: 11px; }
+.csv-err  { color: var(--red);   font-size: 11px; }
+.csv-ph th { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--t3); padding: 9px 12px; text-align: left; background: var(--bg); border-bottom: 1px solid var(--border); white-space: nowrap; }
+.csv-pb td { padding: 8px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+.csv-pb tr:last-child td { border-bottom: none; }
+.csv-pb tr.row-ok:hover td { background: rgba(26,159,90,.04); }
+.csv-pb tr.row-err td { background: var(--r-bg); opacity: .7; }
+.csv-fixed-y { font-size: 10px; font-weight: 700; color: var(--sb-bg); background: var(--yellow); padding: 1px 6px; border-radius: 3px; }
+.csv-sum-pill { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+.csv-sum-n { font-size: 20px; font-weight: 700; }
+
 @media print {
   .sidebar { display: none !important; }
   body, html { overflow: visible; height: auto; }
@@ -470,6 +483,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
     <div class="page-hd">
       <h1>Backoffice</h1>
       <div class="ml">
+        <button class="btn btn-out btn-sm" onclick="downloadCsvTemplate()" title="Download invulsjabloon">⬇ CSV sjabloon</button>
+        <label class="btn btn-out btn-sm" style="cursor:pointer" title="Importeer CSV">⬆ CSV importeren<input type="file" accept=".csv,text/csv" id="csv-file-input" style="display:none" onchange="handleCsvUpload(event)"></label>
         <button class="btn btn-out btn-sm" onclick="openSepModal()">+ Sectie</button>
         <button class="btn btn-y   btn-sm" onclick="openNew()">+ Onderdeel</button>
       </div>
@@ -1476,6 +1491,222 @@ function setupTlDrop(){
   });
 }
 
+
+/* ══════════════════════════════
+   CSV IMPORT
+══════════════════════════════ */
+
+const CSV_COLS = [
+  { key:'omschrijving', label:'Omschrijving',   required:true,  hint:'Naam van het onderdeel'        },
+  { key:'start',        label:'Start',          required:false, hint:'HH:MM  bijv. 09:30'            },
+  { key:'eind',         label:'Eind',           required:false, hint:'HH:MM  bijv. 10:00'            },
+  { key:'wie',          label:'Wie',            required:false, hint:'Naam of rol'                   },
+  { key:'locatie',      label:'Locatie',        required:false, hint:'Podium, Plein…'                },
+  { key:'label',        label:'Label',          required:false, hint:'WEDSTRIJD / HULDIGING / ENTERTAINMENT / ACTIVATIE / FINISH / OVERIGE' },
+  { key:'fixed',        label:'Fixed',          required:false, hint:'ja / nee'                      },
+  { key:'bijzonderheden',label:'Bijzonderheden',required:false, hint:'Vrije tekst'                   },
+];
+
+// Generate and download the CSV template
+function downloadCsvTemplate() {
+  const header = CSV_COLS.map(c => c.label).join(';');
+  const hints  = CSV_COLS.map(c => c.hint).join(';');
+  // one example row
+  const ex = [
+    'Start 21km',       // Omschrijving
+    '09:30',            // Start
+    '09:40',            // Eind
+    'Race Commentaar',  // Wie
+    'Groeneweg',        // Locatie
+    'WEDSTRIJD',        // Label
+    'ja',               // Fixed
+    'Let op startsein', // Bijzonderheden
+  ].join(';');
+  // Add BOM for Excel UTF-8 compat
+  const bom = '\uFEFF';
+  const csv = bom + '# Regie CSV Import — vul in en sla op als .csv\n# Hints: ' + hints + '\n' + header + '\n' + ex + '\n';
+  const blob = new Blob([csv], { type:'text/csv;charset=utf-8;' });
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a');
+  a.href = url; a.download = 'regie-import-sjabloon.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+// Holds parsed rows waiting for confirmation
+let _csvParsed = [];
+
+function handleCsvUpload(e) {
+  const file = e.target.files[0];
+  if (!file) return;
+  // Reset input so same file can be re-uploaded
+  e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = ev => parseCsv(ev.target.result, file.name);
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseCsv(raw, fileName) {
+  // Strip BOM, split lines
+  const text  = raw.replace(/^\uFEFF/, '').replace(/\r\n/g, '\n').replace(/\r/g, '\n');
+  const lines = text.split('\n').filter(l => l.trim() && !l.trim().startsWith('#'));
+  if (!lines.length) { alert('Leeg bestand of geen regels gevonden.'); return; }
+
+  // Detect separator: ; or ,
+  const sep = lines[0].includes(';') ? ';' : ',';
+
+  // Parse header
+  const rawHeader = lines[0].split(sep).map(h => h.trim().toLowerCase()
+    .replace(/[^a-z]/g, '').replace('bijzonderheden','bijzonderheden'));
+  // Map header columns to our keys
+  const colMap = {}; // index -> key
+  CSV_COLS.forEach(col => {
+    const normalKey = col.label.toLowerCase().replace(/[^a-z]/g,'');
+    rawHeader.forEach((h, i) => {
+      const hn = h.replace(/[^a-z]/g,'');
+      if (hn === normalKey || hn.startsWith(normalKey.slice(0,5))) colMap[i] = col.key;
+    });
+  });
+
+  const dataLines = lines.slice(1);
+  _csvParsed = dataLines.map((line, idx) => {
+    const cells = splitCsvLine(line, sep);
+    const row   = {};
+    Object.entries(colMap).forEach(([i, key]) => { row[key] = (cells[i] || '').trim(); });
+
+    // Validate
+    const errors = [];
+    if (!row.omschrijving) errors.push('Omschrijving ontbreekt');
+    if (row.start && !/^\d{1,2}:\d{2}$/.test(row.start)) errors.push('Start: ongeldig tijdformaat (gebruik HH:MM)');
+    if (row.eind  && !/^\d{1,2}:\d{2}$/.test(row.eind))  errors.push('Eind: ongeldig tijdformaat (gebruik HH:MM)');
+
+    // Normalise fixed
+    row.fixed = /^(ja|yes|1|true|j)$/i.test(row.fixed || '');
+    // Normalise label -> label id
+    row.labelId = '';
+    if (row.label) {
+      const match = S.labels.find(l => l.name.toLowerCase() === row.label.trim().toLowerCase());
+      if (match) row.labelId = match.id;
+      else if (row.label.trim()) errors.push(`Label "${row.label}" onbekend — wordt leeg`);
+    }
+
+    return { idx: idx+2, raw: row, errors, ok: errors.length === 0 };
+  }).filter(r => r.raw.omschrijving || r.errors.length); // skip completely empty rows
+
+  if (!_csvParsed.length) { alert('Geen te importeren rijen gevonden.'); return; }
+  showCsvModal(fileName);
+}
+
+function splitCsvLine(line, sep) {
+  // Handle quoted fields
+  const result = []; let cur = ''; let inQ = false;
+  for (let i = 0; i < line.length; i++) {
+    const ch = line[i];
+    if (ch === '"') { inQ = !inQ; }
+    else if (ch === sep && !inQ) { result.push(cur); cur = ''; }
+    else cur += ch;
+  }
+  result.push(cur);
+  return result;
+}
+
+function showCsvModal(fileName) {
+  document.getElementById('csv-file-name').textContent = '📄 ' + fileName;
+
+  const okRows  = _csvParsed.filter(r => r.ok);
+  const errRows = _csvParsed.filter(r => !r.ok);
+
+  // Summary pills
+  document.getElementById('csv-summary').innerHTML =
+    `<div class="csv-sum-pill"><span class="csv-sum-n" style="color:var(--green)">${okRows.length}</span> rijen klaar om te importeren</div>` +
+    (errRows.length ? `<div class="csv-sum-pill"><span class="csv-sum-n" style="color:var(--red)">${errRows.length}</span> rijen overgeslagen</div>` : '') +
+    `<div class="csv-sum-pill"><span class="csv-sum-n">${_csvParsed.length}</span> rijen totaal</div>`;
+
+  // Error list
+  const errEl = document.getElementById('csv-errors');
+  if (errRows.length) {
+    errEl.style.display = 'block';
+    errEl.innerHTML = '<strong>Waarschuwingen:</strong><br>' +
+      errRows.map(r => `Rij ${r.idx}: ${r.errors.join(', ')}`).join('<br>');
+  } else errEl.style.display = 'none';
+
+  // Preview table header
+  document.getElementById('csv-preview-head').innerHTML =
+    `<tr class="csv-ph">
+      <th>Status</th><th>Omschrijving</th><th>Start</th><th>Eind</th>
+      <th>Wie</th><th>Locatie</th><th>Label</th><th>Fixed</th><th>Bijzonderheden</th>
+    </tr>`;
+
+  // Preview rows
+  const tbody = document.getElementById('csv-preview-body');
+  tbody.innerHTML = '';
+  _csvParsed.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.className = 'csv-pb ' + (r.ok ? 'row-ok' : 'row-err');
+    const L = r.raw.labelId ? S.labels.find(l => l.id === r.raw.labelId) : null;
+    tr.innerHTML = `
+      <td>${r.ok ? '<span class="csv-ok">✓</span>' : '<span class="csv-err">✗</span>'}</td>
+      <td style="font-weight:500;max-width:200px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.raw.omschrijving||'—'}</td>
+      <td style="font-family:var(--fm);font-size:11px">${r.raw.start||'—'}</td>
+      <td style="font-family:var(--fm);font-size:11px">${r.raw.eind||'—'}</td>
+      <td>${r.raw.wie||'—'}</td>
+      <td>${r.raw.locatie||'—'}</td>
+      <td>${L ? `<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>` : (r.raw.label||'—')}</td>
+      <td>${r.raw.fixed ? '<span class="csv-fixed-y">FIXED</span>' : '<span style="color:var(--t3)">nee</span>'}</td>
+      <td style="color:var(--t3);max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.raw.bijzonderheden||''}</td>`;
+    tbody.appendChild(tr);
+  });
+
+  document.getElementById('csv-import-count').textContent =
+    okRows.length ? `${okRows.length} onderdeel${okRows.length !== 1 ? 'en' : ''} worden toegevoegd aan het einde van het regiepad` : 'Niets te importeren';
+  document.getElementById('csv-confirm-btn').disabled = okRows.length === 0;
+
+  document.getElementById('csv-ovl').classList.add('open');
+}
+
+function closeCsvModal() {
+  document.getElementById('csv-ovl').classList.remove('open');
+  _csvParsed = [];
+}
+
+function confirmCsvImport() {
+  const toImport = _csvParsed.filter(r => r.ok);
+  if (!toImport.length) return;
+
+  let added = 0;
+  toImport.forEach(r => {
+    const item = {
+      id: S.nextId++,
+      type: 'item',
+      omschrijving: r.raw.omschrijving,
+      start:         r.raw.start    || '',
+      eind:          r.raw.eind     || '',
+      wie:           r.raw.wie      || '',
+      locatie:       r.raw.locatie  || '',
+      label:         r.raw.labelId  || '',
+      fixed:         r.raw.fixed,
+      bijzonderheden:r.raw.bijzonderheden || '',
+      script: '', techniek: '', dj: '',
+      checklist: { persoon:false, script:false, slide:false, techniek:false },
+      fin: { bedrag: '', korting: '' },
+    };
+    S.items.push(item);
+    S.todos.items[item.id] = [];
+    added++;
+  });
+
+  save();
+  closeCsvModal();
+  renderBoList();
+  updateBadges();
+
+  // Flash a success message
+  const notice = document.createElement('div');
+  notice.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.14);transition:opacity .4s';
+  notice.textContent = `✓ ${added} onderdeel${added !== 1 ? 'en' : ''} geïmporteerd`;
+  document.body.appendChild(notice);
+  setTimeout(() => { notice.style.opacity = '0'; setTimeout(() => notice.remove(), 500); }, 2400);
+}
+
 init();
 </script>
 
@@ -1506,5 +1737,40 @@ init();
     </div>
   </div>
 </div>
+
+<!-- CSV IMPORT MODAL -->
+<div class="ovl" id="csv-ovl">
+  <div class="modal-box" style="max-width:780px;width:95vw">
+    <div class="modal-hd" style="padding:24px 28px 0">
+      <h3>CSV importeren</h3>
+      <p id="csv-file-name" style="font-size:12px;color:var(--t3);margin-top:4px"></p>
+    </div>
+    <div style="padding:16px 28px 8px">
+      <!-- summary bar -->
+      <div id="csv-summary" style="display:flex;gap:12px;margin-bottom:14px"></div>
+      <!-- errors -->
+      <div id="csv-errors" style="display:none;background:var(--r-bg);border:1px solid rgba(214,50,86,.15);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--red);line-height:1.7"></div>
+      <!-- preview table -->
+      <div style="overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:10px">
+        <table style="width:100%;border-collapse:collapse;font-size:12px" id="csv-preview-tbl">
+          <thead id="csv-preview-head"></thead>
+          <tbody id="csv-preview-body"></tbody>
+        </table>
+      </div>
+      <p style="font-size:11px;color:var(--t3);margin-top:10px">
+        Rijen met een ✓ worden toegevoegd. Rijen met ✗ worden overgeslagen. 
+        <strong style="color:var(--text)">Bestaande onderdelen worden niet overschreven.</strong>
+      </p>
+    </div>
+    <div style="padding:12px 28px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:0 0 14px 14px">
+      <span id="csv-import-count" style="font-size:12px;color:var(--t2)"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-out btn-sm" onclick="closeCsvModal()">Annuleren</button>
+        <button class="btn btn-y btn-sm" id="csv-confirm-btn" onclick="confirmCsvImport()">Importeren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
