@@ -529,8 +529,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.55; }
       <div class="fin-tcard">
         <table class="fin-t">
           <thead><tr>
-            <th>Onderdeel</th>
-            <th>Label</th>
+            <th>Act</th>
+            <th>Locatie</th>
             <th class="r">Bedrag (excl. btw)</th>
             <th class="r">Korting %</th>
             <th class="r">Korting €</th>
@@ -725,7 +725,7 @@ function updateBadges(){
   const all=[...(S.todos.global||[]),...Object.values(S.todos.items||{}).flat()];
   const p=all.filter(t=>!t.done).length;
   const nt=document.getElementById('nb-td');nt.textContent=p;nt.style.display=p?'inline':'none';
-  const finItems=S.items.filter(i=>i.type==='item'&&parseFloat((i.fin?.bedrag||'').replace(',','.'))||0);
+  const finItems=(S.entertainment||[]).filter(i=>parseFloat((i.bedrag||'').replace(',','.'))||0);
   const nf=document.getElementById('nb-fin');nf.textContent=finItems.length;nf.style.display=finItems.length?'inline':'none';
   document.getElementById('sb-en').textContent=S.event.name;
   const neEl=document.getElementById('nb-ent');if(neEl){neEl.textContent=(S.entertainment||[]).length;neEl.style.display=(S.entertainment||[]).length?'inline':'none';}
@@ -975,24 +975,40 @@ function rmITD(id,i){S.todos.items[id].splice(i,1);save();renderTDV();}
 function renderFin(){
   const tb=document.getElementById('fin-tb');tb.innerHTML='';
   let totB=0,totD=0,totN=0,count=0;
-  let currentSep=null;
 
-  S.items.forEach(item=>{
-    if(item.type==='sep'){currentSep=item.name;return;}
-    const f=calcFin(item.fin);
-    if(!f.bedrag)return;
-    count++;
-    totB+=f.bedrag;totD+=f.disc;totN+=f.netto;
-    const L=lbl(item.label);
-    if(currentSep){
-      const sr=document.createElement('tr');sr.className='fin-sep';
-      sr.innerHTML=`<td colspan="6"><span class="fin-sep-lbl">▸ ${currentSep}</span></td>`;
-      tb.appendChild(sr);currentSep=null;
-    }
+  // Financieel overzicht haalt data ALLEEN uit S.entertainment
+  const ents=(S.entertainment||[]);
+  const withCosts=ents.filter(item=>parseFloat((item.bedrag||'').replace(',','.'))||0);
+
+  if(!withCosts.length){
+    tb.innerHTML=`<tr><td colspan="6"><div class="fin-empty"><p>Nog geen kosten ingevoerd.<br>Voeg bedragen toe via <b>Entertainment → ✏ Bewerk → Financieel</b>.</p></div></td></tr>`;
+    document.getElementById('fin-tot').textContent=euro(0);
+    document.getElementById('fin-disc-tot').textContent=euro(0);
+    document.getElementById('fin-net').textContent=euro(0);
+    document.getElementById('fin-count').textContent='0 acts met kosten';
+    return;
+  }
+
+  // header row
+  const hdr=document.createElement('tr');hdr.className='fin-sep';
+  hdr.innerHTML=`<td colspan="6"><span class="fin-sep-lbl">🎭 Entertainment</span></td>`;
+  tb.appendChild(hdr);
+
+  withCosts.forEach(item=>{
+    const f=calcFin({bedrag:item.bedrag,korting:item.korting});
+    count++;totB+=f.bedrag;totD+=f.disc;totN+=f.netto;
+    const statusCls='status-'+(item.status||'aangevraagd');
     const tr=document.createElement('tr');
     tr.innerHTML=`
-      <td><div style="font-size:13px;font-weight:500">${item.omschrijving}</div>${item.wie?`<div style="font-size:11px;color:var(--t3);margin-top:2px">👤 ${item.wie}</div>`:''}</td>
-      <td>${L?`<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:'—'}</td>
+      <td>
+        <div style="font-size:13px;font-weight:500">${item.naam}</div>
+        <div style="display:flex;align-items:center;gap:7px;margin-top:3px">
+          ${item.type?`<span style="font-size:10px;color:var(--t3)">${item.type}</span>`:''}
+          <span class="status-pill ${statusCls}">${item.status||'aangevraagd'}</span>
+        </div>
+        ${item.contactpersoon?`<div style="font-size:11px;color:var(--t3);margin-top:2px">👤 ${item.contactpersoon}</div>`:''}
+      </td>
+      <td><span style="font-size:11px;color:var(--t2)">${item.locatie||'—'}</span></td>
       <td class="r fin-amount">${euro(f.bedrag)}</td>
       <td class="r">${f.korting?`<span style="font-size:12px;color:var(--t2)">${f.korting}%</span>`:'<span style="color:var(--t3)">—</span>'}</td>
       <td class="r fin-disc">${f.disc?`<span style="color:var(--red)">– ${euro(f.disc)}</span>`:'<span style="color:var(--t3)">—</span>'}</td>
@@ -1000,22 +1016,19 @@ function renderFin(){
     tb.appendChild(tr);
   });
 
-  if(!count){
-    tb.innerHTML=`<tr><td colspan="6"><div class="fin-empty"><p>Nog geen kosten ingevoerd.<br>Voeg kosten toe via Backoffice → Financieel tab.</p></div></td></tr>`;
-  } else {
-    const tr=document.createElement('tr');tr.className='fin-total-row';
-    tr.innerHTML=`
-      <td colspan="2" style="font-family:var(--ui);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)">Totaal (${count} onderdelen)</td>
-      <td class="r fin-amount">${euro(totB)}</td>
-      <td class="r"></td>
-      <td class="r fin-disc"><span style="color:var(--red)">– ${euro(totD)}</span></td>
-      <td class="r fin-final" style="font-size:16px;color:var(--green)">${euro(totN)}</td>`;
-    tb.appendChild(tr);
-  }
+  const tr=document.createElement('tr');tr.className='fin-total-row';
+  tr.innerHTML=`
+    <td colspan="2" style="font-family:var(--ui);font-weight:700;font-size:11px;letter-spacing:1px;text-transform:uppercase;color:var(--t2)">Totaal (${count} act${count!==1?'s':''})</td>
+    <td class="r fin-amount">${euro(totB)}</td>
+    <td class="r"></td>
+    <td class="r fin-disc"><span style="color:var(--red)">– ${euro(totD)}</span></td>
+    <td class="r fin-final" style="font-size:16px;color:var(--green)">${euro(totN)}</td>`;
+  tb.appendChild(tr);
+
   document.getElementById('fin-tot').textContent=euro(totB);
   document.getElementById('fin-disc-tot').textContent=euro(totD);
   document.getElementById('fin-net').textContent=euro(totN);
-  document.getElementById('fin-count').textContent=`${count} onderdeel${count!==1?'en':''} met kosten`;
+  document.getElementById('fin-count').textContent=`${count} act${count!==1?'s':''} met kosten`;
 }
 
 /* ═══ REGIEPAD — NAVIGATIE, AUTO, TABEL, TIJDLIJN ═══ */
