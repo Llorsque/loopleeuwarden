@@ -434,6 +434,44 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 .csv-sum-pill { background: var(--white); border: 1px solid var(--border); border-radius: 8px; padding: 8px 14px; font-size: 12px; font-weight: 500; display: flex; align-items: center; gap: 6px; }
 .csv-sum-n { font-size: 20px; font-weight: 700; }
 
+
+/* ── PRIJSUITREIKINGEN ── */
+.prix-body { flex:1; overflow-y:auto; padding:24px 36px 60px; }
+.prix-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(340px,1fr)); gap:16px; }
+.prix-card { background:var(--white); border:1px solid var(--border); border-radius:var(--r2); box-shadow:var(--sh); overflow:hidden; break-inside:avoid; }
+.prix-card-hd { padding:16px 20px 12px; border-bottom:1px solid var(--border); display:flex; align-items:flex-start; justify-content:space-between; gap:10px; background:var(--bg); }
+.prix-card-num { width:32px; height:32px; border-radius:8px; background:var(--sb-bg); color:#fff; display:flex; align-items:center; justify-content:center; font-size:14px; font-weight:700; flex-shrink:0; }
+.prix-card-title { font-size:15px; font-weight:700; letter-spacing:-.1px; flex:1; line-height:1.3; }
+.prix-card-time { font-family:var(--fm); font-size:12px; font-weight:600; color:var(--t2); white-space:nowrap; }
+.prix-card-body { padding:14px 20px; display:flex; flex-direction:column; gap:10px; }
+.prix-row { display:flex; gap:10px; font-size:13px; }
+.prix-row-lbl { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--t3); width:110px; flex-shrink:0; padding-top:1px; }
+.prix-row-val { color:var(--t2); flex:1; line-height:1.5; }
+.prix-checklist { display:flex; flex-direction:column; gap:6px; }
+.prix-check-item { display:flex; align-items:center; gap:9px; padding:8px 10px; background:var(--bg); border-radius:7px; border:1px solid var(--border); font-size:13px; }
+.prix-check-box { width:18px; height:18px; border-radius:5px; border:2px solid var(--border2); flex-shrink:0; }
+/* ── VRIJWILLIGERS ── */
+.vrij-body { flex:1; overflow-y:auto; padding:24px 36px 60px; }
+.vrij-tcard { background:var(--white); border:1px solid var(--border); border-radius:var(--r2); box-shadow:var(--sh); overflow:hidden; }
+.vrij-t { width:100%; border-collapse:collapse; }
+.vrij-t th { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--t3); padding:12px 18px; text-align:left; border-bottom:1px solid var(--border); background:var(--bg); white-space:nowrap; }
+.vrij-t td { padding:13px 18px; border-bottom:1px solid var(--border); font-size:13px; vertical-align:middle; }
+.vrij-t tbody tr:last-child td { border-bottom:none; }
+.vrij-t tr:hover td { background:#fafaf9; cursor:pointer; }
+.vrij-name { font-weight:600; font-size:14px; }
+.vrij-func { font-size:12px; color:var(--t2); margin-top:2px; }
+.vrij-time { font-family:var(--fm); font-size:12px; color:var(--t2); white-space:nowrap; }
+.vrij-loc  { font-size:12px; color:var(--t3); }
+.vrij-tel  { font-family:var(--fm); font-size:12px; color:var(--t2); }
+.vrij-empty { text-align:center; padding:52px 20px; }
+.vrij-empty p { font-size:13px; color:var(--t3); line-height:1.8; }
+/* ── PRINT OVERRIDES ── */
+@media print {
+  .prix-body, .vrij-body { overflow:visible !important; }
+  .prix-grid { grid-template-columns:1fr 1fr; }
+  .prix-card, .vrij-tcard { box-shadow:none !important; }
+}
+
 @media print {
   .sidebar { display: none !important; }
   body, html { overflow: visible; height: auto; }
@@ -467,6 +505,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
     <div class="sb-lbl">Bibliotheek</div>
     <div class="nv" id="ni-ent" onclick="gv('ent',this)"><span class="ic">🎭</span> Entertainment <span class="bdg bdg-y" id="nb-ent" style="display:none">0</span></div>
     <div class="nv" id="ni-hul" onclick="gv('hul',this)"><span class="ic">🏆</span> Huldigingen <span class="bdg bdg-y" id="nb-hul" style="display:none">0</span></div>
+    <div class="nv" id="ni-prix" onclick="gv('prix',this)"><span class="ic">🥇</span> Prijsuitreikingen</div>
+    <div class="nv" id="ni-vrij" onclick="gv('vrij',this)"><span class="ic">👥</span> Vrijwilligers <span class="bdg bdg-y" id="nb-vrij" style="display:none">0</span></div>
     <div class="sb-lbl">Output</div>
     <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad <span class="bdg bdg-r" id="nb-cf" style="display:none">0</span></div>
   </div>
@@ -607,8 +647,31 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 
   <!-- HULDIGINGEN -->
   <div class="view" id="view-hul">
-    <div class="page-hd"><h1>Huldigingen</h1><div class="ml"><button class="btn btn-y btn-sm" onclick="openLibModal('hul')">+ Huldiging toevoegen</button></div></div>
+    <div class="page-hd"><h1>Huldigingen</h1><div class="ml"><button class="btn btn-out btn-sm" onclick="downloadHulCsv()" title="Download CSV sjabloon">⬇ CSV sjabloon</button><label class="btn btn-out btn-sm" style="cursor:pointer" title="Importeer CSV">⬆ CSV importeren<input type="file" accept=".csv,text/csv" style="display:none" onchange="handleHulCsv(event)"></label><button class="btn btn-y btn-sm" onclick="openLibModal('hul')">+ Huldiging toevoegen</button></div></div>
     <div class="lib-body"><div class="lib-grid" id="hul-grid"></div></div>
+  </div>
+
+  <!-- PRIJSUITREIKINGEN -->
+  <div class="view" id="view-prix">
+    <div class="page-hd">
+      <h1>Prijsuitreikingen</h1>
+      <div class="ml">
+        <button class="btn btn-out btn-sm" onclick="printView('prix')">🖨 Print / PDF</button>
+      </div>
+    </div>
+    <div class="prix-body" id="prix-body"></div>
+  </div>
+
+  <!-- VRIJWILLIGERS -->
+  <div class="view" id="view-vrij">
+    <div class="page-hd">
+      <h1>Vrijwilligers</h1>
+      <div class="ml">
+        <button class="btn btn-out btn-sm" onclick="printView('vrij')">🖨 Print / PDF</button>
+        <button class="btn btn-y btn-sm" onclick="openVrijModal()">+ Vrijwilliger</button>
+      </div>
+    </div>
+    <div class="vrij-body"><div id="vrij-table-wrap"></div></div>
   </div>
 
 </div>
@@ -629,7 +692,7 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 
 <script>
 /* ═══ STATE ═══ */
-let S={event:{name:'Loop Leeuwarden 2026',date:'10 mei 2026'},items:[],labels:[],persons:[],todos:{global:[],items:{}},entertainment:[],huldigingen:[],nextId:1};
+let S={event:{name:'Loop Leeuwarden 2026',date:'10 mei 2026'},items:[],labels:[],persons:[],todos:{global:[],items:{}},entertainment:[],huldigingen:[],vrijwilligers:[],nextId:1};
 let editId=null,editSepId=null,tmpCL={},tmpTodos=[],expanded=[];
 
 /* ═══ BOOT ═══ */
@@ -639,6 +702,7 @@ function init(){
   if(!S.items.length)seedItems();
   if(!S.entertainment||!S.entertainment.length)seedEntertainment();
   if(!S.huldigingen||!S.huldigingen.length)seedHuldigingen();
+  if(!S.vrijwilligers)S.vrijwilligers=[];
   renderRightPanel();
   renderBoList();
   updateBadges();
@@ -712,6 +776,8 @@ function gv(id,el){
   if(id==='bo')renderBoList();
   if(id==='ent')renderLib('ent');
   if(id==='hul')renderLib('hul');
+  if(id==='prix')renderPrix();
+  if(id==='vrij')renderVrij();
 }
 function updateBadges(){
   const cf=conflicts();
@@ -724,6 +790,7 @@ function updateBadges(){
   document.getElementById('sb-en').textContent=S.event.name;
   const neEl=document.getElementById('nb-ent');if(neEl){neEl.textContent=(S.entertainment||[]).length;neEl.style.display=(S.entertainment||[]).length?'inline':'none';}
   const nhEl=document.getElementById('nb-hul');if(nhEl){nhEl.textContent=(S.huldigingen||[]).length;nhEl.style.display=(S.huldigingen||[]).length?'inline':'none';}
+  const nvEl=document.getElementById('nb-vrij');if(nvEl){nvEl.textContent=(S.vrijwilligers||[]).length;nvEl.style.display=(S.vrijwilligers||[]).length?'inline':'none';}
 }
 
 /* ═══ BO LIST ═══ */
@@ -1713,8 +1780,377 @@ function confirmCsvImport() {
   setTimeout(() => { notice.style.opacity = '0'; setTimeout(() => notice.remove(), 500); }, 2400);
 }
 
+
+/* ══════════════════════════════
+   PRIJSUITREIKINGEN
+══════════════════════════════ */
+function renderPrix() {
+  const body = document.getElementById('prix-body');
+  const huls = S.huldigingen || [];
+  if (!huls.length) {
+    body.innerHTML = '<div style="text-align:center;padding:60px;color:var(--t3);font-size:13px">Nog geen huldigingen aangemaakt.<br>Ga naar <b>Huldigingen</b> om ze toe te voegen.</div>';
+    return;
+  }
+  // Try to find linked time from regiepad
+  function getTime(naam) {
+    const match = S.items.find(i => i.type === 'item' && i.omschrijving && i.omschrijving.toLowerCase().includes(naam.toLowerCase().slice(0, 8)));
+    return match ? match.start : null;
+  }
+
+  let html = '<div class="prix-grid">';
+  huls.forEach((h, idx) => {
+    const tijd = getTime(h.naam);
+    // Split items into array for checklist
+    const items = (h.items || '').split(/[,;]/).map(s => s.trim()).filter(Boolean);
+    html += `
+      <div class="prix-card">
+        <div class="prix-card-hd">
+          <div class="prix-card-num">${idx + 1}</div>
+          <div style="flex:1">
+            <div class="prix-card-title">${h.naam}</div>
+            ${h.sponsor ? `<div style="font-size:11px;color:var(--t3);margin-top:2px">Sponsor: ${h.sponsor}</div>` : ''}
+          </div>
+          ${tijd ? `<div class="prix-card-time">${tijd}</div>` : ''}
+        </div>
+        <div class="prix-card-body">
+          ${h.wieReiktUit ? `<div class="prix-row"><span class="prix-row-lbl">Uitreiker</span><span class="prix-row-val">${h.wieReiktUit}</span></div>` : ''}
+          ${h.locatie     ? `<div class="prix-row"><span class="prix-row-lbl">Locatie</span><span class="prix-row-val">${h.locatie}</span></div>` : ''}
+          ${h.bijzonderheden ? `<div class="prix-row"><span class="prix-row-lbl">Protocol</span><span class="prix-row-val">${h.bijzonderheden}</span></div>` : ''}
+          ${items.length ? `
+            <div>
+              <div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3);margin-bottom:7px">Benodigdheden</div>
+              <div class="prix-checklist">
+                ${items.map(it => `<div class="prix-check-item"><div class="prix-check-box"></div>${it}</div>`).join('')}
+              </div>
+            </div>` : ''}
+        </div>
+      </div>`;
+  });
+  html += '</div>';
+  body.innerHTML = html;
+}
+
+function buildPrixHtmlContent() {
+  const huls = S.huldigingen || [];
+  function getTime(naam) {
+    const match = S.items.find(i => i.type === 'item' && i.omschrijving && i.omschrijving.toLowerCase().includes(naam.toLowerCase().slice(0, 8)));
+    return match ? match.start : null;
+  }
+  let cards = huls.map((h, idx) => {
+    const tijd = getTime(h.naam);
+    const items = (h.items || '').split(/[,;]/).map(s => s.trim()).filter(Boolean);
+    return `<div style="background:#fff;border:1px solid #e0e0db;border-radius:10px;overflow:hidden;break-inside:avoid;margin-bottom:16px">
+      <div style="background:#f4f4f2;padding:14px 18px;border-bottom:1px solid #e0e0db;display:flex;align-items:center;gap:12px">
+        <div style="width:30px;height:30px;background:#161618;color:#fff;border-radius:7px;display:flex;align-items:center;justify-content:center;font-weight:700;font-size:13px;flex-shrink:0">${idx+1}</div>
+        <div style="flex:1"><div style="font-size:15px;font-weight:700">${h.naam}</div>${h.sponsor?`<div style="font-size:11px;color:#888;margin-top:1px">Sponsor: ${h.sponsor}</div>`:''}</div>
+        ${tijd?`<div style="font-family:monospace;font-size:13px;font-weight:600;color:#444">${tijd}</div>`:''}
+      </div>
+      <div style="padding:14px 18px">
+        ${h.wieReiktUit?`<div style="display:flex;gap:10px;margin-bottom:8px;font-size:13px"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;width:100px;flex-shrink:0;padding-top:2px">Uitreiker</span><span style="color:#555">${h.wieReiktUit}</span></div>`:''}
+        ${h.locatie?`<div style="display:flex;gap:10px;margin-bottom:8px;font-size:13px"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;width:100px;flex-shrink:0;padding-top:2px">Locatie</span><span style="color:#555">${h.locatie}</span></div>`:''}
+        ${h.bijzonderheden?`<div style="display:flex;gap:10px;margin-bottom:10px;font-size:13px"><span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;width:100px;flex-shrink:0;padding-top:2px">Protocol</span><span style="color:#555">${h.bijzonderheden}</span></div>`:''}
+        ${items.length?`<div style="margin-top:4px"><div style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa;margin-bottom:7px">Benodigdheden</div>${items.map(it=>`<div style="display:flex;align-items:center;gap:9px;padding:7px 10px;background:#f8f8f6;border-radius:6px;border:1px solid #e0e0db;margin-bottom:5px;font-size:13px"><div style="width:17px;height:17px;border:2px solid #ccc;border-radius:4px;flex-shrink:0"></div>${it}</div>`).join('')}</div>`:''}
+      </div>
+    </div>`;
+  }).join('');
+  return `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Prijsuitreikingen — ${S.event.name}</title>
+  <style>body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f4f2;padding:32px;max-width:900px;margin:0 auto;color:#111}h1{font-size:22px;font-weight:700;margin-bottom:4px}p.sub{color:#888;font-size:13px;margin-bottom:24px}@media print{body{background:#fff;padding:16px}.no-print{display:none}}</style>
+  </head><body>
+  <div class="no-print" style="margin-bottom:24px"><button onclick="window.print()" style="background:#161618;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🖨 Print / Opslaan als PDF</button></div>
+  <h1>Prijsuitreikingen</h1><p class="sub">${S.event.name}${S.event.date?' — '+S.event.date:''} &nbsp;·&nbsp; ${huls.length} categorie${huls.length!==1?'ën':''}</p>
+  ${cards}
+  </body></html>`;
+}
+
+function downloadPrixHtml() {
+  const content = buildPrixHtmlContent();
+  const blob = new Blob([content], {type:'text/html;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'prijsuitreikingen.html'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* ══════════════════════════════
+   VRIJWILLIGERS
+══════════════════════════════ */
+function renderVrij() {
+  updateBadges();
+  const wrap = document.getElementById('vrij-table-wrap');
+  const vrs = S.vrijwilligers || [];
+  if (!vrs.length) {
+    wrap.innerHTML = '<div class="vrij-empty"><p>Nog geen vrijwilligers toegevoegd.<br>Klik <b>+ Vrijwilliger</b> om te beginnen.</p></div>';
+    return;
+  }
+  // Group by functie
+  const byFunc = {};
+  vrs.forEach(v => {
+    const k = v.functie || 'Overige';
+    if (!byFunc[k]) byFunc[k] = [];
+    byFunc[k].push(v);
+  });
+
+  let html = '';
+  Object.entries(byFunc).forEach(([func, group]) => {
+    html += `<div style="margin-bottom:22px">
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);padding:0 0 8px;border-bottom:1px solid var(--border);margin-bottom:0">${func}</div>
+      <div class="vrij-tcard" style="border-radius:0 0 var(--r2) var(--r2)">
+        <table class="vrij-t">
+          <thead><tr>
+            <th>Naam</th><th>Functie / rol</th><th>Locatie / post</th><th>Bijzonderheden</th><th style="width:32px"></th>
+          </tr></thead>
+          <tbody>
+            ${group.map(v => `<tr onclick="openVrijModal(${v.id})">
+              <td><div class="vrij-name">${v.naam}</div></td>
+              <td><div class="vrij-func">${v.functie||'—'}</div></td>
+              <td><div class="vrij-loc">${v.locatie||'—'}</div></td>
+              <td style="color:var(--t3);font-size:12px;max-width:240px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${v.bijzonderheden||''}</td>
+              <td><button class="ib del" onclick="event.stopPropagation();delVrijById(${v.id})" title="Verwijder">✕</button></td>
+            </tr>`).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>`;
+  });
+  wrap.innerHTML = html;
+}
+
+let _vrijEditId = null;
+function openVrijModal(editId) {
+  _vrijEditId = editId || null;
+  const v = editId ? (S.vrijwilligers||[]).find(x => x.id === editId) : null;
+  document.getElementById('vrij-modal-title').textContent = editId ? 'Vrijwilliger bewerken' : 'Vrijwilliger toevoegen';
+  document.getElementById('vrij-del-btn').style.display = editId ? 'inline-flex' : 'none';
+  document.getElementById('vrij-naam').value     = v ? v.naam     || '' : '';
+  document.getElementById('vrij-functie').value  = v ? v.functie  || '' : '';
+  document.getElementById('vrij-locatie').value  = v ? v.locatie  || '' : '';
+  document.getElementById('vrij-biz').value      = v ? v.bijzonderheden || '' : '';
+  document.getElementById('vrij-ovl').classList.add('open');
+}
+function closeVrijModal() { document.getElementById('vrij-ovl').classList.remove('open'); }
+function saveVrij() {
+  const naam = (document.getElementById('vrij-naam').value || '').trim();
+  if (!naam) { alert('Vul een naam in.'); return; }
+  const data = {
+    naam,
+    functie:       document.getElementById('vrij-functie').value.trim(),
+    locatie:       document.getElementById('vrij-locatie').value.trim(),
+    bijzonderheden:document.getElementById('vrij-biz').value.trim(),
+  };
+  if (!S.vrijwilligers) S.vrijwilligers = [];
+  if (_vrijEditId) {
+    const i = S.vrijwilligers.findIndex(x => x.id === _vrijEditId);
+    if (i !== -1) S.vrijwilligers[i] = { ...S.vrijwilligers[i], ...data };
+  } else {
+    S.vrijwilligers.push({ id: S.nextId++, ...data });
+  }
+  save(); closeVrijModal(); renderVrij(); updateBadges();
+}
+function delVrij() {
+  if (!confirm('Vrijwilliger verwijderen?')) return;
+  S.vrijwilligers = (S.vrijwilligers||[]).filter(x => x.id !== _vrijEditId);
+  save(); closeVrijModal(); renderVrij(); updateBadges();
+}
+function delVrijById(id) {
+  if (!confirm('Vrijwilliger verwijderen?')) return;
+  S.vrijwilligers = (S.vrijwilligers||[]).filter(x => x.id !== id);
+  save(); renderVrij(); updateBadges();
+}
+
+function buildVrijHtmlContent() {
+  const vrs = S.vrijwilligers || [];
+  const byFunc = {};
+  vrs.forEach(v => { const k = v.functie||'Overige'; if(!byFunc[k])byFunc[k]=[]; byFunc[k].push(v); });
+  const tables = Object.entries(byFunc).map(([func, group]) => `
+    <h3 style="font-size:13px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:#888;margin:20px 0 6px">${func}</h3>
+    <table style="width:100%;border-collapse:collapse;font-size:13px;margin-bottom:8px">
+      <thead><tr style="background:#f4f4f2">
+        <th style="padding:9px 12px;text-align:left;border:1px solid #e0e0db;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa">Naam</th>
+        <th style="padding:9px 12px;text-align:left;border:1px solid #e0e0db;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa">Functie / rol</th>
+        <th style="padding:9px 12px;text-align:left;border:1px solid #e0e0db;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa">Locatie / post</th>
+        <th style="padding:9px 12px;text-align:left;border:1px solid #e0e0db;font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#aaa">Bijzonderheden</th>
+      </tr></thead>
+      <tbody>${group.map((v,i)=>`<tr style="background:${i%2?'#f9f9f7':'#fff'}">
+        <td style="padding:9px 12px;border:1px solid #e0e0db;font-weight:600">${v.naam}</td>
+        <td style="padding:9px 12px;border:1px solid #e0e0db;color:#555">${v.functie||'—'}</td>
+        <td style="padding:9px 12px;border:1px solid #e0e0db;color:#555">${v.locatie||'—'}</td>
+        <td style="padding:9px 12px;border:1px solid #e0e0db;color:#888">${v.bijzonderheden||''}</td>
+      </tr>`).join('')}</tbody>
+    </table>`).join('');
+  return `<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><title>Vrijwilligers — ${S.event.name}</title>
+  <style>body{font-family:'Segoe UI',Arial,sans-serif;background:#f4f4f2;padding:32px;max-width:960px;margin:0 auto;color:#111}h1{font-size:22px;font-weight:700;margin-bottom:4px}p.sub{color:#888;font-size:13px;margin-bottom:8px}@media print{body{background:#fff;padding:16px}.no-print{display:none}}</style>
+  </head><body>
+  <div class="no-print" style="margin-bottom:24px"><button onclick="window.print()" style="background:#161618;color:#fff;border:none;padding:10px 20px;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer">🖨 Print / Opslaan als PDF</button></div>
+  <h1>Vrijwilligers</h1><p class="sub">${S.event.name}${S.event.date?' — '+S.event.date:''} &nbsp;·&nbsp; ${vrs.length} vrijwilliger${vrs.length!==1?'s':''}</p>
+  ${tables}
+  </body></html>`;
+}
+
+function downloadVrijHtml() {
+  const content = buildVrijHtmlContent();
+  const blob = new Blob([content], {type:'text/html;charset=utf-8;'});
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'vrijwilligers.html'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function printView(id) {
+  // Temporarily make only that view visible and print
+  const allViews = document.querySelectorAll('.view');
+  const target = document.getElementById('view-' + id);
+  allViews.forEach(v => v.style.display = 'none');
+  target.style.display = 'flex';
+  window.print();
+  allViews.forEach(v => v.style.display = '');
+  document.querySelectorAll('.view.active').forEach(v => v.style.display = 'flex');
+}
+
+
+/* ══════════════════════════════
+   HULDIGINGEN CSV
+══════════════════════════════ */
+const HUL_COLS = [
+  { key:'naam',          label:'Naam',          required:true,  hint:'bijv. 21km Mannen & Vrouwen'        },
+  { key:'wieReiktUit',   label:'Wie reikt uit',  required:false, hint:'Naam of rol'                        },
+  { key:'locatie',       label:'Locatie',        required:false, hint:'Podium, Plein…'                     },
+  { key:'items',         label:'Benodigdheden',  required:false, hint:'Medaille, bloemen, trofee (komma-gescheiden)' },
+  { key:'sponsor',       label:'Sponsor',        required:false, hint:'bijv. Rabobank'                     },
+  { key:'bijzonderheden',label:'Bijzonderheden', required:false, hint:'Protocol, aandachtspunten'          },
+];
+
+function downloadHulCsv() {
+  const header = HUL_COLS.map(c => c.label).join(';');
+  const hints  = HUL_COLS.map(c => c.hint).join(';');
+  const ex = ['21km Mannen & Vrouwen','Justin | Jan','Podium','Medaille, bloemen, trofee winnaar','Rabobank','Check procedure van tevoren'].join(';');
+  const bom = '\uFEFF';
+  const csv = bom + '# Regie — Huldigingen Import\n# Hints: ' + hints + '\n' + header + '\n' + ex + '\n';
+  const blob = new Blob([csv], {type:'text/csv;charset=utf-8;'});
+  const url  = URL.createObjectURL(blob);
+  const a    = document.createElement('a'); a.href=url; a.download='huldigingen-sjabloon.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+let _hulCsvParsed = [];
+
+function handleHulCsv(e) {
+  const file = e.target.files[0]; if (!file) return;
+  e.target.value = '';
+  const reader = new FileReader();
+  reader.onload = ev => parseHulCsv(ev.target.result, file.name);
+  reader.readAsText(file, 'UTF-8');
+}
+
+function parseHulCsv(raw, fileName) {
+  const text  = raw.replace(/^\uFEFF/,'').replace(/\r\n/g,'\n').replace(/\r/g,'\n');
+  const lines = text.split('\n').filter(l => l.trim() && !l.trim().startsWith('#'));
+  if (!lines.length) { alert('Leeg bestand of geen regels gevonden.'); return; }
+  const sep = lines[0].includes(';') ? ';' : ',';
+  const rawHeader = lines[0].split(sep).map(h => h.trim().toLowerCase().replace(/[^a-z]/g,''));
+  const colMap = {};
+  HUL_COLS.forEach(col => {
+    const nk = col.label.toLowerCase().replace(/[^a-z]/g,'');
+    rawHeader.forEach((h,i) => { if (h === nk || h.startsWith(nk.slice(0,5))) colMap[i] = col.key; });
+  });
+  _hulCsvParsed = lines.slice(1).map((line, idx) => {
+    const cells = splitCsvLine(line, sep);
+    const row = {};
+    Object.entries(colMap).forEach(([i,key]) => { row[key] = (cells[i]||'').trim(); });
+    const errors = [];
+    if (!row.naam) errors.push('Naam ontbreekt');
+    return { idx: idx+2, row, errors, ok: errors.length === 0 };
+  }).filter(r => r.row.naam || r.errors.length);
+  if (!_hulCsvParsed.length) { alert('Geen rijen gevonden.'); return; }
+  showHulCsvModal(fileName);
+}
+
+function showHulCsvModal(fileName) {
+  document.getElementById('hul-csv-filename').textContent = '📄 ' + fileName;
+  const ok  = _hulCsvParsed.filter(r => r.ok);
+  const err = _hulCsvParsed.filter(r => !r.ok);
+  document.getElementById('hul-csv-summary').innerHTML =
+    `<div class="csv-sum-pill"><span class="csv-sum-n" style="color:var(--green)">${ok.length}</span> klaar</div>` +
+    (err.length ? `<div class="csv-sum-pill"><span class="csv-sum-n" style="color:var(--red)">${err.length}</span> overgeslagen</div>` : '') +
+    `<div class="csv-sum-pill"><span class="csv-sum-n">${_hulCsvParsed.length}</span> totaal</div>`;
+  const errEl = document.getElementById('hul-csv-errors');
+  if (err.length) {
+    errEl.style.display = 'block';
+    errEl.innerHTML = '<strong>Waarschuwingen:</strong><br>' + err.map(r => `Rij ${r.idx}: ${r.errors.join(', ')}`).join('<br>');
+  } else errEl.style.display = 'none';
+  document.getElementById('hul-csv-head').innerHTML =
+    `<tr class="csv-ph"><th>Status</th><th>Naam / categorie</th><th>Wie reikt uit</th><th>Locatie</th><th>Benodigdheden</th><th>Sponsor</th><th>Bijzonderheden</th></tr>`;
+  const tbody = document.getElementById('hul-csv-body');
+  tbody.innerHTML = '';
+  _hulCsvParsed.forEach(r => {
+    const tr = document.createElement('tr');
+    tr.className = 'csv-pb ' + (r.ok ? 'row-ok' : 'row-err');
+    tr.innerHTML = `
+      <td>${r.ok ? '<span class="csv-ok">✓</span>' : '<span class="csv-err">✗</span>'}</td>
+      <td style="font-weight:500">${r.row.naam||'—'}</td>
+      <td>${r.row.wieReiktUit||'—'}</td>
+      <td>${r.row.locatie||'—'}</td>
+      <td style="color:var(--t3)">${r.row.items||'—'}</td>
+      <td>${r.row.sponsor||'—'}</td>
+      <td style="color:var(--t3);max-width:140px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${r.row.bijzonderheden||''}</td>`;
+    tbody.appendChild(tr);
+  });
+  document.getElementById('hul-csv-count').textContent =
+    ok.length ? `${ok.length} huldiging${ok.length!==1?'en':''} worden toegevoegd` : 'Niets te importeren';
+  document.getElementById('hul-csv-confirm').disabled = ok.length === 0;
+  document.getElementById('hul-csv-ovl').classList.add('open');
+}
+
+function closeHulCsvModal() {
+  document.getElementById('hul-csv-ovl').classList.remove('open');
+  _hulCsvParsed = [];
+}
+
+function confirmHulCsv() {
+  const toImport = _hulCsvParsed.filter(r => r.ok);
+  if (!toImport.length) return;
+  if (!S.huldigingen) S.huldigingen = [];
+  let added = 0;
+  toImport.forEach(r => {
+    S.huldigingen.push({
+      id:            S.nextId++,
+      naam:          r.row.naam,
+      wieReiktUit:   r.row.wieReiktUit   || '',
+      locatie:       r.row.locatie        || '',
+      items:         r.row.items          || '',
+      sponsor:       r.row.sponsor        || '',
+      bijzonderheden:r.row.bijzonderheden || '',
+    });
+    added++;
+  });
+  save(); closeHulCsvModal(); renderLib('hul'); updateBadges();
+  const notice = document.createElement('div');
+  notice.style.cssText = 'position:fixed;bottom:24px;right:24px;background:var(--green);color:#fff;padding:12px 20px;border-radius:10px;font-size:13px;font-weight:600;z-index:500;box-shadow:0 4px 16px rgba(0,0,0,.14);transition:opacity .4s';
+  notice.textContent = `✓ ${added} huldiging${added!==1?'en':''} geïmporteerd`;
+  document.body.appendChild(notice);
+  setTimeout(() => { notice.style.opacity='0'; setTimeout(()=>notice.remove(),500); }, 2400);
+}
+
 init();
 </script>
+
+
+<!-- VRIJWILLIGER MODAL -->
+<div class="ovl" id="vrij-ovl">
+  <div class="modal-box" style="max-width:480px">
+    <div class="modal-hd"><h3 id="vrij-modal-title">Vrijwilliger toevoegen</h3></div>
+    <div class="modal-body">
+      <div class="fg"><label>Naam *</label><input type="text" id="vrij-naam" placeholder="Voornaam Achternaam"></div>
+      <div class="fg"><label>Functie / rol</label><input type="text" id="vrij-functie" placeholder="bijv. Finish marshal, Podium crew"></div>
+      <div class="fg"><label>Locatie / post</label><input type="text" id="vrij-locatie" placeholder="bijv. Finish, Podium"></div>
+      <div class="fg"><label>Bijzonderheden</label><textarea id="vrij-biz" placeholder="Extra info, aandachtspunten…" style="min-height:56px"></textarea></div>
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-del btn-sm" id="vrij-del-btn" style="display:none;margin-right:auto" onclick="delVrij()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeVrijModal()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="saveVrij()">Opslaan</button>
+    </div>
+  </div>
+</div>
 
 <!-- LIBRARY FORM MODAL -->
 <div class="ovl" id="lib-ovl">
@@ -1773,6 +2209,35 @@ init();
       <div style="display:flex;gap:8px">
         <button class="btn btn-out btn-sm" onclick="closeCsvModal()">Annuleren</button>
         <button class="btn btn-y btn-sm" id="csv-confirm-btn" onclick="confirmCsvImport()">Importeren</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- HULDIGINGEN CSV MODAL -->
+<div class="ovl" id="hul-csv-ovl">
+  <div class="modal-box" style="max-width:760px;width:95vw">
+    <div class="modal-hd" style="padding:24px 28px 0">
+      <h3>Huldigingen importeren</h3>
+      <p id="hul-csv-filename" style="font-size:12px;color:var(--t3);margin-top:4px"></p>
+    </div>
+    <div style="padding:16px 28px 8px">
+      <div id="hul-csv-summary" style="display:flex;gap:12px;margin-bottom:14px"></div>
+      <div id="hul-csv-errors" style="display:none;background:var(--r-bg);border:1px solid rgba(214,50,86,.15);border-radius:8px;padding:10px 14px;margin-bottom:12px;font-size:12px;color:var(--red);line-height:1.7"></div>
+      <div style="overflow-x:auto;max-height:340px;overflow-y:auto;border:1px solid var(--border);border-radius:10px">
+        <table style="width:100%;border-collapse:collapse;font-size:12px">
+          <thead id="hul-csv-head"></thead>
+          <tbody id="hul-csv-body"></tbody>
+        </table>
+      </div>
+      <p style="font-size:11px;color:var(--t3);margin-top:10px">Rijen met ✓ worden toegevoegd. Bestaande huldigingen worden niet overschreven.</p>
+    </div>
+    <div style="padding:12px 28px 20px;border-top:1px solid var(--border);display:flex;justify-content:space-between;align-items:center;background:var(--bg);border-radius:0 0 14px 14px">
+      <span id="hul-csv-count" style="font-size:12px;color:var(--t2)"></span>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-out btn-sm" onclick="closeHulCsvModal()">Annuleren</button>
+        <button class="btn btn-y btn-sm" id="hul-csv-confirm" onclick="confirmHulCsv()">Importeren</button>
       </div>
     </div>
   </div>
