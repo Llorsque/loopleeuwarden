@@ -269,13 +269,34 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 .ckd-dot { width: 8px; height: 8px; border-radius: 50%; border: 1.5px solid var(--border); }
 .ckd-dot.on { background: var(--green); border-color: var(--green); }
 .now-badge { font-size: 9px; font-weight: 700; letter-spacing: .8px; text-transform: uppercase; background: var(--yellow); color: #6b5400; padding: 1px 6px; border-radius: 4px; margin-left: 6px; }
-.rp-row.has-det { cursor: pointer; }
+.rp-row { cursor: pointer; }
+
+/* ─── REGIEPAD DETAIL PANEL ─── */
 .rp-det-row { display: none; }
 .rp-det-row.open { display: table-row; }
-.rp-det-row td { background: var(--bg) !important; padding: 16px 28px 18px !important; }
-.rp-det-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 18px; }
-.rdg h5 { font-size: 10px; font-weight: 700; letter-spacing: 1.2px; text-transform: uppercase; color: var(--acc); margin-bottom: 6px; }
-.rdg p { font-size: 13px; color: var(--t2); line-height: 1.65; }
+.rp-det-row td { background: #f9f9f7 !important; padding: 0 !important; border-bottom: 2px solid var(--border) !important; }
+.det-panel { display: grid; grid-template-columns: 220px 1fr 1fr; gap: 0; }
+.det-col { padding: 18px 22px; border-right: 1px solid var(--border); }
+.det-col:last-child { border-right: none; }
+.det-col-lbl { font-size: 9px; font-weight: 700; letter-spacing: 1.8px; text-transform: uppercase; color: var(--acc); margin-bottom: 12px; display: flex; align-items: center; gap: 6px; }
+/* Checklist column */
+.det-ck-item { display: flex; align-items: center; gap: 9px; padding: 7px 0; border-bottom: 1px solid var(--border); }
+.det-ck-item:last-child { border-bottom: none; }
+.det-ck-dot { width: 18px; height: 18px; border-radius: 5px; border: 1.5px solid var(--border2); flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 700; }
+.det-ck-dot.on { background: var(--green); border-color: var(--green); color: #fff; }
+.det-ck-lbl { font-size: 12px; color: var(--t2); }
+.det-ck-lbl.done { color: var(--green); }
+/* Todo sub-list */
+.det-td-item { display: flex; align-items: flex-start; gap: 8px; padding: 5px 0; font-size: 12px; color: var(--t2); }
+.det-td-bullet { width: 5px; height: 5px; border-radius: 50%; background: var(--t3); margin-top: 6px; flex-shrink: 0; }
+.det-td-bullet.done { background: var(--green); }
+.det-td-txt.done { text-decoration: line-through; color: var(--t3); }
+/* Script / text columns */
+.det-text { font-size: 13px; color: var(--t2); line-height: 1.7; white-space: pre-wrap; }
+.det-empty { font-size: 12px; color: var(--t3); font-style: italic; }
+/* action bar at bottom of panel */
+.det-actions { grid-column: 1 / -1; border-top: 1px solid var(--border); padding: 10px 22px; display: flex; align-items: center; gap: 8px; background: var(--bg); }
+
 
 /* ── TIMELINE ── */
 .tl-outer { overflow: auto; }
@@ -1133,7 +1154,7 @@ document.addEventListener('keydown',e=>{
     e.preventDefault();
     if(rpIdx>=0&&rpIdx<rpItemIds.length){
       const id=rpItemIds[rpIdx],item=S.items.find(i=>i.id===id);
-      if(item&&(item.script||item.techniek||item.dj)){const ix=expanded.indexOf(id);if(ix===-1)expanded.push(id);else expanded.splice(ix,1);if(rpView==='table')renderRPTable();}
+      if(item){const ix=expanded.indexOf(id);if(ix===-1)expanded.push(id);else expanded.splice(ix,1);if(rpView==='table')renderRPTable();}
     }
   }
 });
@@ -1165,21 +1186,57 @@ function renderRPTable(){
   const tb=document.getElementById('rp-tb');tb.innerHTML='';let num=1,ic=0;
   S.items.forEach(item=>{
     if(item.type==='sep'){const tr=document.createElement('tr');tr.className='rp-sep';tr.innerHTML=`<td colspan="9"><span class="rp-sep-lbl">▸ ${item.name}</span></td>`;tb.appendChild(tr);return;}
-    const c=item.checklist||{},L=lbl(item.label),exp=expanded.includes(item.id),hasDet=item.script||item.techniek||item.dj;
+    const c=item.checklist||{},L=lbl(item.label),exp=expanded.includes(item.id);
     const isKbd=rpIdx===ic,isNow=rpAutoOn&&nowIdx===ic;
+    const ckDone=[c.persoon,c.script,c.slide,c.techniek].filter(Boolean).length;
     const tr=document.createElement('tr');
-    tr.className='rp-row'+(hasDet?' has-det':'')+(isKbd?' kbd-sel':'')+(isNow?' now-active':'');
+    tr.className='rp-row'+(isKbd?' kbd-sel':'')+(isNow?' now-active':'');
     tr.dataset.rpid=item.id;
-    const ic2=ic;tr.onclick=()=>{rpIdx=ic2;if(hasDet){const ix=expanded.indexOf(item.id);if(ix===-1)expanded.push(item.id);else expanded.splice(ix,1);}renderRPTable();};
+    const ic2=ic,iid=item.id;
+    tr.onclick=()=>{rpIdx=ic2;const ix=expanded.indexOf(iid);if(ix===-1)expanded.push(iid);else expanded.splice(ix,1);renderRPTable();};
     tr.innerHTML=`<td><span class="rp-num">${num++}</span></td><td><span class="rp-ts">${item.start||'—'}</span></td><td><span class="rp-te">${item.eind||'—'}</span></td><td><span class="rp-dur">${durStr(item.start,item.eind)}</span></td>
       <td><div style="display:flex;align-items:center;gap:8px">${cfIds.has(item.id)?'<span style="color:var(--orange);font-size:11px">⚠</span>':''}
         <div><div class="rp-ttl">${item.omschrijving||'—'}${item.fixed?' <span class="fixed-tag">FIXED</span>':''}${isNow?' <span class="now-badge">▶ nu</span>':''}</div>${item.bijzonderheden?`<div class="rp-biz">${item.bijzonderheden}</div>`:''}</div>
-        ${hasDet?`<span style="font-size:9px;color:var(--t3);margin-left:2px">${exp?'▲':'▼'}</span>`:''}</div></td>
+        <span style="font-size:9px;color:var(--t3);margin-left:auto;padding-left:8px">${exp?'▲':'▼'}</span></div></td>
       <td><span class="rp-wie">${item.wie||'—'}</span></td><td><span class="rp-loc">${item.locatie||'—'}</span></td>
       <td>${L?`<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:'—'}</td>
       <td><div class="ckd"><div class="ckd-dot ${c.persoon?'on':''}"></div><div class="ckd-dot ${c.script?'on':''}"></div><div class="ckd-dot ${c.slide?'on':''}"></div><div class="ckd-dot ${c.techniek?'on':''}"></div></div></td>`;
     tb.appendChild(tr);
-    if(exp&&hasDet){const dr=document.createElement('tr');dr.className='rp-det-row open';dr.innerHTML=`<td colspan="9"><div class="rp-det-grid">${item.script?`<div class="rdg"><h5>📝 Script</h5><p>${item.script.replace(/\n/g,'<br>')}</p></div>`:''}${item.techniek?`<div class="rdg"><h5>🔊 Techniek</h5><p>${item.techniek.replace(/\n/g,'<br>')}</p></div>`:''}${item.dj?`<div class="rdg"><h5>🎵 DJ</h5><p>${item.dj.replace(/\n/g,'<br>')}</p></div>`:''}</div></td>`;tb.appendChild(dr);}
+    if(exp){
+      const todos=(S.todos.items[item.id]||[]);
+      const dr=document.createElement('tr');dr.className='rp-det-row open';
+      dr.innerHTML=`<td colspan="9"><div class="det-panel">
+        <!-- COL 1: Checklist + To-do's -->
+        <div class="det-col">
+          <div class="det-col-lbl">✓ Checklist</div>
+          <div>
+            <div class="det-ck-item"><div class="det-ck-dot ${c.persoon?'on':''}">${c.persoon?'✓':''}</div><span class="det-ck-lbl ${c.persoon?'done':''}">Persoon gebrieft</span></div>
+            <div class="det-ck-item"><div class="det-ck-dot ${c.script?'on':''}">${c.script?'✓':''}</div><span class="det-ck-lbl ${c.script?'done':''}">Script / tekst klaar</span></div>
+            <div class="det-ck-item"><div class="det-ck-dot ${c.slide?'on':''}">${c.slide?'✓':''}</div><span class="det-ck-lbl ${c.slide?'done':''}">Slide / video gereed</span></div>
+            <div class="det-ck-item"><div class="det-ck-dot ${c.techniek?'on':''}">${c.techniek?'✓':''}</div><span class="det-ck-lbl ${c.techniek?'done':''}">Techniek getest</span></div>
+          </div>
+          ${todos.length?`<div style="margin-top:14px"><div class="det-col-lbl">To-do's</div>${todos.map(t=>`<div class="det-td-item"><div class="det-td-bullet ${t.done?'done':''}"></div><span class="det-td-txt ${t.done?'done':''}">${t.text}</span></div>`).join('')}</div>`:''}
+        </div>
+        <!-- COL 2: Script -->
+        <div class="det-col">
+          <div class="det-col-lbl">📝 Script / spreektekst</div>
+          ${item.script?`<div class="det-text">${item.script.split('\n').join('<br>')}</div>`:`<div class="det-empty">Geen script ingevuld</div>`}
+          ${item.techniek?`<div style="margin-top:16px"><div class="det-col-lbl">🔊 Technische instructies</div><div class="det-text">${item.techniek.split('\n').join('<br>')}</div></div>`:''}
+        </div>
+        <!-- COL 3: DJ + overige info -->
+        <div class="det-col">
+          <div class="det-col-lbl">🎵 DJ instructies</div>
+          ${item.dj?`<div class="det-text">${item.dj.split('\n').join('<br>')}</div>`:`<div class="det-empty">Geen DJ instructies</div>`}
+          ${item.bijzonderheden?`<div style="margin-top:16px"><div class="det-col-lbl">⚠ Bijzonderheden</div><div class="det-text">${item.bijzonderheden}</div></div>`:''}
+        </div>
+        <!-- Action bar -->
+        <div class="det-actions">
+          <button class="btn btn-out btn-sm" style="font-size:10px;padding:5px 12px" onclick="event.stopPropagation();gv('bo',document.getElementById('ni-bo'));setTimeout(()=>openEdit(${item.id}),80)">✏ Bewerken in backoffice</button>
+          <span style="font-size:11px;color:var(--t3);margin-left:4px">${ckDone}/4 checks voltooid</span>
+        </div>
+      </div></td>`;
+      tb.appendChild(dr);
+    }
     ic++;
   });
 }
