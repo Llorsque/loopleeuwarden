@@ -4,7 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Regie</title>
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,400&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
 /* ══════════════════════════════════════════
    REGIE — DESIGN SYSTEM
@@ -52,8 +52,8 @@
   --r2:       12px;
 
   /* Typography */
-  --f: 'DM Sans', sans-serif;
-  --fm: 'DM Mono', monospace;
+  --f: 'Inter', system-ui, sans-serif;
+  --fm: 'JetBrains Mono', monospace;
 }
 
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; -webkit-font-smoothing: antialiased; }
@@ -258,9 +258,9 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 .rp-sep td { background: var(--bg) !important; padding: 6px 16px !important; }
 .rp-sep-lbl { font-size: 9px; font-weight: 700; letter-spacing: 2.5px; text-transform: uppercase; color: var(--t3); }
 .rp-num { font-family: var(--fm); font-size: 11px; color: var(--t3); font-weight: 500; }
-.rp-ts { font-family: var(--fm); font-weight: 600; font-size: 14px; color: var(--text); white-space: nowrap; }
-.rp-te { font-family: var(--fm); font-size: 12px; color: var(--t3); }
-.rp-dur { font-family: var(--fm); font-size: 12px; color: var(--t3); }
+.rp-ts { font-family: var(--fm); font-weight: 600; font-size: 13px; color: var(--text); white-space: nowrap; }
+.rp-te { font-family: var(--fm); font-weight: 500; font-size: 13px; color: var(--t2); }
+.rp-dur { font-family: var(--fm); font-weight: 500; font-size: 13px; color: var(--t2); }
 .rp-ttl { font-weight: 500; font-size: 14px; line-height: 1.35; }
 .rp-biz { font-size: 12px; color: var(--t3); margin-top: 3px; }
 .rp-wie { font-size: 13px; color: var(--t2); }
@@ -627,7 +627,8 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
     <div class="nv" id="ni-prix" onclick="gv('prix',this)"><span class="ic">🥇</span> Prijsuitreikingen</div>
     <div class="nv" id="ni-vrij" onclick="gv('vrij',this)"><span class="ic">👥</span> Vrijwilligers <span class="bdg bdg-y" id="nb-vrij" style="display:none">0</span></div>
     <div class="sb-lbl">Output</div>
-    <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad <span class="bdg bdg-r" id="nb-cf" style="display:none">0</span></div>
+    <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad</div>
+    <div class="nv" id="ni-cf" onclick="gv('rp',document.getElementById('ni-rp'));setTimeout(()=>{cfPanelOpen=true;renderRPTable();document.getElementById('cf-panel-wrap').scrollIntoView({behavior:'smooth'});},150)"><span class="ic">⚠</span> Conflicten <span class="bdg bdg-r" id="nb-cf" style="display:none">0</span></div>
   </div>
   <div class="sb-foot">
     <button class="sb-print" onclick="window.print()">🖨 &nbsp;Print regiepad</button>
@@ -729,7 +730,7 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
       <div class="rp-stat"><div class="rp-stat-lbl">Onderdelen</div><div class="rp-stat-val" id="rs-i">0</div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Totale duur</div><div class="rp-stat-val" id="rs-d">—</div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Gereed</div><div class="rp-stat-val" id="rs-r">0%</div><div class="rp-bar"><div class="rp-bar-fill" id="rs-rb" style="width:0%"></div></div></div>
-      <div class="rp-stat"><div class="rp-stat-lbl">Conflicten</div><div class="rp-stat-val" id="rs-c">0</div><div class="rp-stat-sub" id="rs-cs">Alles in orde</div></div>
+      <div class="rp-stat" style="min-width:140px"><div class="rp-stat-lbl">Actuele tijd</div><div class="rp-stat-val" id="rs-clock" style="font-family:var(--fm);letter-spacing:-.5px;font-size:28px">—</div><div class="rp-stat-sub" id="rs-clock-date" style="font-size:11px"></div></div>
     </div>
     <div id="cf-panel-wrap" style="flex-shrink:0"></div>
     <!-- TABLE -->
@@ -1272,8 +1273,8 @@ function rpStats(){
   const ri=S.items.filter(i=>i.type==='item');document.getElementById('rs-i').textContent=ri.length;
   const pct=readiness();document.getElementById('rs-r').textContent=pct+'%';document.getElementById('rs-rb').style.width=pct+'%';
   const open=cf.filter(c=>!c.ids.every(id=>rpAcked.has(id+'_'+c.key)));
-  const cEl=document.getElementById('rs-c');cEl.textContent=open.length;cEl.style.color=open.length?'var(--orange)':'var(--text)';
-  document.getElementById('rs-cs').textContent=open.length?`${open.length} open conflict${open.length>1?'en':''}`:'Alles in orde';
+  // Conflict count goes to sidebar badge
+  const nbCf=document.getElementById('nb-cf');if(nbCf){nbCf.textContent=open.length;nbCf.style.display=open.length?'inline':'none';}
   let tot=0;ri.forEach(i=>{if(i.start&&i.eind){const d=t2m(i.eind)-t2m(i.start);if(d>0)tot+=d;}});
   const h=Math.floor(tot/60),m=tot%60;document.getElementById('rs-d').textContent=m?`${h}u ${m}m`:`${h}u`;
   renderCfPanel(cf);
@@ -1447,9 +1448,9 @@ function renderRpRow(item,num,ic,nowIdx,nowItems,cfByItemId,cfIdSet,tb){
     const jx=expanded.indexOf(iid);if(jx===-1)expanded.push(iid);else expanded.splice(jx,1);
     renderRPTable();
   };
-  const tStart=item.start?`<span style="font-family:var(--fm);font-size:13px;font-weight:600">${item.start}</span>`:'<span style="color:var(--t3)">—</span>';
-  const tEind=item.eind?`<span style="font-family:var(--fm);font-size:12px;color:var(--t3)">${item.eind}</span>`:'';
-  const tDur=item.start&&item.eind?`<span style="font-family:var(--fm);font-size:11px;color:var(--t3)">${durStr(item.start,item.eind)}</span>`:'';
+  const tStart=item.start?`<span class="rp-ts">${item.start}</span>`:'<span style="color:var(--t3)">—</span>';
+  const tEind=item.eind?`<span class="rp-te">${item.eind}</span>`:'';
+  const tDur=item.start&&item.eind?`<span class="rp-dur">${durStr(item.start,item.eind)}</span>`:'';
   const fixedIcon=item.fixed?'<span class="fixed-icon" title="Vast tijdstip">📌</span>':'';
   const cfIcon=hasOpenCf?'<span style="color:var(--orange);font-size:12px" title="Conflict">⚠</span>':(isAckedCf?'<span style="color:var(--green);font-size:11px" title="Geaccordeerd">✓</span>':'');
   const nowBadge=isNow?'<span class="now-badge">▶ nu</span>':'';
@@ -2461,6 +2462,30 @@ function confirmHulCsv() {
   document.body.appendChild(notice);
   setTimeout(() => { notice.style.opacity='0'; setTimeout(()=>notice.remove(),500); }, 2400);
 }
+
+
+/* ── LIVE CLOCK ── */
+function tickClock(){
+  const el=document.getElementById('rs-clock');
+  const de=document.getElementById('rs-clock-date');
+  if(!el)return;
+  try{
+    const now=new Date();
+    const ams=now.toLocaleString('nl-NL',{timeZone:'Europe/Amsterdam',
+      hour:'2-digit',minute:'2-digit',second:'2-digit',hour12:false});
+    el.textContent=ams.replace(/,/,'').trim();
+    const d=now.toLocaleString('nl-NL',{timeZone:'Europe/Amsterdam',
+      weekday:'short',day:'numeric',month:'short'});
+    if(de)de.textContent=d;
+  }catch(e){
+    const n=new Date();
+    el.textContent=String(n.getHours()).padStart(2,'0')+':'+
+                   String(n.getMinutes()).padStart(2,'0')+':'+
+                   String(n.getSeconds()).padStart(2,'0');
+  }
+}
+setInterval(tickClock,1000);
+tickClock();
 
 init();
 </script>
