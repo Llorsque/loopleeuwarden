@@ -536,6 +536,30 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 .cf-ack-btn:hover { background: var(--bg); }
 .cf-ack-btn.acked { background: var(--g-bg); border-color: var(--green); color: var(--green); }
 
+
+/* ─── COLUMN RESIZE ─── */
+.rp-t { table-layout: fixed; width: 100%; }
+.rp-t th { position: relative; overflow: hidden; white-space: nowrap; user-select: none; }
+.rp-t th .col-resizer {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 6px; cursor: col-resize;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.rp-t th .col-resizer::after {
+  content: '';
+  display: block;
+  width: 2px; height: 60%;
+  background: var(--border2);
+  border-radius: 1px;
+  transition: background .12s;
+}
+.rp-t th:hover .col-resizer::after { background: var(--acc); }
+.rp-t th.resizing .col-resizer::after { background: var(--acc); }
+.rp-t th.resizing { cursor: col-resize; }
+body.col-resizing { cursor: col-resize !important; user-select: none !important; }
+body.col-resizing * { user-select: none !important; cursor: col-resize !important; }
+
 @media print {
   .prix-body, .vrij-body { overflow:visible !important; }
   .prix-grid { grid-template-columns:1fr 1fr; }
@@ -590,6 +614,30 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 .cf-ack-btn { font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); color: var(--t3); cursor: pointer; transition: all .12s; white-space: nowrap; }
 .cf-ack-btn:hover { background: var(--bg); }
 .cf-ack-btn.acked { background: var(--g-bg); border-color: var(--green); color: var(--green); }
+
+
+/* ─── COLUMN RESIZE ─── */
+.rp-t { table-layout: fixed; width: 100%; }
+.rp-t th { position: relative; overflow: hidden; white-space: nowrap; user-select: none; }
+.rp-t th .col-resizer {
+  position: absolute; right: 0; top: 0; bottom: 0;
+  width: 6px; cursor: col-resize;
+  display: flex; align-items: center; justify-content: center;
+  z-index: 1;
+}
+.rp-t th .col-resizer::after {
+  content: '';
+  display: block;
+  width: 2px; height: 60%;
+  background: var(--border2);
+  border-radius: 1px;
+  transition: background .12s;
+}
+.rp-t th:hover .col-resizer::after { background: var(--acc); }
+.rp-t th.resizing .col-resizer::after { background: var(--acc); }
+.rp-t th.resizing { cursor: col-resize; }
+body.col-resizing { cursor: col-resize !important; user-select: none !important; }
+body.col-resizing * { user-select: none !important; cursor: col-resize !important; }
 
 @media print {
   .sidebar { display: none !important; }
@@ -712,6 +760,7 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
       </button>
       <span class="key-hint">↑ ↓ navigeren &nbsp;·&nbsp; Enter = detail</span>
       <div style="flex:1"></div>
+      <button class="btn btn-out btn-sm" style="font-size:10px;padding:6px 10px" onclick="resetColWidths()" title="Kolombreedte resetten">⟳ Reset kolommen</button>
       <button class="btn btn-out btn-sm" onclick="window.print()">🖨 Print</button>
     </div>
     <!-- SORT + FILTER BAR -->
@@ -737,9 +786,16 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
     <div id="rp-table-div" style="flex:1;overflow-y:auto;padding:0 32px 60px">
       <div class="rp-tcard">
         <table class="rp-t">
-          <thead><tr>
-            <th style="width:26px">#</th><th style="width:76px">Start</th><th style="width:62px">Eind</th><th style="width:52px">Duur</th>
-            <th>Onderdeel</th><th style="width:115px">Wie</th><th style="width:92px">Locatie</th><th style="width:115px">Label</th><th style="width:56px">Gereed</th>
+          <thead><tr id="rp-thead-row">
+            <th id="rph-num"  style="width:26px" >#<span class="col-resizer" data-col="num"></span></th>
+            <th id="rph-start"style="width:80px" >Start<span class="col-resizer" data-col="start"></span></th>
+            <th id="rph-eind" style="width:68px" >Eind<span class="col-resizer" data-col="eind"></span></th>
+            <th id="rph-duur" style="width:58px" >Duur<span class="col-resizer" data-col="duur"></span></th>
+            <th id="rph-ond"                     >Onderdeel<span class="col-resizer" data-col="ond"></span></th>
+            <th id="rph-wie"  style="width:120px">Wie<span class="col-resizer" data-col="wie"></span></th>
+            <th id="rph-loc"  style="width:96px" >Locatie<span class="col-resizer" data-col="loc"></span></th>
+            <th id="rph-lbl"  style="width:120px">Label<span class="col-resizer" data-col="lbl"></span></th>
+            <th id="rph-ger"  style="width:60px" >Gereed<span class="col-resizer" data-col="ger"></span></th>
           </tr></thead>
           <tbody id="rp-tb"></tbody>
         </table>
@@ -838,6 +894,7 @@ function init(){
   renderRightPanel();
   renderBoList();
   updateBadges();
+  // Col resize init runs after first RP render
 }
 
 function seedLabels(){
@@ -884,6 +941,7 @@ function calcFin(fin){
 }
 
 /* conflicts() now defined inside rpStats area */
+/* initColResize called after table render */
 function readiness(){const it=S.items.filter(i=>i.type==='item');if(!it.length)return 0;let t=0,d=0;it.forEach(i=>{const c=i.checklist||{};t+=4;d+=(c.persoon?1:0)+(c.script?1:0)+(c.slide?1:0)+(c.techniek?1:0);});return Math.round(d/t*100);}
 
 /* ═══ NAV ═══ */
@@ -892,7 +950,7 @@ function gv(id,el){
   document.querySelectorAll('.nv').forEach(n=>n.classList.remove('active'));
   document.getElementById('view-'+id).classList.add('active');
   if(el)el.classList.add('active');
-  if(id==='rp'){if(rpView==='timeline')renderRPTimeline();else renderRPTable();}
+  if(id==='rp'){if(rpView==='timeline')renderRPTimeline();else{renderRPTable();setTimeout(()=>{initColResize();},50);}}
   if(id==='td')renderTDV();
   if(id==='fin')renderFin();
   if(id==='bo')renderBoList();
@@ -2486,6 +2544,82 @@ function tickClock(){
 }
 setInterval(tickClock,1000);
 tickClock();
+
+
+/* ═══════════════════════════════
+   COLUMN RESIZE
+═══════════════════════════════ */
+const COL_STORAGE_KEY = 'regie_col_widths';
+const COL_MIN = 30;   // px minimum
+const COL_DEFAULTS = {
+  num:26, start:80, eind:68, duur:58, ond:300, wie:120, loc:96, lbl:120, ger:60
+};
+
+function loadColWidths(){
+  try{
+    const saved=JSON.parse(localStorage.getItem(COL_STORAGE_KEY)||'{}');
+    return Object.assign({},COL_DEFAULTS,saved);
+  }catch(e){return {...COL_DEFAULTS};}
+}
+function saveColWidths(widths){
+  try{localStorage.setItem(COL_STORAGE_KEY,JSON.stringify(widths));}catch(e){}
+}
+function applyColWidths(widths){
+  Object.entries(widths).forEach(([col,w])=>{
+    const th=document.getElementById('rph-'+col);
+    if(th)th.style.width=w+'px';
+  });
+}
+function resetColWidths(){
+  saveColWidths(COL_DEFAULTS);
+  applyColWidths(COL_DEFAULTS);
+}
+
+function initColResize(){
+  const widths=loadColWidths();
+  applyColWidths(widths);
+
+  document.querySelectorAll('.col-resizer').forEach(handle=>{
+    handle.addEventListener('mousedown', onResizeStart);
+    // Prevent click from bubbling to sort
+    handle.addEventListener('click', e=>e.stopPropagation());
+  });
+}
+
+let _resizeState=null;
+
+function onResizeStart(e){
+  e.preventDefault();
+  e.stopPropagation();
+  const col=e.currentTarget.dataset.col;
+  const th=document.getElementById('rph-'+col);
+  if(!th)return;
+  th.classList.add('resizing');
+  document.body.classList.add('col-resizing');
+  _resizeState={col, th, startX:e.clientX, startW:th.offsetWidth};
+  document.addEventListener('mousemove',onResizeMove);
+  document.addEventListener('mouseup',onResizeEnd);
+}
+function onResizeMove(e){
+  if(!_resizeState)return;
+  const dx=e.clientX-_resizeState.startX;
+  const newW=Math.max(COL_MIN,_resizeState.startW+dx);
+  _resizeState.th.style.width=newW+'px';
+}
+function onResizeEnd(e){
+  if(!_resizeState)return;
+  const col=_resizeState.col;
+  const newW=Math.max(COL_MIN,_resizeState.th.offsetWidth);
+  _resizeState.th.classList.remove('resizing');
+  document.body.classList.remove('col-resizing');
+  document.removeEventListener('mousemove',onResizeMove);
+  document.removeEventListener('mouseup',onResizeEnd);
+  // Save
+  const widths=loadColWidths();
+  widths[col]=newW;
+  saveColWidths(widths);
+  _resizeState=null;
+}
 
 init();
 </script>
