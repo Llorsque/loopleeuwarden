@@ -487,11 +487,109 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
 .vrij-empty { text-align:center; padding:52px 20px; }
 .vrij-empty p { font-size:13px; color:var(--t3); line-height:1.8; }
 /* ── PRINT OVERRIDES ── */
+
+/* ─── SORT / FILTER TOOLBAR ─── */
+.rp-filter-bar { padding: 10px 36px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--white); flex-wrap: wrap; }
+.sort-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 11px; font-weight: 600; color: var(--t2); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.sort-chip:hover { border-color: var(--acc); color: var(--acc); }
+.sort-chip.active { background: var(--acc); border-color: var(--acc); color: #fff; }
+.sort-chip .sort-arrow { font-size: 9px; opacity: .7; }
+.filter-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.filter-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 11px; font-weight: 600; color: var(--t2); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.filter-chip:hover { border-color: var(--text); color: var(--text); }
+.filter-chip.active { background: var(--sb-bg); border-color: var(--sb-bg); color: #fff; }
+.filter-chip.cf-chip { border-color: rgba(217,112,0,.3); color: var(--orange); }
+.filter-chip.cf-chip.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+/* ─── TABLE REFINEMENTS ─── */
+.rp-t th { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); padding: 11px 14px; text-align: left; white-space: nowrap; border-bottom: 2px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 2; cursor: pointer; user-select: none; }
+.rp-t th:hover { color: var(--text); }
+.rp-t th.sorted { color: var(--acc); }
+.rp-t td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+.rp-row td { transition: background .08s; }
+/* Color-coded left border by label */
+.rp-row.has-color td:first-child { border-left: 3px solid var(--row-color, transparent); }
+/* FIXED icon — subtle pin instead of text badge */
+.fixed-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; background: rgba(17,17,18,.08); color: var(--text); font-size: 10px; margin-left: 4px; vertical-align: middle; flex-shrink: 0; title: 'Vast tijdstip'; }
+/* Conflict highlight */
+.rp-row.has-conflict td { background: rgba(217,112,0,.04) !important; }
+.rp-row.has-conflict.open-row td { background: rgba(217,112,0,.07) !important; }
+/* Acknowledged conflict = muted */
+.rp-row.ack-conflict td:first-child { border-left: 3px solid var(--border2); }
+/* Conflict panel */
+.cf-panel { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r2); margin: 0 36px 14px; flex-shrink: 0; overflow: hidden; }
+.cf-panel-hd { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+.cf-panel-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--o-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.cf-panel-title { font-size: 14px; font-weight: 600; flex: 1; }
+.cf-panel-count { font-size: 11px; color: var(--t3); }
+.cf-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); transition: background .1s; }
+.cf-row:last-child { border-bottom: none; }
+.cf-row.acked { opacity: .45; }
+.cf-row-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+.cf-row.acked .cf-row-dot { background: var(--green); }
+.cf-row-msg { flex: 1; font-size: 13px; color: var(--t2); line-height: 1.4; }
+.cf-row-time { font-family: var(--fm); font-size: 11px; color: var(--t3); white-space: nowrap; }
+.cf-row-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.cf-resolve-btn { font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); color: var(--t2); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.cf-resolve-btn:hover { border-color: var(--green); color: var(--green); }
+.cf-ack-btn { font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); color: var(--t3); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.cf-ack-btn:hover { background: var(--bg); }
+.cf-ack-btn.acked { background: var(--g-bg); border-color: var(--green); color: var(--green); }
+
 @media print {
   .prix-body, .vrij-body { overflow:visible !important; }
   .prix-grid { grid-template-columns:1fr 1fr; }
   .prix-card, .vrij-tcard { box-shadow:none !important; }
 }
+
+
+/* ─── SORT / FILTER TOOLBAR ─── */
+.rp-filter-bar { padding: 10px 36px; display: flex; align-items: center; gap: 8px; border-bottom: 1px solid var(--border); flex-shrink: 0; background: var(--white); flex-wrap: wrap; }
+.sort-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 11px; font-weight: 600; color: var(--t2); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.sort-chip:hover { border-color: var(--acc); color: var(--acc); }
+.sort-chip.active { background: var(--acc); border-color: var(--acc); color: #fff; }
+.sort-chip .sort-arrow { font-size: 9px; opacity: .7; }
+.filter-sep { width: 1px; height: 18px; background: var(--border); margin: 0 4px; }
+.filter-chip { display: inline-flex; align-items: center; gap: 5px; padding: 5px 12px; border-radius: 20px; border: 1.5px solid var(--border); background: transparent; font-size: 11px; font-weight: 600; color: var(--t2); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.filter-chip:hover { border-color: var(--text); color: var(--text); }
+.filter-chip.active { background: var(--sb-bg); border-color: var(--sb-bg); color: #fff; }
+.filter-chip.cf-chip { border-color: rgba(217,112,0,.3); color: var(--orange); }
+.filter-chip.cf-chip.active { background: var(--orange); border-color: var(--orange); color: #fff; }
+
+/* ─── TABLE REFINEMENTS ─── */
+.rp-t th { font-size: 10px; font-weight: 700; letter-spacing: 1.5px; text-transform: uppercase; color: var(--t3); padding: 11px 14px; text-align: left; white-space: nowrap; border-bottom: 2px solid var(--border); background: var(--bg); position: sticky; top: 0; z-index: 2; cursor: pointer; user-select: none; }
+.rp-t th:hover { color: var(--text); }
+.rp-t th.sorted { color: var(--acc); }
+.rp-t td { padding: 12px 14px; border-bottom: 1px solid var(--border); vertical-align: middle; font-size: 13px; }
+.rp-row td { transition: background .08s; }
+/* Color-coded left border by label */
+.rp-row.has-color td:first-child { border-left: 3px solid var(--row-color, transparent); }
+/* FIXED icon — subtle pin instead of text badge */
+.fixed-icon { display: inline-flex; align-items: center; justify-content: center; width: 16px; height: 16px; border-radius: 4px; background: rgba(17,17,18,.08); color: var(--text); font-size: 10px; margin-left: 4px; vertical-align: middle; flex-shrink: 0; title: 'Vast tijdstip'; }
+/* Conflict highlight */
+.rp-row.has-conflict td { background: rgba(217,112,0,.04) !important; }
+.rp-row.has-conflict.open-row td { background: rgba(217,112,0,.07) !important; }
+/* Acknowledged conflict = muted */
+.rp-row.ack-conflict td:first-child { border-left: 3px solid var(--border2); }
+/* Conflict panel */
+.cf-panel { background: var(--white); border: 1.5px solid var(--border); border-radius: var(--r2); margin: 0 36px 14px; flex-shrink: 0; overflow: hidden; }
+.cf-panel-hd { display: flex; align-items: center; gap: 12px; padding: 14px 20px; border-bottom: 1px solid var(--border); cursor: pointer; user-select: none; }
+.cf-panel-icon { width: 28px; height: 28px; border-radius: 7px; background: var(--o-bg); display: flex; align-items: center; justify-content: center; font-size: 14px; flex-shrink: 0; }
+.cf-panel-title { font-size: 14px; font-weight: 600; flex: 1; }
+.cf-panel-count { font-size: 11px; color: var(--t3); }
+.cf-row { display: flex; align-items: center; gap: 12px; padding: 12px 20px; border-bottom: 1px solid var(--border); transition: background .1s; }
+.cf-row:last-child { border-bottom: none; }
+.cf-row.acked { opacity: .45; }
+.cf-row-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--orange); flex-shrink: 0; }
+.cf-row.acked .cf-row-dot { background: var(--green); }
+.cf-row-msg { flex: 1; font-size: 13px; color: var(--t2); line-height: 1.4; }
+.cf-row-time { font-family: var(--fm); font-size: 11px; color: var(--t3); white-space: nowrap; }
+.cf-row-acts { display: flex; gap: 6px; flex-shrink: 0; }
+.cf-resolve-btn { font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); color: var(--t2); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.cf-resolve-btn:hover { border-color: var(--green); color: var(--green); }
+.cf-ack-btn { font-size: 10px; font-weight: 600; padding: 5px 10px; border-radius: 6px; border: 1.5px solid var(--border); background: var(--white); color: var(--t3); cursor: pointer; transition: all .12s; white-space: nowrap; }
+.cf-ack-btn:hover { background: var(--bg); }
+.cf-ack-btn.acked { background: var(--g-bg); border-color: var(--green); color: var(--green); }
 
 @media print {
   .sidebar { display: none !important; }
@@ -615,13 +713,25 @@ textarea { resize: vertical; min-height: 72px; line-height: 1.6; }
       <div style="flex:1"></div>
       <button class="btn btn-out btn-sm" onclick="window.print()">🖨 Print</button>
     </div>
+    <!-- SORT + FILTER BAR -->
+    <div class="rp-filter-bar" id="rp-filter-bar">
+      <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)">Sorteren</span>
+      <button class="sort-chip active" id="sc-time"  onclick="setSort('time')" >⏱ Starttijd <span class="sort-arrow" id="sa-time">↑</span></button>
+      <button class="sort-chip"        id="sc-label" onclick="setSort('label')">Label</button>
+      <button class="sort-chip"        id="sc-wie"   onclick="setSort('wie')">Wie</button>
+      <div class="filter-sep"></div>
+      <span style="font-size:10px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--t3)">Filter</span>
+      <button class="filter-chip" id="fc-fixed" onclick="toggleFilter('fixed')">📌 Alleen fixed</button>
+      <button class="filter-chip cf-chip" id="fc-cf" onclick="toggleFilter('conflict')">⚠ Conflicten</button>
+      <button class="filter-chip" id="fc-todo" onclick="toggleFilter('todo')">✗ Onvolledig</button>
+    </div>
     <div class="rp-stats" style="padding:14px 32px 16px;margin:0;flex-shrink:0">
       <div class="rp-stat"><div class="rp-stat-lbl">Onderdelen</div><div class="rp-stat-val" id="rs-i">0</div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Totale duur</div><div class="rp-stat-val" id="rs-d">—</div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Gereed</div><div class="rp-stat-val" id="rs-r">0%</div><div class="rp-bar"><div class="rp-bar-fill" id="rs-rb" style="width:0%"></div></div></div>
       <div class="rp-stat"><div class="rp-stat-lbl">Conflicten</div><div class="rp-stat-val" id="rs-c">0</div><div class="rp-stat-sub" id="rs-cs">Alles in orde</div></div>
     </div>
-    <div id="cf-wrap" style="flex-shrink:0;padding:0 32px"></div>
+    <div id="cf-panel-wrap" style="flex-shrink:0"></div>
     <!-- TABLE -->
     <div id="rp-table-div" style="flex:1;overflow-y:auto;padding:0 32px 60px">
       <div class="rp-tcard">
@@ -772,17 +882,7 @@ function calcFin(fin){
   return{bedrag:b,korting:k,disc,netto:b-disc};
 }
 
-function conflicts(){
-  const it=S.items.filter(i=>i.type==='item'&&i.start&&i.eind),res=[];
-  for(let i=0;i<it.length;i++)for(let j=i+1;j<it.length;j++){
-    const a=it[i],b=it[j];
-    if(t2m(a.start)<t2m(b.eind)&&t2m(b.start)<t2m(a.eind)){
-      if(a.wie&&b.wie&&a.wie===b.wie)res.push({msg:`"${a.wie}" tegelijk: "${a.omschrijving}" & "${b.omschrijving}"`,ids:[a.id,b.id]});
-      else res.push({msg:`Tijdoverlap: "${a.omschrijving}" (${a.start}–${a.eind}) ↔ "${b.omschrijving}"`,ids:[a.id,b.id]});
-    }
-  }
-  return res;
-}
+/* conflicts() now defined inside rpStats area */
 function readiness(){const it=S.items.filter(i=>i.type==='item');if(!it.length)return 0;let t=0,d=0;it.forEach(i=>{const c=i.checklist||{};t+=4;d+=(c.persoon?1:0)+(c.script?1:0)+(c.slide?1:0)+(c.techniek?1:0);});return Math.round(d/t*100);}
 
 /* ═══ NAV ═══ */
@@ -1115,6 +1215,7 @@ function renderFin(){
 
 /* ═══ REGIEPAD — NAVIGATIE, AUTO, TABEL, TIJDLIJN ═══ */
 let rpView='table',rpIdx=-1,rpItemIds=[],rpAutoOn=false,rpAutoTimer=null;
+let rpSort='time',rpSortDir=1,rpFilters=new Set(),rpAcked=new Set(),cfPanelOpen=true;
 
 function getAmsTime(){
   try{return new Date().toLocaleString('nl-NL',{timeZone:'Europe/Amsterdam',hour:'2-digit',minute:'2-digit',hour12:false}).replace(',','').trim();}
@@ -1170,75 +1271,249 @@ function rpStats(){
   document.getElementById('rp-t').textContent=S.event.name;document.getElementById('rp-st').textContent=S.event.date;
   const ri=S.items.filter(i=>i.type==='item');document.getElementById('rs-i').textContent=ri.length;
   const pct=readiness();document.getElementById('rs-r').textContent=pct+'%';document.getElementById('rs-rb').style.width=pct+'%';
-  const cEl=document.getElementById('rs-c');cEl.textContent=cf.length;cEl.style.color=cf.length?'var(--red)':'var(--text)';
-  document.getElementById('rs-cs').textContent=cf.length?'Controleer regiepad':'Alles in orde';
+  const open=cf.filter(c=>!c.ids.every(id=>rpAcked.has(id+'_'+c.key)));
+  const cEl=document.getElementById('rs-c');cEl.textContent=open.length;cEl.style.color=open.length?'var(--orange)':'var(--text)';
+  document.getElementById('rs-cs').textContent=open.length?`${open.length} open conflict${open.length>1?'en':''}`:'Alles in orde';
   let tot=0;ri.forEach(i=>{if(i.start&&i.eind){const d=t2m(i.eind)-t2m(i.start);if(d>0)tot+=d;}});
   const h=Math.floor(tot/60),m=tot%60;document.getElementById('rs-d').textContent=m?`${h}u ${m}m`:`${h}u`;
-  document.getElementById('cf-wrap').innerHTML=cf.length?`<div class="cf-notice" style="margin-bottom:12px"><div class="cf-notice-title">⚠ ${cf.length} conflict${cf.length>1?'en':''}</div>${cf.map(c=>`<p>• ${c.msg}</p>`).join('')}</div>`:'';
+  renderCfPanel(cf);
+}
+function conflicts(){
+  const it=S.items.filter(i=>i.type==='item'&&i.start&&i.eind),res=[];
+  for(let i=0;i<it.length;i++)for(let j=i+1;j<it.length;j++){
+    const a=it[i],b=it[j];
+    if(t2m(a.start)<t2m(b.eind)&&t2m(b.start)<t2m(a.eind)){
+      const key=[a.id,b.id].sort().join('_');
+      if(a.wie&&b.wie&&a.wie===b.wie)res.push({key,msg:`"${a.wie}" tegelijk ingepland: "${a.omschrijving}" en "${b.omschrijving}"`,type:'persoon',ids:[a.id,b.id],times:`${a.start}–${a.eind} ↔ ${b.start}–${b.eind}`});
+      else res.push({key,msg:`Tijdoverlap: "${a.omschrijving}" en "${b.omschrijving}"`,type:'tijd',ids:[a.id,b.id],times:`${a.start}–${a.eind} ↔ ${b.start}–${b.eind}`});
+    }
+  }return res;
+}
+function renderCfPanel(cf){
+  const wrap=document.getElementById('cf-panel-wrap');
+  if(!cf||!cf.length){wrap.innerHTML='';return;}
+  const ackKey=c=>c.ids.join('_')+'_'+c.key;
+  const isAcked=c=>rpAcked.has(ackKey(c));
+  const open=cf.filter(c=>!isAcked(c));
+  wrap.innerHTML=`
+    <div class="cf-panel" style="margin-bottom:0">
+      <div class="cf-panel-hd" onclick="cfPanelOpen=!cfPanelOpen;renderRPTable()">
+        <div class="cf-panel-icon">⚠</div>
+        <div class="cf-panel-title" style="color:${open.length?'var(--orange)':'var(--green)'}">
+          ${open.length?`${open.length} conflict${open.length>1?'en':''} gevonden`:'Alle conflicten afgehandeld'}
+        </div>
+        <span style="font-size:11px;color:var(--t3)">${cf.length} totaal &nbsp;·&nbsp; ${cf.length-open.length} geaccordeerd</span>
+        <span style="font-size:12px;color:var(--t3);margin-left:8px">${cfPanelOpen?'▲':'▼'}</span>
+      </div>
+      ${cfPanelOpen?`<div>${cf.map(c=>{
+        const acked=isAcked(c);
+        const ids=c.ids;
+        return `<div class="cf-row ${acked?'acked':''}">
+          <div class="cf-row-dot"></div>
+          <div>
+            <div class="cf-row-msg">${c.msg}</div>
+            <div class="cf-row-time">${c.times}</div>
+          </div>
+          <div class="cf-row-acts">
+            <button class="cf-resolve-btn" onclick="cfResolve(${ids[0]},${ids[1]})" title="Ga naar eerste onderdeel om aan te passen">✏ Oplossen</button>
+            <button class="cf-ack-btn ${acked?'acked':''}" onclick="cfAck('${ackKey(c)}')">${acked?'✓ Geaccordeerd':'Accordeer'}</button>
+          </div>
+        </div>`;
+      }).join('')}</div>`:''}
+    </div>`;
+}
+function cfAck(key){
+  if(rpAcked.has(key))rpAcked.delete(key);else rpAcked.add(key);
+  renderRPTable();
+}
+function cfResolve(id1,id2){
+  gv('bo',document.getElementById('ni-bo'));
+  setTimeout(()=>openEdit(id1),100);
+}
+
+
+/* ─── SORT & FILTER ─── */
+function setSort(key){
+  if(rpSort===key)rpSortDir*=-1;else{rpSort=key;rpSortDir=1;}
+  document.querySelectorAll('.sort-chip').forEach(c=>c.classList.remove('active'));
+  const chip=document.getElementById('sc-'+key);if(chip)chip.classList.add('active');
+  const arrows={time:'sa-time'};
+  if(arrows[key]){const a=document.getElementById(arrows[key]);if(a)a.textContent=rpSortDir===1?'↑':'↓';}
+  renderRPTable();
+}
+function toggleFilter(key){
+  if(rpFilters.has(key))rpFilters.delete(key);else rpFilters.add(key);
+  document.querySelectorAll('.filter-chip').forEach(c=>c.classList.remove('active'));
+  rpFilters.forEach(k=>{const el=document.getElementById('fc-'+k);if(el)el.classList.add('active');});
+  renderRPTable();
+}
+function getSortedItems(){
+  const cf=conflicts();
+  const cfIdSet=new Set(cf.flatMap(c=>c.ids));
+  const ackedKeys=new Set([...rpAcked]);
+  // Build flat list of items (no seps) for sorting
+  let items=S.items.filter(i=>i.type==='item');
+  // Apply filters
+  if(rpFilters.has('fixed'))    items=items.filter(i=>i.fixed);
+  if(rpFilters.has('conflict')) items=items.filter(i=>cfIdSet.has(i.id)&&!cf.filter(c=>c.ids.includes(i.id)).every(c=>rpAcked.has(c.ids.join('_')+'_'+c.key)));
+  if(rpFilters.has('todo')){
+    items=items.filter(i=>{
+      const c=i.checklist||{};
+      const done=[c.persoon,c.script,c.slide,c.techniek].filter(Boolean).length;
+      const td=(S.todos.items[i.id]||[]).filter(t=>!t.done).length;
+      return done<4||td>0;
+    });
+  }
+  // Sort
+  items=items.slice().sort((a,b)=>{
+    let va,vb;
+    if(rpSort==='time'){va=t2m(a.start||'99:99');vb=t2m(b.start||'99:99');}
+    else if(rpSort==='label'){va=a.label||'';vb=b.label||'';}
+    else if(rpSort==='wie'){va=(a.wie||'').toLowerCase();vb=(b.wie||'').toLowerCase();}
+    if(va<vb)return-rpSortDir;if(va>vb)return rpSortDir;return 0;
+  });
+  return{items,cfIdSet};
 }
 
 function renderRPTable(){
   rpStats();
-  const cf=conflicts(),cfIds=new Set(cf.flatMap(c=>c.ids));
-  const allItems=S.items.filter(i=>i.type==='item');
-  rpItemIds=allItems.map(i=>i.id);
-  const nowIdx=rpAutoOn?findNowIdx(allItems):-1;
+  const {items:sortedItems,cfIdSet}=getSortedItems();
+  rpItemIds=sortedItems.map(i=>i.id);
+  const nowItems=S.items.filter(i=>i.type==='item');
+  const nowIdx=rpAutoOn?findNowIdx(nowItems):-1;
+  const cf=conflicts();
+  const ackKey=c=>c.ids.join('_')+'_'+c.key;
+  // Build cfId -> conflict map for quick lookup
+  const cfByItemId={};
+  cf.forEach(c=>c.ids.forEach(id=>{if(!cfByItemId[id])cfByItemId[id]=[];cfByItemId[id].push(c);}));
   const tb=document.getElementById('rp-tb');tb.innerHTML='';let num=1,ic=0;
-  S.items.forEach(item=>{
-    if(item.type==='sep'){const tr=document.createElement('tr');tr.className='rp-sep';tr.innerHTML=`<td colspan="9"><span class="rp-sep-lbl">▸ ${item.name}</span></td>`;tb.appendChild(tr);return;}
-    const c=item.checklist||{},L=lbl(item.label),exp=expanded.includes(item.id);
-    const isKbd=rpIdx===ic,isNow=rpAutoOn&&nowIdx===ic;
-    const ckDone=[c.persoon,c.script,c.slide,c.techniek].filter(Boolean).length;
-    const tr=document.createElement('tr');
-    tr.className='rp-row'+(isKbd?' kbd-sel':'')+(isNow?' now-active':'');
-    tr.dataset.rpid=item.id;
-    const ic2=ic,iid=item.id;
-    tr.onclick=()=>{rpIdx=ic2;const ix=expanded.indexOf(iid);if(ix===-1)expanded.push(iid);else expanded.splice(ix,1);renderRPTable();};
-    tr.innerHTML=`<td><span class="rp-num">${num++}</span></td><td><span class="rp-ts">${item.start||'—'}</span></td><td><span class="rp-te">${item.eind||'—'}</span></td><td><span class="rp-dur">${durStr(item.start,item.eind)}</span></td>
-      <td><div style="display:flex;align-items:center;gap:8px">${cfIds.has(item.id)?'<span style="color:var(--orange);font-size:11px">⚠</span>':''}
-        <div><div class="rp-ttl">${item.omschrijving||'—'}${item.fixed?' <span class="fixed-tag">FIXED</span>':''}${isNow?' <span class="now-badge">▶ nu</span>':''}</div>${item.bijzonderheden?`<div class="rp-biz">${item.bijzonderheden}</div>`:''}</div>
-        <span style="font-size:9px;color:var(--t3);margin-left:auto;padding-left:8px">${exp?'▲':'▼'}</span></div></td>
-      <td><span class="rp-wie">${item.wie||'—'}</span></td><td><span class="rp-loc">${item.locatie||'—'}</span></td>
-      <td>${L?`<span class="lpill" style="background:${L.color}18;color:${L.color}">${L.name}</span>`:'—'}</td>
-      <td><div class="ckd"><div class="ckd-dot ${c.persoon?'on':''}"></div><div class="ckd-dot ${c.script?'on':''}"></div><div class="ckd-dot ${c.slide?'on':''}"></div><div class="ckd-dot ${c.techniek?'on':''}"></div></div></td>`;
-    tb.appendChild(tr);
-    if(exp){
-      const todos=(S.todos.items[item.id]||[]);
-      const dr=document.createElement('tr');dr.className='rp-det-row open';
-      dr.innerHTML=`<td colspan="9"><div class="det-panel">
-        <!-- COL 1: Checklist + To-do's -->
-        <div class="det-col">
-          <div class="det-col-lbl">✓ Checklist</div>
-          <div>
-            <div class="det-ck-item"><div class="det-ck-dot ${c.persoon?'on':''}">${c.persoon?'✓':''}</div><span class="det-ck-lbl ${c.persoon?'done':''}">Persoon gebrieft</span></div>
-            <div class="det-ck-item"><div class="det-ck-dot ${c.script?'on':''}">${c.script?'✓':''}</div><span class="det-ck-lbl ${c.script?'done':''}">Script / tekst klaar</span></div>
-            <div class="det-ck-item"><div class="det-ck-dot ${c.slide?'on':''}">${c.slide?'✓':''}</div><span class="det-ck-lbl ${c.slide?'done':''}">Slide / video gereed</span></div>
-            <div class="det-ck-item"><div class="det-ck-dot ${c.techniek?'on':''}">${c.techniek?'✓':''}</div><span class="det-ck-lbl ${c.techniek?'done':''}">Techniek getest</span></div>
-          </div>
-          ${todos.length?`<div style="margin-top:14px"><div class="det-col-lbl">To-do's</div>${todos.map(t=>`<div class="det-td-item"><div class="det-td-bullet ${t.done?'done':''}"></div><span class="det-td-txt ${t.done?'done':''}">${t.text}</span></div>`).join('')}</div>`:''}
-        </div>
-        <!-- COL 2: Script -->
-        <div class="det-col">
-          <div class="det-col-lbl">📝 Script / spreektekst</div>
-          ${item.script?`<div class="det-text">${item.script.split('\n').join('<br>')}</div>`:`<div class="det-empty">Geen script ingevuld</div>`}
-          ${item.techniek?`<div style="margin-top:16px"><div class="det-col-lbl">🔊 Technische instructies</div><div class="det-text">${item.techniek.split('\n').join('<br>')}</div></div>`:''}
-        </div>
-        <!-- COL 3: DJ + overige info -->
-        <div class="det-col">
-          <div class="det-col-lbl">🎵 DJ instructies</div>
-          ${item.dj?`<div class="det-text">${item.dj.split('\n').join('<br>')}</div>`:`<div class="det-empty">Geen DJ instructies</div>`}
-          ${item.bijzonderheden?`<div style="margin-top:16px"><div class="det-col-lbl">⚠ Bijzonderheden</div><div class="det-text">${item.bijzonderheden}</div></div>`:''}
-        </div>
-        <!-- Action bar -->
-        <div class="det-actions">
-          <button class="btn btn-out btn-sm" style="font-size:10px;padding:5px 12px" onclick="event.stopPropagation();gv('bo',document.getElementById('ni-bo'));setTimeout(()=>openEdit(${item.id}),80)">✏ Bewerken in backoffice</button>
-          <span style="font-size:11px;color:var(--t3);margin-left:4px">${ckDone}/4 checks voltooid</span>
-        </div>
-      </div></td>`;
-      tb.appendChild(dr);
+  // If sorted/filtered, render flat list without section headers
+  const useFlat=rpSort!=='time'||rpFilters.size>0;
+  const renderItems=useFlat?sortedItems:null;
+  // flat render
+  if(useFlat){
+    if(!sortedItems.length){
+      tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:40px;color:var(--t3);font-size:13px">Geen resultaten met huidige filter</td></tr>`;
     }
-    ic++;
-  });
+    sortedItems.forEach(item=>{
+      renderRpRow(item,num++,ic,nowIdx,nowItems,cfByItemId,cfIdSet,tb);
+      ic++;
+    });
+  } else {
+    // Sorted by time: show section headers + items sorted by time within group
+    // Collect items per section
+    let currentSepId=null;
+    const itemsBySep={_nosep:[]};
+    const sepOrder=[];
+    S.items.forEach(item=>{
+      if(item.type==='sep'){currentSepId=item.id;if(!itemsBySep[item.id])itemsBySep[item.id]=[];sepOrder.push(item);}
+      else{const k=currentSepId||'_nosep';if(!itemsBySep[k])itemsBySep[k]=[];itemsBySep[k].push(item);}
+    });
+    // Sort each group's items by time
+    const sortGroup=arr=>arr.slice().sort((a,b)=>{return t2m(a.start||'99:99')-t2m(b.start||'99:99');});
+    // Render nosep items first if any
+    if(itemsBySep['_nosep']&&itemsBySep['_nosep'].length){
+      sortGroup(itemsBySep['_nosep']).forEach(item=>{renderRpRow(item,num++,ic,nowIdx,nowItems,cfByItemId,cfIdSet,tb);ic++;});
+    }
+    sepOrder.forEach(sep=>{
+      const grp=sortGroup(itemsBySep[sep.id]||[]);
+      if(!grp.length)return;
+      const tr=document.createElement('tr');tr.className='rp-sep';
+      tr.innerHTML=`<td colspan="9"><span class="rp-sep-lbl">▸ ${sep.name}</span></td>`;tb.appendChild(tr);
+      grp.forEach(item=>{renderRpRow(item,num++,ic,nowIdx,nowItems,cfByItemId,cfIdSet,tb);ic++;});
+    });
+  }
+}
+
+function renderRpRow(item,num,ic,nowIdx,nowItems,cfByItemId,cfIdSet,tb){
+  const c=item.checklist||{},L=lbl(item.label),exp=expanded.includes(item.id);
+  const isNow=rpAutoOn&&nowItems.length>nowIdx&&nowIdx>=0&&nowItems[nowIdx].id===item.id;
+  const isKbd=rpItemIds[rpIdx]===item.id;
+  const ckDone=[c.persoon,c.script,c.slide,c.techniek].filter(Boolean).length;
+  const itemCfs=cfByItemId[item.id]||[];
+  const hasOpenCf=itemCfs.some(cf=>!rpAcked.has(cf.ids.join('_')+'_'+cf.key));
+  const isAckedCf=itemCfs.length>0&&!hasOpenCf;
+  const tr=document.createElement('tr');
+  let cls='rp-row';
+  if(isKbd)cls+=' kbd-sel';
+  if(isNow)cls+=' now-active';
+  if(hasOpenCf)cls+=' has-conflict';
+  if(L)cls+=' has-color';
+  tr.className=cls;
+  if(L)tr.style.setProperty('--row-color',L.color);
+  tr.dataset.rpid=item.id;
+  const iid=item.id;
+  tr.onclick=()=>{
+    const jx=expanded.indexOf(iid);if(jx===-1)expanded.push(iid);else expanded.splice(jx,1);
+    renderRPTable();
+  };
+  const tStart=item.start?`<span style="font-family:var(--fm);font-size:13px;font-weight:600">${item.start}</span>`:'<span style="color:var(--t3)">—</span>';
+  const tEind=item.eind?`<span style="font-family:var(--fm);font-size:12px;color:var(--t3)">${item.eind}</span>`:'';
+  const tDur=item.start&&item.eind?`<span style="font-family:var(--fm);font-size:11px;color:var(--t3)">${durStr(item.start,item.eind)}</span>`:'';
+  const fixedIcon=item.fixed?'<span class="fixed-icon" title="Vast tijdstip">📌</span>':'';
+  const cfIcon=hasOpenCf?'<span style="color:var(--orange);font-size:12px" title="Conflict">⚠</span>':(isAckedCf?'<span style="color:var(--green);font-size:11px" title="Geaccordeerd">✓</span>':'');
+  const nowBadge=isNow?'<span class="now-badge">▶ nu</span>':'';
+  const labelPill=L?`<span class="lpill" style="background:${L.color}20;color:${L.color};border:1px solid ${L.color}44">${L.name}</span>`:'—';
+  tr.innerHTML=`
+    <td><span class="rp-num">${num}</span></td>
+    <td>${tStart}</td>
+    <td>${tEind}</td>
+    <td>${tDur}</td>
+    <td>
+      <div style="display:flex;align-items:center;gap:6px">
+        ${cfIcon}
+        <div style="flex:1;min-width:0">
+          <div style="font-size:13px;font-weight:500;display:flex;align-items:center;gap:4px;flex-wrap:wrap">
+            ${item.omschrijving||'—'}${fixedIcon}${nowBadge}
+          </div>
+          ${item.bijzonderheden?`<div style="font-size:11px;color:var(--t3);margin-top:2px">${item.bijzonderheden}</div>`:''}
+        </div>
+        <span style="font-size:10px;color:var(--t3);flex-shrink:0">${exp?'▲':'▼'}</span>
+      </div>
+    </td>
+    <td><span style="font-size:12px">${item.wie||'—'}</span></td>
+    <td><span style="font-size:12px;color:var(--t3)">${item.locatie||'—'}</span></td>
+    <td>${labelPill}</td>
+    <td><div class="ckd">
+      <div class="ckd-dot ${c.persoon?'on':''}"></div>
+      <div class="ckd-dot ${c.script?'on':''}"></div>
+      <div class="ckd-dot ${c.slide?'on':''}"></div>
+      <div class="ckd-dot ${c.techniek?'on':''}"></div>
+    </div></td>`;
+  tb.appendChild(tr);
+  if(exp){
+    const todos=(S.todos.items[item.id]||[]);
+    const dr=document.createElement('tr');dr.className='rp-det-row open';
+    const ackBtns=itemCfs.length?`<button class="cf-ack-btn" style="margin-left:auto" onclick="event.stopPropagation();${itemCfs.map(cf=>`cfAck('${cf.ids.join('_')+'_'+cf.key}')`).join(';')};renderRPTable()">${hasOpenCf?'Accordeer conflict':'✓ Geaccordeerd'}</button>`:'';
+    dr.innerHTML=`<td colspan="9"><div class="det-panel">
+      <div class="det-col">
+        <div class="det-col-lbl">✓ Checklist</div>
+        <div>
+          <div class="det-ck-item"><div class="det-ck-dot ${c.persoon?'on':''}">${c.persoon?'✓':''}</div><span class="det-ck-lbl ${c.persoon?'done':''}">Persoon gebrieft</span></div>
+          <div class="det-ck-item"><div class="det-ck-dot ${c.script?'on':''}">${c.script?'✓':''}</div><span class="det-ck-lbl ${c.script?'done':''}">Script / tekst klaar</span></div>
+          <div class="det-ck-item"><div class="det-ck-dot ${c.slide?'on':''}">${c.slide?'✓':''}</div><span class="det-ck-lbl ${c.slide?'done':''}">Slide / video gereed</span></div>
+          <div class="det-ck-item"><div class="det-ck-dot ${c.techniek?'on':''}">${c.techniek?'✓':''}</div><span class="det-ck-lbl ${c.techniek?'done':''}">Techniek getest</span></div>
+        </div>
+        ${todos.length?`<div style="margin-top:14px"><div class="det-col-lbl">To-do's</div>${todos.map(t=>`<div class="det-td-item"><div class="det-td-bullet ${t.done?'done':''}"></div><span class="det-td-txt ${t.done?'done':''}">${t.text}</span></div>`).join('')}</div>`:''}
+      </div>
+      <div class="det-col">
+        <div class="det-col-lbl">📝 Script / spreektekst</div>
+        ${item.script?`<div class="det-text">${item.script.split('\n').join('<br>')}</div>`:'<div class="det-empty">Geen script ingevuld</div>'}
+        ${item.techniek?`<div style="margin-top:16px"><div class="det-col-lbl">🔊 Technische instructies</div><div class="det-text">${item.techniek.split('\n').join('<br>')}</div></div>`:''}
+      </div>
+      <div class="det-col">
+        <div class="det-col-lbl">🎵 DJ instructies</div>
+        ${item.dj?`<div class="det-text">${item.dj.split('\n').join('<br>')}</div>`:'<div class="det-empty">Geen DJ instructies</div>'}
+        ${itemCfs.length?`<div style="margin-top:16px"><div class="det-col-lbl" style="color:var(--orange)">⚠ Conflicten</div>${itemCfs.map(cf=>`<div style="font-size:12px;color:var(--t2);margin-bottom:5px;padding:6px 8px;background:var(--o-bg);border-radius:6px">${cf.msg}<br><span style="font-family:var(--fm);font-size:10px;color:var(--t3)">${cf.times}</span></div>`).join('')}</div>`:''}
+      </div>
+      <div class="det-actions">
+        <button class="btn btn-out btn-sm" style="font-size:10px;padding:5px 12px" onclick="event.stopPropagation();gv('bo',document.getElementById('ni-bo'));setTimeout(()=>openEdit(${item.id}),80)">✏ Bewerken</button>
+        <span style="font-size:11px;color:var(--t3)">${ckDone}/4 checks</span>
+        ${ackBtns}
+      </div>
+    </div></td>`;
+    tb.appendChild(dr);
+  }
 }
 
 function renderRPTimeline(){
