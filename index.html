@@ -1351,6 +1351,8 @@ function conflicts(){
 function renderCfPanel(cf){
   const wrap=document.getElementById('cf-panel-wrap');
   if(!cf||!cf.length){wrap.innerHTML='';return;}
+  const openCf=cf.filter(c=>!rpAcked.has(c.ids.join('_')+'_'+c.key));
+  if(!openCf.length){wrap.innerHTML='';return;}
   const ackKey=c=>c.ids.join('_')+'_'+c.key;
   const isAcked=c=>rpAcked.has(ackKey(c));
   const open=cf.filter(c=>!isAcked(c));
@@ -1361,13 +1363,12 @@ function renderCfPanel(cf){
         <div class="cf-panel-title" style="color:${open.length?'var(--orange)':'var(--green)'}">
           ${open.length?`${open.length} conflict${open.length>1?'en':''} gevonden`:'Alle conflicten afgehandeld'}
         </div>
-        <span style="font-size:11px;color:var(--t3)">${cf.length} totaal &nbsp;·&nbsp; ${cf.length-open.length} geaccordeerd</span>
+
         <span style="font-size:12px;color:var(--t3);margin-left:8px">${cfPanelOpen?'▲':'▼'}</span>
       </div>
-      ${cfPanelOpen?`<div>${cf.map(c=>{
-        const acked=isAcked(c);
+      ${cfPanelOpen&&open.length?`<div>${open.map(c=>{
         const ids=c.ids;
-        return `<div class="cf-row ${acked?'acked':''}">
+        return `<div class="cf-row">
           <div class="cf-row-dot"></div>
           <div>
             <div class="cf-row-msg">${c.msg}</div>
@@ -1375,7 +1376,7 @@ function renderCfPanel(cf){
           </div>
           <div class="cf-row-acts">
             <button class="cf-resolve-btn" onclick="cfResolve(${ids[0]},${ids[1]})" title="Ga naar eerste onderdeel om aan te passen">✏ Oplossen</button>
-            <button class="cf-ack-btn ${acked?'acked':''}" onclick="cfAck('${ackKey(c)}')">${acked?'✓ Geaccordeerd':'Accordeer'}</button>
+            <button class="cf-ack-btn" onclick="cfAck('${ackKey(c)}')">Accordeer</button>
           </div>
         </div>`;
       }).join('')}</div>`:''}
@@ -1510,7 +1511,7 @@ function renderRpRow(item,num,ic,nowIdx,nowItems,cfByItemId,cfIdSet,tb){
   const tEind=item.eind?`<span class="rp-te">${item.eind}</span>`:'';
   const tDur=item.start&&item.eind?`<span class="rp-dur">${durStr(item.start,item.eind)}</span>`:'';
   const fixedIcon=item.fixed?'<span class="fixed-icon" title="Vast tijdstip">📌</span>':'';
-  const cfIcon=hasOpenCf?'<span style="color:var(--orange);font-size:12px" title="Conflict">⚠</span>':(isAckedCf?'<span style="color:var(--green);font-size:11px" title="Geaccordeerd">✓</span>':'');
+  const cfIcon=hasOpenCf?'<span style="color:var(--orange);font-size:12px" title="Conflict">⚠</span>':'';
   const nowBadge=isNow?'<span class="now-badge">▶ nu</span>':'';
   const labelPill=L?`<span class="lpill" style="background:${L.color}20;color:${L.color};border:1px solid ${L.color}44">${L.name}</span>`:'—';
   tr.innerHTML=`
