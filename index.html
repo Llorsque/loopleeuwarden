@@ -355,5 +355,79 @@
     </div>
   </div>
 </div>
+<!-- SPONSOR MODAL -->
+<div class="ovl" id="spon-ovl">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-hd"><h3 id="spon-modal-title">Sponsor toevoegen</h3></div>
+    <div class="modal-body">
+      <div class="fg"><label>Naam *</label><input type="text" id="spon-naam" placeholder="bijv. Rabobank Leeuwarden"></div>
+      <div class="fg2">
+        <div class="fg"><label>Categorie</label><select id="spon-cat"><option>Hoofdsponsor</option><option>Titelpartner</option><option>Sponsor</option><option>Mediapartner</option><option>Overige</option></select></div>
+        <div class="fg"><label>Bijdrage</label><input type="text" id="spon-bijdrage" placeholder="bijv. €5.000 / natura"></div>
+      </div>
+      <div class="fg"><label>Vermelding / tagline</label><input type="text" id="spon-vermelding" placeholder="bijv. 'Mede mogelijk gemaakt door Rabobank'"></div>
+      <div class="fg"><label>Contactpersoon</label><input type="text" id="spon-contact" placeholder="Naam"></div>
+      <div class="fg"><label>Bijzonderheden</label><textarea id="spon-biz" style="min-height:60px" placeholder="Afspraken, tegenprestaties, logo-gebruik..."></textarea></div>
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-del btn-sm" id="spon-del-btn" style="display:none;margin-right:auto" onclick="delSpon()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeSponModal()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="saveSpon()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- PARCOURS MODAL -->
+<div class="ovl" id="parc-ovl">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-hd"><h3 id="parc-modal-title">Parcours toevoegen</h3></div>
+    <div class="modal-body">
+      <div class="fg2">
+        <div class="fg"><label>Afstand *</label><input type="text" id="parc-afstand" placeholder="bijv. 21km"></div>
+        <div class="fg"><label>Naam</label><input type="text" id="parc-naam" placeholder="bijv. Halve Marathon"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label>Start locatie</label><input type="text" id="parc-start" placeholder="bijv. Groeneweg"></div>
+        <div class="fg"><label>Finish locatie</label><input type="text" id="parc-finish" placeholder="bijv. Wilhelminaplein"></div>
+      </div>
+      <div class="fg"><label>Route beschrijving</label><textarea id="parc-route" style="min-height:80px" placeholder="Beschrijving van het parcours..."></textarea></div>
+      <div class="fg2">
+        <div class="fg"><label>Verwachte winnaarstijd</label><input type="text" id="parc-tijd" placeholder="bijv. 1:05:00"></div>
+        <div class="fg"><label>Aantal deelnemers</label><input type="number" id="parc-deeln" placeholder="0" min="0"></div>
+      </div>
+      <div class="fg"><label>Bijzonderheden</label><textarea id="parc-biz" style="min-height:60px" placeholder="Speciale regels, tijdlimieten..."></textarea></div>
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-del btn-sm" id="parc-del-btn" style="display:none;margin-right:auto" onclick="delParc()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeParcModal()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="saveParc()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
+<!-- CONTACT MODAL -->
+<div class="ovl" id="cont-ovl">
+  <div class="modal-box" style="max-width:460px">
+    <div class="modal-hd"><h3 id="cont-modal-title">Contact toevoegen</h3></div>
+    <div class="modal-body">
+      <div class="fg"><label>Naam *</label><input type="text" id="cont-naam" placeholder="Naam"></div>
+      <div class="fg2">
+        <div class="fg"><label>Functie / rol</label><input type="text" id="cont-functie" placeholder="bijv. Eventdirecteur"></div>
+        <div class="fg"><label>Organisatie</label><input type="text" id="cont-org" placeholder="bijv. Stichting Gezonde Stad"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label>Telefoon</label><input type="text" id="cont-tel" placeholder="06-…"></div>
+        <div class="fg"><label>E-mail</label><input type="text" id="cont-email" placeholder="naam@mail.nl"></div>
+      </div>
+      <div class="fg"><label>Bijzonderheden / rol op de dag</label><textarea id="cont-biz" style="min-height:56px" placeholder="Bijv. Eerste aanspreekpunt voor media."></textarea></div>
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-del btn-sm" id="cont-del-btn" style="display:none;margin-right:auto" onclick="delCont()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeContModal()">Annuleren</button>
+      <button class="btn btn-y   btn-sm" onclick="saveCont()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
 <script src="app.js"></script>
 </html>
