@@ -11,6 +11,10 @@ function init(){
   if(!S.entertainment||!S.entertainment.length)seedEntertainment();
   if(!S.huldigingen||!S.huldigingen.length)seedHuldigingen();
   if(!S.vrijwilligers)S.vrijwilligers=[];
+  if(!S.eventInfo)S.eventInfo={naam:'',datum:'',locatie:'',editie:'',inleiding:'',noemen:'',startInfo:'',deelnemers:[]};
+  if(!S.sponsoren)S.sponsoren=[];
+  if(!S.parcoursen)S.parcoursen=[];
+  if(!S.contacten)S.contacten=[];
   renderRightPanel();
   renderBoList();
   updateBadges();
@@ -78,6 +82,11 @@ function gv(id,el){
   if(id==='hul')renderLib('hul');
   if(id==='prix')renderPrix();
   if(id==='vrij')renderVrij();
+  if(id==='info')renderEventInfo();
+  if(id==='spon')renderSpon();
+  if(id==='parc')renderParc();
+  if(id==='cont')renderCont();
+  if(id==='claude')renderClaudeView();
 }
 function updateBadges(){
   const cf=conflicts();
@@ -91,6 +100,9 @@ function updateBadges(){
   const neEl=document.getElementById('nb-ent');if(neEl){neEl.textContent=(S.entertainment||[]).length;neEl.style.display=(S.entertainment||[]).length?'inline':'none';}
   const nhEl=document.getElementById('nb-hul');if(nhEl){nhEl.textContent=(S.huldigingen||[]).length;nhEl.style.display=(S.huldigingen||[]).length?'inline':'none';}
   const nvEl=document.getElementById('nb-vrij');if(nvEl){nvEl.textContent=(S.vrijwilligers||[]).length;nvEl.style.display=(S.vrijwilligers||[]).length?'inline':'none';}
+  const nsEl=document.getElementById('nb-spon');if(nsEl){nsEl.textContent=(S.sponsoren||[]).length;nsEl.style.display=(S.sponsoren||[]).length?'inline':'none';}
+  const npEl=document.getElementById('nb-parc');if(npEl){npEl.textContent=(S.parcoursen||[]).length;npEl.style.display=(S.parcoursen||[]).length?'inline':'none';}
+  const ncEl=document.getElementById('nb-cont');if(ncEl){ncEl.textContent=(S.contacten||[]).length;ncEl.style.display=(S.contacten||[]).length?'inline':'none';}
 }
 
 /* ═══ BO LIST ═══ */
@@ -1986,41 +1998,6 @@ function showToast(msg) {
 }
 
 init();
-
-/* ═══════════════════════════════════════════
-   DATABRON — STATE UITBREIDING
-═══════════════════════════════════════════ */
-
-// Init uitbreiding — veilig toevoegen aan bestaande state
-const _origInit = init;
-function init() {
-  _origInit();
-  if (!S.eventInfo) S.eventInfo = { naam:'', datum:'', locatie:'', editie:'', inleiding:'', noemen:'', startInfo:'', deelnemers:[] };
-  if (!S.sponsoren)  S.sponsoren  = [];
-  if (!S.parcoursen) S.parcoursen = [];
-  if (!S.contacten)  S.contacten  = [];
-  // Patch gv for new modules
-}
-
-// Patch gv
-const _gv2 = gv;
-function gv(id, el) {
-  _gv2(id, el);
-  if (id === 'info')   renderEventInfo();
-  if (id === 'spon')   renderSpon();
-  if (id === 'parc')   renderParc();
-  if (id === 'cont')   renderCont();
-  if (id === 'claude') renderClaudeView();
-}
-
-// Patch updateBadges
-const _ub2 = updateBadges;
-function updateBadges() {
-  _ub2();
-  const ns = document.getElementById('nb-spon'); if (ns) { ns.textContent=(S.sponsoren||[]).length; ns.style.display=(S.sponsoren||[]).length?'inline':'none'; }
-  const np = document.getElementById('nb-parc'); if (np) { np.textContent=(S.parcoursen||[]).length; np.style.display=(S.parcoursen||[]).length?'inline':'none'; }
-  const nc = document.getElementById('nb-cont'); if (nc) { nc.textContent=(S.contacten||[]).length; nc.style.display=(S.contacten||[]).length?'inline':'none'; }
-}
 
 /* ── EVENT-INFO ── */
 function renderEventInfo() {
