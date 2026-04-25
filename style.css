@@ -709,3 +709,42 @@ body.col-resizing * { user-select: none !important; cursor: col-resize !importan
   #view-td, #view-bo, #view-fin { display: none !important; }
   .rp-body { overflow: visible; }
 }
+
+/* ═══════════════════════════════
+   DATABRON MODULES
+═══════════════════════════════ */
+.db-body { flex:1; overflow-y:auto; padding:24px 36px 60px; }
+.db-section { background:var(--white); border:1px solid var(--border); border-radius:var(--r2); padding:20px 24px; margin-bottom:16px; }
+.db-section-title { font-size:10px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--t3); margin-bottom:14px; padding-bottom:8px; border-bottom:1px solid var(--border); }
+.db-grid { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+.db-grid-cards { display:grid; grid-template-columns:repeat(auto-fill,minmax(300px,1fr)); gap:14px; }
+
+/* Deelnemersrij */
+.deeln-rij { display:flex; gap:8px; align-items:center; margin-bottom:8px; }
+.deeln-rij input { flex:1; }
+
+/* Sponsor card */
+.spon-card { background:var(--white); border:1px solid var(--border); border-radius:var(--r2); padding:16px 18px; cursor:pointer; transition:box-shadow .12s; }
+.spon-card:hover { box-shadow:var(--sh2); }
+.spon-cat-pill { font-size:9px; font-weight:700; letter-spacing:.8px; text-transform:uppercase; padding:2px 8px; border-radius:20px; background:rgba(242,101,34,.1); color:var(--acc); display:inline-block; margin-bottom:6px; }
+.spon-naam { font-size:15px; font-weight:600; margin-bottom:4px; }
+.spon-detail { font-size:12px; color:var(--t2); }
+
+/* Parcours card */
+.parc-card { background:var(--white); border:1px solid var(--border); border-radius:var(--r2); padding:16px 20px; margin-bottom:12px; cursor:pointer; transition:box-shadow .12s; display:flex; align-items:flex-start; gap:16px; }
+.parc-card:hover { box-shadow:var(--sh2); }
+.parc-dist { font-family:var(--fm); font-size:22px; font-weight:700; color:var(--acc); min-width:60px; }
+.parc-info { flex:1; }
+.parc-naam { font-size:14px; font-weight:600; margin-bottom:4px; }
+.parc-route { font-size:12px; color:var(--t2); line-height:1.6; }
+.parc-meta { display:flex; gap:12px; margin-top:6px; flex-wrap:wrap; }
+.parc-meta span { font-size:11px; color:var(--t3); }
+
+/* Claude-invoer */
+.claude-type-btn { font-size:11px; font-weight:600; padding:7px 14px; border-radius:20px; border:1.5px solid var(--border); background:transparent; color:var(--t2); cursor:pointer; transition:all .12s; white-space:nowrap; }
+.claude-type-btn:hover { border-color:var(--acc); color:var(--acc); }
+.claude-type-btn.active { background:var(--acc); border-color:var(--acc); color:#fff; }
+.claude-preview-item { background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:12px 14px; margin-bottom:8px; font-size:12px; }
+.claude-preview-item .cp-type { font-size:9px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--acc); margin-bottom:5px; }
+.claude-preview-item .cp-val { color:var(--t2); line-height:1.6; }
+.claude-preview-item .cp-key { font-weight:600; color:var(--text); }

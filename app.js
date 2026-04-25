@@ -1986,3 +1986,365 @@ function showToast(msg) {
 }
 
 init();
+
+/* ═══════════════════════════════════════════
+   DATABRON — STATE UITBREIDING
+═══════════════════════════════════════════ */
+
+// Init uitbreiding — veilig toevoegen aan bestaande state
+const _origInit = init;
+function init() {
+  _origInit();
+  if (!S.eventInfo) S.eventInfo = { naam:'', datum:'', locatie:'', editie:'', inleiding:'', noemen:'', startInfo:'', deelnemers:[] };
+  if (!S.sponsoren)  S.sponsoren  = [];
+  if (!S.parcoursen) S.parcoursen = [];
+  if (!S.contacten)  S.contacten  = [];
+  // Patch gv for new modules
+}
+
+// Patch gv
+const _gv2 = gv;
+function gv(id, el) {
+  _gv2(id, el);
+  if (id === 'info')   renderEventInfo();
+  if (id === 'spon')   renderSpon();
+  if (id === 'parc')   renderParc();
+  if (id === 'cont')   renderCont();
+  if (id === 'claude') renderClaudeView();
+}
+
+// Patch updateBadges
+const _ub2 = updateBadges;
+function updateBadges() {
+  _ub2();
+  const ns = document.getElementById('nb-spon'); if (ns) { ns.textContent=(S.sponsoren||[]).length; ns.style.display=(S.sponsoren||[]).length?'inline':'none'; }
+  const np = document.getElementById('nb-parc'); if (np) { np.textContent=(S.parcoursen||[]).length; np.style.display=(S.parcoursen||[]).length?'inline':'none'; }
+  const nc = document.getElementById('nb-cont'); if (nc) { nc.textContent=(S.contacten||[]).length; nc.style.display=(S.contacten||[]).length?'inline':'none'; }
+}
+
+/* ── EVENT-INFO ── */
+function renderEventInfo() {
+  if (!S.eventInfo) S.eventInfo = {};
+  const ei = S.eventInfo;
+  const set = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  set('ei-naam', ei.naam || S.event.name);
+  set('ei-datum', ei.datum || S.event.date);
+  set('ei-locatie', ei.locatie);
+  set('ei-editie', ei.editie);
+  set('ei-inleiding', ei.inleiding);
+  set('ei-noemen', ei.noemen);
+  set('ei-start', ei.startInfo);
+  renderDeelnRijen();
+}
+function renderDeelnRijen() {
+  const el = document.getElementById('ei-deeln-list'); if (!el) return;
+  const rows = (S.eventInfo.deelnemers || []);
+  el.innerHTML = rows.map((r, i) =>
+    `<div class="deeln-rij">
+      <input type="text" value="${r.cat||''}" placeholder="Categorie (bijv. 21km Mannen)" oninput="updDeeln(${i},'cat',this.value)">
+      <input type="number" value="${r.aantal||''}" placeholder="Aantal" style="width:100px" min="0" oninput="updDeeln(${i},'aantal',this.value)">
+      <button class="ib del" onclick="rmDeeln(${i})">✕</button>
+    </div>`
+  ).join('');
+}
+function addDeelnRij() {
+  if (!S.eventInfo.deelnemers) S.eventInfo.deelnemers = [];
+  S.eventInfo.deelnemers.push({ cat:'', aantal:'' });
+  renderDeelnRijen();
+}
+function rmDeeln(i) { S.eventInfo.deelnemers.splice(i,1); save(); renderDeelnRijen(); }
+function updDeeln(i, key, val) { S.eventInfo.deelnemers[i][key] = val; }
+function saveEventInfo() {
+  const g = id => (document.getElementById(id)||{}).value || '';
+  S.eventInfo = {
+    naam:      g('ei-naam'),
+    datum:     g('ei-datum'),
+    locatie:   g('ei-locatie'),
+    editie:    g('ei-editie'),
+    inleiding: g('ei-inleiding'),
+    noemen:    g('ei-noemen'),
+    startInfo: g('ei-start'),
+    deelnemers: S.eventInfo.deelnemers || [],
+  };
+  // Also sync to S.event
+  if (S.eventInfo.naam)  S.event.name = S.eventInfo.naam;
+  if (S.eventInfo.datum) S.event.date = S.eventInfo.datum;
+  save(); updateBadges();
+  showToast('✓ Event-info opgeslagen');
+}
+
+/* ── SPONSOREN ── */
+let _sponEditId = null;
+function renderSpon() {
+  const grid = document.getElementById('spon-grid');
+  const list = S.sponsoren || [];
+  if (!list.length) {
+    grid.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font-size:13px">Nog geen sponsoren toegevoegd.</div>';
+    return;
+  }
+  grid.innerHTML = list.map(s => `
+    <div class="spon-card" onclick="openSponModal(${s.id})">
+      <div class="spon-cat-pill">${s.categorie||'Sponsor'}</div>
+      <div class="spon-naam">${s.naam}</div>
+      ${s.vermelding ? `<div class="spon-detail" style="margin-top:4px;font-style:italic">"${s.vermelding}"</div>` : ''}
+      ${s.contact ? `<div class="spon-detail" style="margin-top:6px">👤 ${s.contact}</div>` : ''}
+      ${s.bijdrage ? `<div class="spon-detail">💶 ${s.bijdrage}</div>` : ''}
+    </div>`).join('');
+}
+function openSponModal(editId) {
+  _sponEditId = editId || null;
+  const s = editId ? (S.sponsoren||[]).find(x=>x.id===editId) : null;
+  document.getElementById('spon-modal-title').textContent = editId ? 'Sponsor bewerken' : 'Sponsor toevoegen';
+  document.getElementById('spon-del-btn').style.display = editId ? 'inline-flex' : 'none';
+  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('spon-naam', s?.naam); set('spon-bijdrage', s?.bijdrage);
+  set('spon-vermelding', s?.vermelding); set('spon-contact', s?.contact); set('spon-biz', s?.bijzonderheden);
+  if (s?.categorie) document.getElementById('spon-cat').value = s.categorie;
+  document.getElementById('spon-ovl').classList.add('open');
+}
+function closeSponModal() { document.getElementById('spon-ovl').classList.remove('open'); }
+function saveSpon() {
+  const naam = (document.getElementById('spon-naam').value||'').trim();
+  if (!naam) { alert('Vul een naam in.'); return; }
+  const data = { naam, categorie: document.getElementById('spon-cat').value, bijdrage: document.getElementById('spon-bijdrage').value.trim(), vermelding: document.getElementById('spon-vermelding').value.trim(), contact: document.getElementById('spon-contact').value.trim(), bijzonderheden: document.getElementById('spon-biz').value.trim() };
+  if (!S.sponsoren) S.sponsoren = [];
+  if (_sponEditId) { const i=S.sponsoren.findIndex(x=>x.id===_sponEditId); if(i!==-1)S.sponsoren[i]={...S.sponsoren[i],...data}; }
+  else S.sponsoren.push({ id:S.nextId++, ...data });
+  save(); closeSponModal(); renderSpon(); updateBadges();
+}
+function delSpon() { if(!confirm('Sponsor verwijderen?'))return; S.sponsoren=S.sponsoren.filter(x=>x.id!==_sponEditId); save(); closeSponModal(); renderSpon(); updateBadges(); }
+
+/* ── PARCOURSEN ── */
+let _parcEditId = null;
+function renderParc() {
+  const el = document.getElementById('parc-list');
+  const list = S.parcoursen || [];
+  if (!list.length) {
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font-size:13px">Nog geen parcoursen toegevoegd.</div>';
+    return;
+  }
+  el.innerHTML = list.map(p => `
+    <div class="parc-card" onclick="openParcModal(${p.id})">
+      <div class="parc-dist">${p.afstand||'?'}</div>
+      <div class="parc-info">
+        <div class="parc-naam">${p.naam||p.afstand}</div>
+        ${p.route ? `<div class="parc-route">${p.route}</div>` : ''}
+        <div class="parc-meta">
+          ${p.startLoc  ? `<span>📍 Start: ${p.startLoc}</span>` : ''}
+          ${p.finishLoc ? `<span>🏁 Finish: ${p.finishLoc}</span>` : ''}
+          ${p.deelnemers ? `<span>👥 ${p.deelnemers} deelnemers</span>` : ''}
+          ${p.winnaarstijd ? `<span>⏱ Winnaarstijd: ${p.winnaarstijd}</span>` : ''}
+        </div>
+      </div>
+    </div>`).join('');
+}
+function openParcModal(editId) {
+  _parcEditId = editId || null;
+  const p = editId ? (S.parcoursen||[]).find(x=>x.id===editId) : null;
+  document.getElementById('parc-modal-title').textContent = editId ? 'Parcours bewerken' : 'Parcours toevoegen';
+  document.getElementById('parc-del-btn').style.display = editId ? 'inline-flex' : 'none';
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('parc-afstand',p?.afstand); set('parc-naam',p?.naam); set('parc-start',p?.startLoc);
+  set('parc-finish',p?.finishLoc); set('parc-route',p?.route); set('parc-tijd',p?.winnaarstijd);
+  set('parc-deeln',p?.deelnemers); set('parc-biz',p?.bijzonderheden);
+  document.getElementById('parc-ovl').classList.add('open');
+}
+function closeParcModal() { document.getElementById('parc-ovl').classList.remove('open'); }
+function saveParc() {
+  const afstand = (document.getElementById('parc-afstand').value||'').trim();
+  if (!afstand) { alert('Vul een afstand in.'); return; }
+  const data = { afstand, naam:document.getElementById('parc-naam').value.trim(), startLoc:document.getElementById('parc-start').value.trim(), finishLoc:document.getElementById('parc-finish').value.trim(), route:document.getElementById('parc-route').value.trim(), winnaarstijd:document.getElementById('parc-tijd').value.trim(), deelnemers:document.getElementById('parc-deeln').value, bijzonderheden:document.getElementById('parc-biz').value.trim() };
+  if (!S.parcoursen) S.parcoursen = [];
+  if (_parcEditId) { const i=S.parcoursen.findIndex(x=>x.id===_parcEditId); if(i!==-1)S.parcoursen[i]={...S.parcoursen[i],...data}; }
+  else S.parcoursen.push({ id:S.nextId++, ...data });
+  save(); closeParcModal(); renderParc(); updateBadges();
+}
+function delParc() { if(!confirm('Parcours verwijderen?'))return; S.parcoursen=S.parcoursen.filter(x=>x.id!==_parcEditId); save(); closeParcModal(); renderParc(); updateBadges(); }
+
+/* ── CONTACTEN ── */
+let _contEditId = null;
+function renderCont() {
+  const tb = document.getElementById('cont-tb');
+  const list = S.contacten || [];
+  if (!list.length) { tb.innerHTML = '<tr><td colspan="5"><div style="padding:24px;text-align:center;color:var(--t3);font-size:13px">Nog geen contacten toegevoegd.</div></td></tr>'; return; }
+  tb.innerHTML = list.map(c => `<tr onclick="openContModal(${c.id})" style="cursor:pointer">
+    <td><div class="vrij-name">${c.naam}</div></td>
+    <td><div class="vrij-func">${c.functie||''}${c.organisatie?' · '+c.organisatie:''}</div></td>
+    <td><div class="vrij-tel" style="font-family:var(--fm)">${c.telefoon||'—'}</div></td>
+    <td style="font-size:12px;color:var(--t3)">${c.bijzonderheden||''}</td>
+    <td><button class="ib del" onclick="event.stopPropagation();S.contacten=S.contacten.filter(x=>x.id!==${c.id});save();renderCont()">✕</button></td>
+  </tr>`).join('');
+}
+function openContModal(editId) {
+  _contEditId = editId || null;
+  const c = editId ? (S.contacten||[]).find(x=>x.id===editId) : null;
+  document.getElementById('cont-modal-title').textContent = editId ? 'Contact bewerken' : 'Contact toevoegen';
+  document.getElementById('cont-del-btn').style.display = editId ? 'inline-flex' : 'none';
+  const set = (id,val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
+  set('cont-naam',c?.naam); set('cont-functie',c?.functie); set('cont-org',c?.organisatie);
+  set('cont-tel',c?.telefoon); set('cont-email',c?.email); set('cont-biz',c?.bijzonderheden);
+  document.getElementById('cont-ovl').classList.add('open');
+}
+function closeContModal() { document.getElementById('cont-ovl').classList.remove('open'); }
+function saveCont() {
+  const naam = (document.getElementById('cont-naam').value||'').trim();
+  if (!naam) { alert('Vul een naam in.'); return; }
+  const data = { naam, functie:document.getElementById('cont-functie').value.trim(), organisatie:document.getElementById('cont-org').value.trim(), telefoon:document.getElementById('cont-tel').value.trim(), email:document.getElementById('cont-email').value.trim(), bijzonderheden:document.getElementById('cont-biz').value.trim() };
+  if (!S.contacten) S.contacten = [];
+  if (_contEditId) { const i=S.contacten.findIndex(x=>x.id===_contEditId); if(i!==-1)S.contacten[i]={...S.contacten[i],...data}; }
+  else S.contacten.push({ id:S.nextId++, ...data });
+  save(); closeContModal(); renderCont(); updateBadges();
+}
+function delCont() { if(!confirm('Contact verwijderen?'))return; S.contacten=S.contacten.filter(x=>x.id!==_contEditId); save(); closeContModal(); renderCont(); updateBadges(); }
+
+/* ── CLAUDE-INVOER ── */
+let _cType = 'programma';
+let _claudeResult = null;
+
+function setCType(btn) {
+  document.querySelectorAll('.claude-type-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  _cType = btn.dataset.type;
+}
+function renderClaudeView() {
+  // nothing to init dynamically
+}
+function clearClaude() {
+  document.getElementById('claude-preview').style.display = 'none';
+  document.getElementById('claude-input').value = '';
+  document.getElementById('claude-status').textContent = '';
+  _claudeResult = null;
+}
+
+async function verwerkClaude() {
+  const tekst = (document.getElementById('claude-input').value || '').trim();
+  if (!tekst) { alert('Plak eerst tekst in het invoerveld.'); return; }
+
+  const btn = document.getElementById('claude-btn');
+  const status = document.getElementById('claude-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Verwerken…';
+  status.textContent = 'Claude analyseert de tekst…';
+  document.getElementById('claude-preview').style.display = 'none';
+
+  const typeInstructions = {
+    programma: `Extraheer een programma-tijdschema. Geef een JSON-array terug met objecten: { omschrijving, start (HH:MM), eind (HH:MM, optioneel), wie (optioneel), locatie (optioneel), bijzonderheden (optioneel), fixed (true als het een vast starttijdstip betreft) }`,
+    huldiging: `Extraheer huldigingen/prijsuitreikingen. JSON-array: { naam, wieReiktUit (optioneel), locatie (optioneel), items (benodigdheden als kommalijst, optioneel), sponsor (optioneel), bijzonderheden (optioneel) }`,
+    sponsor:   `Extraheer sponsorinformatie. JSON-array: { naam, categorie (Hoofdsponsor/Sponsor/Mediapartner/Overige), bijdrage (optioneel), vermelding (optioneel), contact (optioneel) }`,
+    parcours:  `Extraheer parcoursinformatie. JSON-array: { afstand, naam (optioneel), startLoc (optioneel), finishLoc (optioneel), route (optioneel), deelnemers (getal, optioneel), winnaarstijd (optioneel) }`,
+    contact:   `Extraheer contactpersonen. JSON-array: { naam, functie (optioneel), organisatie (optioneel), telefoon (optioneel), email (optioneel), bijzonderheden (optioneel) }`,
+    vrij:      `Extraheer vrijwilligersinformatie. JSON-array: { naam, functie (optioneel), locatie (optioneel), bijzonderheden (optioneel) }`,
+    algemeen:  `Analyseer de tekst en extraheer alle relevante informatie. Geef een JSON-object terug met sleutels: programma (array), huldigingen (array), sponsoren (array), contacten (array), vrijwilligers (array), eventinfo (object met naam, datum, locatie, inleiding, noemen). Laat lege arrays/objecten weg.`,
+  };
+
+  const systemPrompt = `Je bent een assistent die tekst over evenementen omzet naar gestructureerde JSON voor een regietool.
+Instructies:
+- Geef ALLEEN geldige JSON terug, geen uitleg, geen markdown codeblokken
+- Gebruik Nederlandse veldnamen zoals aangegeven
+- Als een waarde niet duidelijk is, laat het veld dan weg (geen null, geen lege string)
+- Tijden altijd in HH:MM formaat
+- ${typeInstructions[_cType]}`;
+
+  try {
+    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 2000,
+        system: systemPrompt,
+        messages: [{ role: 'user', content: tekst }]
+      })
+    });
+    const data = await resp.json();
+    const raw = (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
+    let parsed;
+    try {
+      parsed = JSON.parse(raw.replace(/```json\n?|```/g,'').trim());
+    } catch(e) {
+      throw new Error('Claude gaf geen geldige JSON terug. Probeer het opnieuw of pas de tekst aan.');
+    }
+    _claudeResult = { type: _cType, data: parsed };
+    toonClaudePreview(parsed);
+    status.textContent = '✓ Klaar — controleer de preview';
+  } catch(e) {
+    status.textContent = '✗ Fout: ' + e.message;
+  }
+  btn.disabled = false;
+  btn.textContent = '⚡ Verwerk met Claude';
+}
+
+function toonClaudePreview(data) {
+  const wrap = document.getElementById('claude-preview');
+  const content = document.getElementById('claude-preview-content');
+  const items = Array.isArray(data) ? data : Object.entries(data).flatMap(([k,v]) => Array.isArray(v) ? v.map(i=>({_bron:k,...i})) : [{_bron:k,...v}]);
+
+  content.innerHTML = items.map((item, i) => {
+    const bron = item._bron ? `<div class="cp-type">${item._bron}</div>` : '';
+    const velden = Object.entries(item)
+      .filter(([k]) => k !== '_bron')
+      .map(([k,v]) => `<div><span class="cp-key">${k}:</span> ${v}</div>`)
+      .join('');
+    return `<div class="claude-preview-item">${bron}<div class="cp-val">${velden}</div></div>`;
+  }).join('') || '<div style="color:var(--t3);font-size:13px">Geen items gevonden in de tekst.</div>';
+
+  const count = items.length;
+  document.getElementById('claude-import-btn').textContent = `✓ Importeer ${count} item${count!==1?'s':''} in databron`;
+  wrap.style.display = 'block';
+  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function importClaudeResult() {
+  if (!_claudeResult) return;
+  const { type, data } = _claudeResult;
+  let added = 0;
+
+  const addTo = (list, items) => {
+    items.forEach(item => {
+      const clean = {...item}; delete clean._bron;
+      list.push({ id: S.nextId++, ...clean });
+      added++;
+    });
+  };
+  const asArray = d => Array.isArray(d) ? d : [];
+
+  if (type === 'programma') {
+    asArray(data).forEach(item => {
+      S.items.push({ id:S.nextId++, type:'item', omschrijving:item.omschrijving||'', start:item.start||'', eind:item.eind||'', wie:item.wie||'', locatie:item.locatie||'', label:'', fixed:!!item.fixed, bijzonderheden:item.bijzonderheden||'', script:'', techniek:'', dj:'', checklist:{persoon:false,script:false,slide:false,techniek:false}, fin:{bedrag:'',korting:''} });
+      added++;
+    });
+    save(); renderBoList();
+  } else if (type === 'huldiging') {
+    if (!S.huldigingen) S.huldigingen=[];
+    addTo(S.huldigingen, asArray(data));
+    save();
+  } else if (type === 'sponsor') {
+    if (!S.sponsoren) S.sponsoren=[];
+    addTo(S.sponsoren, asArray(data));
+    save(); renderSpon();
+  } else if (type === 'parcours') {
+    if (!S.parcoursen) S.parcoursen=[];
+    addTo(S.parcoursen, asArray(data));
+    save(); renderParc();
+  } else if (type === 'contact') {
+    if (!S.contacten) S.contacten=[];
+    addTo(S.contacten, asArray(data));
+    save(); renderCont();
+  } else if (type === 'vrij') {
+    if (!S.vrijwilligers) S.vrijwilligers=[];
+    addTo(S.vrijwilligers, asArray(data));
+    save();
+  } else if (type === 'algemeen') {
+    if (data.programma)     { data.programma.forEach(item => { S.items.push({id:S.nextId++,type:'item',omschrijving:item.omschrijving||'',start:item.start||'',eind:item.eind||'',wie:item.wie||'',locatie:item.locatie||'',label:'',fixed:!!item.fixed,bijzonderheden:item.bijzonderheden||'',script:'',techniek:'',dj:'',checklist:{persoon:false,script:false,slide:false,techniek:false},fin:{bedrag:'',korting:''}}); added++; }); }
+    if (data.huldigingen)   { if(!S.huldigingen)S.huldigingen=[]; addTo(S.huldigingen, data.huldigingen); }
+    if (data.sponsoren)     { if(!S.sponsoren)S.sponsoren=[]; addTo(S.sponsoren, data.sponsoren); }
+    if (data.contacten)     { if(!S.contacten)S.contacten=[]; addTo(S.contacten, data.contacten); }
+    if (data.vrijwilligers) { if(!S.vrijwilligers)S.vrijwilligers=[]; addTo(S.vrijwilligers, data.vrijwilligers); }
+    if (data.eventinfo)     { S.eventInfo = {...(S.eventInfo||{}), ...data.eventinfo}; }
+    save(); renderBoList();
+  }
+
+  updateBadges();
+  clearClaude();
+  showToast(`✓ ${added} item${added!==1?'s':''} toegevoegd aan de databron`);
+}
