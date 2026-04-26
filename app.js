@@ -4,8 +4,32 @@ let S={event:{name:'Loop Leeuwarden 2026',date:'10 mei 2026'},items:[],labels:[]
 let editId=null,editSepId=null,tmpCL={},tmpTodos=[],expanded=[];
 
 /* ═══ BOOT ═══ */
-function init(){
-  try{const r=localStorage.getItem('regie2');if(r)S={...S,...JSON.parse(r)};}catch(e){}
+async function init(){
+  // Stap 1: probeer data.json uit dezelfde folder te laden (gepubliceerde versie uit GitHub)
+  let loadedFromRepo = false;
+  try {
+    const resp = await fetch('./data.json?_=' + Date.now(), { cache: 'no-store' });
+    if (resp.ok) {
+      const data = await resp.json();
+      if (data && data.items && data.event) {
+        // Verwijder _meta voor het in S beland
+        const { _meta, ...stateData } = data;
+        S = { ...S, ...stateData };
+        loadedFromRepo = true;
+        // Schrijf ook naar localStorage zodat offline werken werkt
+        try { localStorage.setItem('regie2', JSON.stringify(S)); } catch(e) {}
+      }
+    }
+  } catch(e) {
+    // data.json bestaat niet of fetch mislukt — geen probleem, val terug op localStorage
+  }
+
+  // Stap 2: als geen data.json gevonden — gebruik localStorage
+  if (!loadedFromRepo) {
+    try { const r = localStorage.getItem('regie2'); if(r) S = {...S, ...JSON.parse(r)}; } catch(e) {}
+  }
+
+  // Stap 3: defaults vullen voor ontbrekende velden
   if(!S.labels.length)seedLabels();
   if(!S.items.length)seedItems();
   if(!S.entertainment||!S.entertainment.length)seedEntertainment();
@@ -19,6 +43,12 @@ function init(){
   renderBoList();
   updateBadges();
   // Col resize init runs after first RP render
+
+  // Toon bron in sidebar zodat je weet of je read-only via repo werkt of in eigen lokale modus
+  const sub = document.getElementById('sb-en');
+  if (sub && loadedFromRepo) {
+    sub.title = 'Geladen uit data.json (repo). Wijzigingen blijven lokaal totdat je exporteert.';
+  }
 }
 
 function seedLabels(){
@@ -86,7 +116,6 @@ function gv(id,el){
   if(id==='spon')renderSpon();
   if(id==='parc')renderParc();
   if(id==='cont')renderCont();
-  if(id==='claude')renderClaudeView();
 }
 function updateBadges(){
   const cf=conflicts();
@@ -1907,17 +1936,14 @@ function exportData() {
   const url  = URL.createObjectURL(blob);
   const a    = document.createElement('a');
 
-  // Filename: regie-backup-[eventnaam]-[datum].json
-  const eventSlug = (S.event.name || 'regie').toLowerCase()
-    .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 30);
-  const datumSlug = new Date().toISOString().slice(0, 10);
+  // Bestandsnaam: data.json (1-op-1 voor upload naar repo-root)
   a.href     = url;
-  a.download = `regie-backup-${eventSlug}-${datumSlug}.json`;
+  a.download = 'data.json';
   a.click();
   URL.revokeObjectURL(url);
 
-  // Flash bevestiging
-  showToast('✓ Backup opgeslagen als ' + a.download);
+  // Flash bevestiging met instructie
+  showToast('✓ data.json gedownload — upload naar je GitHub-repo om team te updaten');
 }
 
 function importData(e) {
@@ -2174,154 +2200,3 @@ function saveCont() {
 }
 function delCont() { if(!confirm('Contact verwijderen?'))return; S.contacten=S.contacten.filter(x=>x.id!==_contEditId); save(); closeContModal(); renderCont(); updateBadges(); }
 
-/* ── CLAUDE-INVOER ── */
-let _cType = 'programma';
-let _claudeResult = null;
-
-function setCType(btn) {
-  document.querySelectorAll('.claude-type-btn').forEach(b => b.classList.remove('active'));
-  btn.classList.add('active');
-  _cType = btn.dataset.type;
-}
-function renderClaudeView() {
-  // nothing to init dynamically
-}
-function clearClaude() {
-  document.getElementById('claude-preview').style.display = 'none';
-  document.getElementById('claude-input').value = '';
-  document.getElementById('claude-status').textContent = '';
-  _claudeResult = null;
-}
-
-async function verwerkClaude() {
-  const tekst = (document.getElementById('claude-input').value || '').trim();
-  if (!tekst) { alert('Plak eerst tekst in het invoerveld.'); return; }
-
-  const btn = document.getElementById('claude-btn');
-  const status = document.getElementById('claude-status');
-  btn.disabled = true;
-  btn.textContent = '⏳ Verwerken…';
-  status.textContent = 'Claude analyseert de tekst…';
-  document.getElementById('claude-preview').style.display = 'none';
-
-  const typeInstructions = {
-    programma: `Extraheer een programma-tijdschema. Geef een JSON-array terug met objecten: { omschrijving, start (HH:MM), eind (HH:MM, optioneel), wie (optioneel), locatie (optioneel), bijzonderheden (optioneel), fixed (true als het een vast starttijdstip betreft) }`,
-    huldiging: `Extraheer huldigingen/prijsuitreikingen. JSON-array: { naam, wieReiktUit (optioneel), locatie (optioneel), items (benodigdheden als kommalijst, optioneel), sponsor (optioneel), bijzonderheden (optioneel) }`,
-    sponsor:   `Extraheer sponsorinformatie. JSON-array: { naam, categorie (Hoofdsponsor/Sponsor/Mediapartner/Overige), bijdrage (optioneel), vermelding (optioneel), contact (optioneel) }`,
-    parcours:  `Extraheer parcoursinformatie. JSON-array: { afstand, naam (optioneel), startLoc (optioneel), finishLoc (optioneel), route (optioneel), deelnemers (getal, optioneel), winnaarstijd (optioneel) }`,
-    contact:   `Extraheer contactpersonen. JSON-array: { naam, functie (optioneel), organisatie (optioneel), telefoon (optioneel), email (optioneel), bijzonderheden (optioneel) }`,
-    vrij:      `Extraheer vrijwilligersinformatie. JSON-array: { naam, functie (optioneel), locatie (optioneel), bijzonderheden (optioneel) }`,
-    algemeen:  `Analyseer de tekst en extraheer alle relevante informatie. Geef een JSON-object terug met sleutels: programma (array), huldigingen (array), sponsoren (array), contacten (array), vrijwilligers (array), eventinfo (object met naam, datum, locatie, inleiding, noemen). Laat lege arrays/objecten weg.`,
-  };
-
-  const systemPrompt = `Je bent een assistent die tekst over evenementen omzet naar gestructureerde JSON voor een regietool.
-Instructies:
-- Geef ALLEEN geldige JSON terug, geen uitleg, geen markdown codeblokken
-- Gebruik Nederlandse veldnamen zoals aangegeven
-- Als een waarde niet duidelijk is, laat het veld dan weg (geen null, geen lege string)
-- Tijden altijd in HH:MM formaat
-- ${typeInstructions[_cType]}`;
-
-  try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 2000,
-        system: systemPrompt,
-        messages: [{ role: 'user', content: tekst }]
-      })
-    });
-    const data = await resp.json();
-    const raw = (data.content||[]).filter(c=>c.type==='text').map(c=>c.text).join('');
-    let parsed;
-    try {
-      parsed = JSON.parse(raw.replace(/```json\n?|```/g,'').trim());
-    } catch(e) {
-      throw new Error('Claude gaf geen geldige JSON terug. Probeer het opnieuw of pas de tekst aan.');
-    }
-    _claudeResult = { type: _cType, data: parsed };
-    toonClaudePreview(parsed);
-    status.textContent = '✓ Klaar — controleer de preview';
-  } catch(e) {
-    status.textContent = '✗ Fout: ' + e.message;
-  }
-  btn.disabled = false;
-  btn.textContent = '⚡ Verwerk met Claude';
-}
-
-function toonClaudePreview(data) {
-  const wrap = document.getElementById('claude-preview');
-  const content = document.getElementById('claude-preview-content');
-  const items = Array.isArray(data) ? data : Object.entries(data).flatMap(([k,v]) => Array.isArray(v) ? v.map(i=>({_bron:k,...i})) : [{_bron:k,...v}]);
-
-  content.innerHTML = items.map((item, i) => {
-    const bron = item._bron ? `<div class="cp-type">${item._bron}</div>` : '';
-    const velden = Object.entries(item)
-      .filter(([k]) => k !== '_bron')
-      .map(([k,v]) => `<div><span class="cp-key">${k}:</span> ${v}</div>`)
-      .join('');
-    return `<div class="claude-preview-item">${bron}<div class="cp-val">${velden}</div></div>`;
-  }).join('') || '<div style="color:var(--t3);font-size:13px">Geen items gevonden in de tekst.</div>';
-
-  const count = items.length;
-  document.getElementById('claude-import-btn').textContent = `✓ Importeer ${count} item${count!==1?'s':''} in databron`;
-  wrap.style.display = 'block';
-  wrap.scrollIntoView({ behavior: 'smooth', block: 'start' });
-}
-
-function importClaudeResult() {
-  if (!_claudeResult) return;
-  const { type, data } = _claudeResult;
-  let added = 0;
-
-  const addTo = (list, items) => {
-    items.forEach(item => {
-      const clean = {...item}; delete clean._bron;
-      list.push({ id: S.nextId++, ...clean });
-      added++;
-    });
-  };
-  const asArray = d => Array.isArray(d) ? d : [];
-
-  if (type === 'programma') {
-    asArray(data).forEach(item => {
-      S.items.push({ id:S.nextId++, type:'item', omschrijving:item.omschrijving||'', start:item.start||'', eind:item.eind||'', wie:item.wie||'', locatie:item.locatie||'', label:'', fixed:!!item.fixed, bijzonderheden:item.bijzonderheden||'', script:'', techniek:'', dj:'', checklist:{persoon:false,script:false,slide:false,techniek:false}, fin:{bedrag:'',korting:''} });
-      added++;
-    });
-    save(); renderBoList();
-  } else if (type === 'huldiging') {
-    if (!S.huldigingen) S.huldigingen=[];
-    addTo(S.huldigingen, asArray(data));
-    save();
-  } else if (type === 'sponsor') {
-    if (!S.sponsoren) S.sponsoren=[];
-    addTo(S.sponsoren, asArray(data));
-    save(); renderSpon();
-  } else if (type === 'parcours') {
-    if (!S.parcoursen) S.parcoursen=[];
-    addTo(S.parcoursen, asArray(data));
-    save(); renderParc();
-  } else if (type === 'contact') {
-    if (!S.contacten) S.contacten=[];
-    addTo(S.contacten, asArray(data));
-    save(); renderCont();
-  } else if (type === 'vrij') {
-    if (!S.vrijwilligers) S.vrijwilligers=[];
-    addTo(S.vrijwilligers, asArray(data));
-    save();
-  } else if (type === 'algemeen') {
-    if (data.programma)     { data.programma.forEach(item => { S.items.push({id:S.nextId++,type:'item',omschrijving:item.omschrijving||'',start:item.start||'',eind:item.eind||'',wie:item.wie||'',locatie:item.locatie||'',label:'',fixed:!!item.fixed,bijzonderheden:item.bijzonderheden||'',script:'',techniek:'',dj:'',checklist:{persoon:false,script:false,slide:false,techniek:false},fin:{bedrag:'',korting:''}}); added++; }); }
-    if (data.huldigingen)   { if(!S.huldigingen)S.huldigingen=[]; addTo(S.huldigingen, data.huldigingen); }
-    if (data.sponsoren)     { if(!S.sponsoren)S.sponsoren=[]; addTo(S.sponsoren, data.sponsoren); }
-    if (data.contacten)     { if(!S.contacten)S.contacten=[]; addTo(S.contacten, data.contacten); }
-    if (data.vrijwilligers) { if(!S.vrijwilligers)S.vrijwilligers=[]; addTo(S.vrijwilligers, data.vrijwilligers); }
-    if (data.eventinfo)     { S.eventInfo = {...(S.eventInfo||{}), ...data.eventinfo}; }
-    save(); renderBoList();
-  }
-
-  updateBadges();
-  clearClaude();
-  showToast(`✓ ${added} item${added!==1?'s':''} toegevoegd aan de databron`);
-}
