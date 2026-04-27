@@ -39,6 +39,7 @@ async function init(){
   if(!S.sponsoren)S.sponsoren=[];
   if(!S.parcoursen)S.parcoursen=[];
   if(!S.contacten)S.contacten=[];
+  if(!S.leveranciers)S.leveranciers=[];
   renderRightPanel();
   renderBoList();
   updateBadges();
@@ -112,6 +113,7 @@ function gv(id,el){
   if(id==='hul')renderLib('hul');
   if(id==='prix')renderPrix();
   if(id==='vrij')renderVrij();
+  if(id==='lev')renderLev();
   if(id==='info')renderEventInfo();
   if(id==='spon')renderSpon();
   if(id==='parc')renderParc();
@@ -132,6 +134,7 @@ function updateBadges(){
   const nsEl=document.getElementById('nb-spon');if(nsEl){nsEl.textContent=(S.sponsoren||[]).length;nsEl.style.display=(S.sponsoren||[]).length?'inline':'none';}
   const npEl=document.getElementById('nb-parc');if(npEl){npEl.textContent=(S.parcoursen||[]).length;npEl.style.display=(S.parcoursen||[]).length?'inline':'none';}
   const ncEl=document.getElementById('nb-cont');if(ncEl){ncEl.textContent=(S.contacten||[]).length;ncEl.style.display=(S.contacten||[]).length?'inline':'none';}
+  const nlEl=document.getElementById('nb-lev');if(nlEl){nlEl.textContent=(S.leveranciers||[]).length;nlEl.style.display=(S.leveranciers||[]).length?'inline':'none';}
 }
 
 /* ═══ BO LIST ═══ */
@@ -2651,5 +2654,402 @@ async function genereerDraaiboek() {
   } catch (err) {
     console.error('Draaiboek-fout:', err);
     alert('Fout bij genereren draaiboek:\n\n' + err.message + '\n\nCheck de browser-console (Cmd+Opt+I) voor details.');
+  }
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LEVERANCIERS  +  CALLSHEET-EXPORT (Word/.docx)
+   ═══════════════════════════════════════════════════════════════ */
+
+function renderLev() {
+  updateBadges();
+  const wrap = document.getElementById('lev-list-wrap');
+  const lvs = S.leveranciers || [];
+  if (!lvs.length) {
+    wrap.innerHTML = '<div class="vrij-empty"><p>Nog geen leveranciers toegevoegd.<br>Klik <b>+ Leverancier</b> om te beginnen.</p></div>';
+    return;
+  }
+
+  let html = '<div class="vrij-tcard"><table class="vrij-t"><thead><tr>' +
+    '<th>Leverancier</th><th>Contact</th><th>Locatie</th><th>Tijden</th><th style="width:170px">Callsheet</th><th style="width:32px"></th>' +
+    '</tr></thead><tbody>';
+
+  lvs.forEach(l => {
+    const tijden = [l.tijdAanwezig, l.tijdStart, l.tijdEinde].filter(Boolean).join(' / ');
+    const contact = [l.contactPersoon, l.telefoon].filter(Boolean).join(' — ');
+    html += `<tr>
+      <td onclick="openLevModal(${l.id})" style="cursor:pointer">
+        <div class="vrij-name">${escHtml(l.naam || '')}</div>
+        ${l.rol ? `<div class="vrij-func" style="font-size:11px">${escHtml(l.rol)}</div>` : ''}
+      </td>
+      <td onclick="openLevModal(${l.id})" style="cursor:pointer;font-size:12px;color:var(--t2)">${escHtml(contact || '—')}</td>
+      <td onclick="openLevModal(${l.id})" style="cursor:pointer;font-size:12px;color:var(--t2)">${escHtml(l.locNaam || '—')}</td>
+      <td onclick="openLevModal(${l.id})" style="cursor:pointer;font-family:var(--fm);font-size:12px;color:var(--t2)">${escHtml(tijden || '—')}</td>
+      <td><button class="btn btn-out btn-sm" style="font-size:11px;padding:5px 9px" onclick="event.stopPropagation();genereerCallsheet(${l.id})">📄 Genereer</button></td>
+      <td><button class="ib del" onclick="event.stopPropagation();delLevById(${l.id})" title="Verwijder">✕</button></td>
+    </tr>`;
+  });
+  html += '</tbody></table></div>';
+  wrap.innerHTML = html;
+}
+
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+let _levEditId = null;
+function openLevModal(editId) {
+  _levEditId = editId || null;
+  const l = editId ? (S.leveranciers||[]).find(x => x.id === editId) : null;
+  document.getElementById('lev-modal-title').textContent = editId ? 'Leverancier bewerken' : 'Leverancier toevoegen';
+  document.getElementById('lev-del-btn').style.display = editId ? 'inline-flex' : 'none';
+
+  const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  v('lev-naam',         l?.naam);
+  v('lev-contact',      l?.contactPersoon);
+  v('lev-rol',          l?.rol);
+  v('lev-tel',          l?.telefoon);
+  v('lev-email',        l?.email);
+  v('lev-loc-naam',     l?.locNaam);
+  v('lev-loc-adres',    l?.locAdres);
+  v('lev-loc-maps',     l?.locMaps);
+  v('lev-melden',       l?.meldenBij);
+  v('lev-t-aanwezig',   l?.tijdAanwezig);
+  v('lev-t-start',      l?.tijdStart);
+  v('lev-t-einde',      l?.tijdEinde);
+  v('lev-catering',     l?.catering);
+  v('lev-stroom',       l?.stroom);
+  v('lev-opdracht',     l?.opdracht);
+  v('lev-gage',         l?.gage);
+  v('lev-notities',     l?.notities);
+  v('lev-org-naam',     l?.orgNaam);
+  v('lev-org-tel',      l?.orgTel);
+  v('lev-org-email',    l?.orgEmail);
+  v('lev-nood-naam',    l?.noodNaam);
+  v('lev-nood-tel',     l?.noodTel);
+
+  document.getElementById('lev-ovl').classList.add('open');
+}
+
+function closeLevModal() { document.getElementById('lev-ovl').classList.remove('open'); }
+
+function saveLev() {
+  const naam = (document.getElementById('lev-naam').value || '').trim();
+  if (!naam) { alert('Vul een naam voor de leverancier in.'); return; }
+
+  const g = (id) => (document.getElementById(id).value || '').trim();
+  const data = {
+    naam,
+    contactPersoon: g('lev-contact'),
+    rol:            g('lev-rol'),
+    telefoon:       g('lev-tel'),
+    email:          g('lev-email'),
+    locNaam:        g('lev-loc-naam'),
+    locAdres:       g('lev-loc-adres'),
+    locMaps:        g('lev-loc-maps'),
+    meldenBij:      g('lev-melden'),
+    tijdAanwezig:   g('lev-t-aanwezig'),
+    tijdStart:      g('lev-t-start'),
+    tijdEinde:      g('lev-t-einde'),
+    catering:       g('lev-catering'),
+    stroom:         g('lev-stroom'),
+    opdracht:       g('lev-opdracht'),
+    gage:           g('lev-gage'),
+    notities:       g('lev-notities'),
+    orgNaam:        g('lev-org-naam'),
+    orgTel:         g('lev-org-tel'),
+    orgEmail:       g('lev-org-email'),
+    noodNaam:       g('lev-nood-naam'),
+    noodTel:        g('lev-nood-tel'),
+  };
+
+  if (!S.leveranciers) S.leveranciers = [];
+  if (_levEditId) {
+    const i = S.leveranciers.findIndex(x => x.id === _levEditId);
+    if (i !== -1) S.leveranciers[i] = { ...S.leveranciers[i], ...data };
+  } else {
+    S.leveranciers.push({ id: S.nextId++, ...data });
+  }
+  save(); closeLevModal(); renderLev(); updateBadges();
+}
+
+function delLev() {
+  if (!confirm('Leverancier verwijderen?')) return;
+  S.leveranciers = (S.leveranciers||[]).filter(x => x.id !== _levEditId);
+  save(); closeLevModal(); renderLev(); updateBadges();
+}
+
+function delLevById(id) {
+  if (!confirm('Leverancier verwijderen?')) return;
+  S.leveranciers = (S.leveranciers||[]).filter(x => x.id !== id);
+  save(); renderLev(); updateBadges();
+}
+
+/* ── CALLSHEET-EXPORT ───────────────────────────────────────── */
+
+async function genereerCallsheet(levId) {
+  const lev = (S.leveranciers || []).find(x => x.id === levId);
+  if (!lev) { alert('Leverancier niet gevonden.'); return; }
+
+  showToast('📄 Callsheet wordt voorbereid…');
+
+  // Lazy-load docx library
+  try {
+    await window.loadDocxLibrary();
+  } catch (e) {
+    alert('Kon Word-library niet laden:\n\n' + e.message);
+    return;
+  }
+  if (typeof docx === 'undefined') {
+    alert('Word-library niet beschikbaar. Probeer Cmd+Shift+R en opnieuw.');
+    return;
+  }
+
+  showToast('📄 Callsheet wordt gegenereerd…');
+
+  try {
+    const {
+      Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
+      Table, TableRow, TableCell, WidthType, BorderStyle, ExternalHyperlink,
+      Header, Footer, PageNumber
+    } = docx;
+
+    const ev = S.event || {};
+    const evi = S.eventInfo || {};
+    const eventNaam = ev.name || evi.naam || 'Event';
+    const eventDatum = ev.date || evi.datum || '';
+
+    // ── helpers ──
+    const T = (text, opts={}) => new TextRun({ text: String(text||''), ...opts });
+    const P = (children, opts={}) => new Paragraph({ children: Array.isArray(children) ? children : [children], ...opts });
+    const empty = () => new Paragraph({ children: [new TextRun('')] });
+
+    // Sectiekop
+    const SH = (text) => new Paragraph({
+      children: [new TextRun({ text: text.toUpperCase(), bold: true, size: 18, color: '666666', characterSpacing: 30 })],
+      spacing: { before: 280, after: 100 },
+      border: { bottom: { color: 'CCCCCC', space: 4, style: BorderStyle.SINGLE, size: 4 } }
+    });
+
+    // Label + waarde regel — alleen als waarde niet leeg
+    const LV = (label, value) => {
+      if (!value || !String(value).trim()) return null;
+      return new Paragraph({
+        children: [
+          new TextRun({ text: label + ': ', bold: true, size: 20 }),
+          new TextRun({ text: String(value), size: 20 })
+        ],
+        spacing: { after: 80 }
+      });
+    };
+
+    // Multi-line value (textarea inhoud) — splitst op nieuwe regels
+    const LVmulti = (label, value) => {
+      if (!value || !String(value).trim()) return null;
+      const lines = String(value).split(/\n+/).filter(s => s.trim());
+      const paras = [
+        new Paragraph({
+          children: [new TextRun({ text: label, bold: true, size: 20 })],
+          spacing: { after: 40 }
+        })
+      ];
+      lines.forEach(line => {
+        paras.push(new Paragraph({
+          children: [new TextRun({ text: line, size: 20 })],
+          spacing: { after: 40 }
+        }));
+      });
+      return paras;
+    };
+
+    // Hyperlink (Google Maps)
+    const linkParagraph = (label, url) => {
+      if (!url || !String(url).trim()) return null;
+      return new Paragraph({
+        children: [
+          new TextRun({ text: label + ': ', bold: true, size: 20 }),
+          new ExternalHyperlink({
+            link: url,
+            children: [new TextRun({ text: 'Open in Google Maps →', style: 'Hyperlink', color: '0066CC', underline: {} , size: 20 })]
+          })
+        ],
+        spacing: { after: 80 }
+      });
+    };
+
+    const filter = (arr) => arr.filter(x => x !== null);
+
+    // ── Body opbouwen ──
+    const children = [];
+
+    // VOORHOOFD: titel
+    children.push(new Paragraph({
+      children: [new TextRun({ text: 'CALLSHEET', size: 22, color: '999999', bold: true, characterSpacing: 60 })],
+      alignment: AlignmentType.LEFT,
+      spacing: { after: 80 }
+    }));
+
+    children.push(new Paragraph({
+      children: [new TextRun({ text: lev.naam, bold: true, size: 44 })],
+      spacing: { after: 100 }
+    }));
+
+    if (lev.rol) {
+      children.push(new Paragraph({
+        children: [new TextRun({ text: lev.rol, size: 24, color: '666666' })],
+        spacing: { after: 200 }
+      }));
+    }
+
+    // Event-context
+    children.push(new Paragraph({
+      children: [
+        new TextRun({ text: 'Voor: ', bold: true, size: 20 }),
+        new TextRun({ text: eventNaam + (eventDatum ? '  ·  ' + eventDatum : ''), size: 20 })
+      ],
+      spacing: { after: 80 }
+    }));
+
+    // SECTIE 1: Contactgegevens leverancier
+    if (lev.contactPersoon || lev.telefoon || lev.email) {
+      children.push(SH('Jouw contactgegevens'));
+      filter([
+        LV('Contactpersoon', lev.contactPersoon),
+        LV('Telefoon', lev.telefoon),
+        LV('E-mail', lev.email)
+      ]).forEach(p => children.push(p));
+    }
+
+    // SECTIE 2: Locatie
+    if (lev.locNaam || lev.locAdres || lev.locMaps || lev.meldenBij) {
+      children.push(SH('Locatie'));
+      filter([
+        LV('Locatie', lev.locNaam),
+        LV('Adres', lev.locAdres),
+        linkParagraph('Route', lev.locMaps),
+        LV('Melden bij', lev.meldenBij || 'n.v.t.')
+      ]).forEach(p => children.push(p));
+    }
+
+    // SECTIE 3: Tijden
+    if (lev.tijdAanwezig || lev.tijdStart || lev.tijdEinde) {
+      children.push(SH('Tijden'));
+      filter([
+        LV('Aanwezig vanaf', lev.tijdAanwezig),
+        LV('Start', lev.tijdStart),
+        LV('Einde verwacht', lev.tijdEinde)
+      ]).forEach(p => children.push(p));
+    }
+
+    // SECTIE 4: Opdracht
+    if (lev.opdracht) {
+      children.push(SH('Opdracht'));
+      const m = LVmulti('Wat ga je doen?', lev.opdracht);
+      if (m) m.forEach(p => children.push(p));
+    }
+
+    // SECTIE 5: Faciliteiten
+    if (lev.catering || lev.stroom) {
+      children.push(SH('Faciliteiten op locatie'));
+      const c = LVmulti('Catering', lev.catering); if (c) c.forEach(p => children.push(p));
+      const s = LVmulti('Stroom', lev.stroom);     if (s) s.forEach(p => children.push(p));
+    }
+
+    // SECTIE 6: Notities
+    if (lev.notities) {
+      children.push(SH('Aanrijden, parkeren & notities'));
+      const n = LVmulti('', lev.notities);
+      if (n) {
+        // skip eerste lege label-paragraaf
+        n.slice(1).forEach(p => children.push(p));
+      }
+    }
+
+    // SECTIE 7: Gage
+    if (lev.gage) {
+      children.push(SH('Vergoeding'));
+      const g = LV('Afgesproken gage', lev.gage);
+      if (g) children.push(g);
+    }
+
+    // SECTIE 8: Contact organisatie
+    if (lev.orgNaam || lev.orgTel || lev.orgEmail || lev.noodNaam || lev.noodTel) {
+      children.push(SH('Contact organisatie'));
+      filter([
+        LV('Contactpersoon', lev.orgNaam),
+        LV('Telefoon', lev.orgTel),
+        LV('E-mail', lev.orgEmail),
+      ]).forEach(p => children.push(p));
+
+      if (lev.noodNaam || lev.noodTel) {
+        children.push(empty());
+        children.push(new Paragraph({
+          children: [new TextRun({ text: 'Noodcontact op de dag:', bold: true, size: 20, color: 'A03030' })],
+          spacing: { after: 40 }
+        }));
+        filter([
+          LV('Naam', lev.noodNaam),
+          LV('Telefoon', lev.noodTel)
+        ]).forEach(p => children.push(p));
+      }
+    }
+
+    // ── Document ──
+    const doc = new Document({
+      creator: 'Regie',
+      title: `Callsheet — ${lev.naam}`,
+      description: 'Callsheet voor leverancier',
+      styles: { default: { document: { run: { font: 'Calibri', size: 20 } } } },
+      sections: [{
+        properties: {
+          page: { margin: { top: 1000, right: 1100, bottom: 1000, left: 1100 } }
+        },
+        headers: {
+          default: new Header({
+            children: [new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [new TextRun({ text: eventNaam + ' — Callsheet ' + lev.naam, size: 16, color: '888888' })]
+            })]
+          })
+        },
+        footers: {
+          default: new Footer({
+            children: [new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: 'Gegenereerd op ' + new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }) + '  ·  pagina ', size: 14, color: '999999' }),
+                new TextRun({ children: [PageNumber.CURRENT], size: 14, color: '999999' })
+              ]
+            })]
+          })
+        },
+        children
+      }]
+    });
+
+    // Pakken & downloaden
+    const blob = await Packer.toBlob(doc);
+    const slug = (lev.naam || 'leverancier').toLowerCase()
+      .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 40);
+    const filename = `callsheet-${slug}.docx`;
+
+    if (typeof saveAs !== 'undefined') {
+      saveAs(blob, filename);
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    showToast('✓ Callsheet gedownload: ' + filename);
+
+  } catch (err) {
+    console.error('Callsheet-fout:', err);
+    alert('Fout bij genereren callsheet:\n\n' + err.message + '\n\nCheck browser-console (Cmd+Opt+I) voor details.');
   }
 }
