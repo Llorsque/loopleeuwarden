@@ -2148,52 +2148,216 @@ function saveSpon() {
 }
 function delSpon() { if(!confirm('Sponsor verwijderen?'))return; S.sponsoren=S.sponsoren.filter(x=>x.id!==_sponEditId); save(); closeSponModal(); renderSpon(); updateBadges(); }
 
-/* ── PARCOURSEN ── */
+/* ── AFSTANDEN (uitgebreide parcoursen) ── */
 let _parcEditId = null;
+let _parcAtleten = []; // tijdelijke atleten-lijst tijdens bewerken
+
 function renderParc() {
   const el = document.getElementById('parc-list');
   const list = S.parcoursen || [];
   if (!list.length) {
-    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font-size:13px">Nog geen parcoursen toegevoegd.</div>';
+    el.innerHTML = '<div style="padding:40px;text-align:center;color:var(--t3);font-size:13px">Nog geen afstanden toegevoegd.</div>';
     return;
   }
-  el.innerHTML = list.map(p => `
+  // Sorteer op starttijd
+  const sorted = list.slice().sort((a,b)=>{
+    const ta = (a.starttijd||'99:99'), tb = (b.starttijd||'99:99');
+    return ta.localeCompare(tb);
+  });
+  el.innerHTML = sorted.map(p => {
+    const atleten = (p.atleten || []).length;
+    const sponsorTxt = p.sponsorNaam ? ` · 🤝 ${escHtml(p.sponsorNaam)}` : '';
+    return `
     <div class="parc-card" onclick="openParcModal(${p.id})">
-      <div class="parc-dist">${p.afstand||'?'}</div>
+      <div class="parc-dist">${escHtml(p.afstand||'?')}</div>
       <div class="parc-info">
-        <div class="parc-naam">${p.naam||p.afstand}</div>
-        ${p.route ? `<div class="parc-route">${p.route}</div>` : ''}
+        <div class="parc-naam">${escHtml(p.naam||p.afstand)}${sponsorTxt}</div>
+        ${p.route ? `<div class="parc-route">${escHtml(p.route)}</div>` : ''}
         <div class="parc-meta">
-          ${p.startLoc  ? `<span>📍 Start: ${p.startLoc}</span>` : ''}
-          ${p.finishLoc ? `<span>🏁 Finish: ${p.finishLoc}</span>` : ''}
-          ${p.deelnemers ? `<span>👥 ${p.deelnemers} deelnemers</span>` : ''}
-          ${p.winnaarstijd ? `<span>⏱ Winnaarstijd: ${p.winnaarstijd}</span>` : ''}
+          ${p.starttijd ? `<span>🕐 Start: ${escHtml(p.starttijd)}</span>` : ''}
+          ${p.startLoc  ? `<span>📍 ${escHtml(p.startLoc)}</span>` : ''}
+          ${p.finishLoc ? `<span>🏁 ${escHtml(p.finishLoc)}</span>` : ''}
+          ${p.deelnemers ? `<span>👥 ${escHtml(String(p.deelnemers))}</span>` : ''}
+          ${p.wavesAantal ? `<span>🚦 ${escHtml(String(p.wavesAantal))} waves</span>` : ''}
+          ${atleten ? `<span>🏆 ${atleten} atleet${atleten!==1?'en':''}</span>` : ''}
         </div>
       </div>
-    </div>`).join('');
+    </div>`;
+  }).join('');
 }
+
+function parcT(id, btn) {
+  document.querySelectorAll('#parc-ovl .lib-modal-pane').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('#parc-modal-tabs .lib-modal-tab').forEach(b => b.classList.remove('active'));
+  const pane = document.getElementById('parcp-' + id);
+  if (pane) pane.classList.add('active');
+  if (btn) btn.classList.add('active');
+}
+
 function openParcModal(editId) {
   _parcEditId = editId || null;
   const p = editId ? (S.parcoursen||[]).find(x=>x.id===editId) : null;
-  document.getElementById('parc-modal-title').textContent = editId ? 'Parcours bewerken' : 'Parcours toevoegen';
+  document.getElementById('parc-modal-title').textContent = editId ? 'Afstand bewerken' : 'Afstand toevoegen';
   document.getElementById('parc-del-btn').style.display = editId ? 'inline-flex' : 'none';
+
   const set = (id,val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
-  set('parc-afstand',p?.afstand); set('parc-naam',p?.naam); set('parc-start',p?.startLoc);
-  set('parc-finish',p?.finishLoc); set('parc-route',p?.route); set('parc-tijd',p?.winnaarstijd);
-  set('parc-deeln',p?.deelnemers); set('parc-biz',p?.bijzonderheden);
+
+  // BASIS
+  set('parc-afstand',  p?.afstand);
+  set('parc-naam',     p?.naam);
+  set('parc-starttijd',p?.starttijd);
+  set('parc-deeln',    p?.deelnemers);
+
+  // Sponsor: dropdown vullen vanuit S.sponsoren
+  const sponSel = document.getElementById('parc-sponsor-sel');
+  if (sponSel) {
+    let html = '<option value="">— Geen / vrije invoer —</option>';
+    (S.sponsoren || []).forEach(s => {
+      const sel = (p?.sponsorNaam === s.naam) ? ' selected' : '';
+      html += `<option value="${escAttr(s.naam)}"${sel}>${escHtml(s.naam)}</option>`;
+    });
+    sponSel.innerHTML = html;
+  }
+  // Vrije sponsor-naam alleen tonen als die niet matcht met dropdown
+  const sponInLijst = (S.sponsoren || []).some(s => s.naam === p?.sponsorNaam);
+  set('parc-sponsor-vrij', (p?.sponsorNaam && !sponInLijst) ? p.sponsorNaam : '');
+  set('parc-sponsor-info', p?.sponsorInfo);
+
+  // PARCOURS — locatie-dropdowns
+  const startSel = document.getElementById('parc-start-sel');
+  const finishSel = document.getElementById('parc-finish-sel');
+  if (startSel) startSel.innerHTML = locDropdownOptions(p?.startLoc || '');
+  if (finishSel) finishSel.innerHTML = locDropdownOptions(p?.finishLoc || '');
+  const startInLijst = (S.locaties||[]).some(l => l.naam === p?.startLoc);
+  const finishInLijst = (S.locaties||[]).some(l => l.naam === p?.finishLoc);
+  set('parc-start',  (p?.startLoc && !startInLijst) ? p.startLoc : '');
+  set('parc-finish', (p?.finishLoc && !finishInLijst) ? p.finishLoc : '');
+  set('parc-route',  p?.route);
+  set('parc-tijd',   p?.winnaarstijd);
+  set('parc-vorig',  p?.vorigJaar);
+
+  // WAVES & KLASSEMENTEN
+  set('parc-waves-aantal',   p?.wavesAantal);
+  set('parc-waves-interval', p?.wavesInterval);
+  set('parc-waves-biz',      p?.wavesBijzonderheden);
+  set('parc-klass',          p?.klassementen);
+
+  // ATLETEN — tijdelijke kopie
+  _parcAtleten = (p?.atleten || []).map(a => ({...a}));
+  renderAtletenList();
+
+  // SPEAKER & AV
+  set('parc-speaker', p?.speakerTekst);
+  set('parc-av',      p?.avCues);
+  set('parc-biz',     p?.bijzonderheden);
+
+  // Reset naar Basis-tab
+  parcT('basis', document.querySelector('#parc-modal-tabs .lib-modal-tab'));
+
   document.getElementById('parc-ovl').classList.add('open');
 }
-function closeParcModal() { document.getElementById('parc-ovl').classList.remove('open'); }
+
+function closeParcModal() {
+  document.getElementById('parc-ovl').classList.remove('open');
+}
+
+function parcLocChange(which) {
+  // which = 'start' of 'finish'
+  // Als dropdown wordt gekozen, leeg het vrije veld
+  const sel = document.getElementById('parc-' + which + '-sel');
+  const txt = document.getElementById('parc-' + which);
+  if (sel && sel.value && txt) txt.value = '';
+}
+
+function renderAtletenList() {
+  const wrap = document.getElementById('parc-atleten-list');
+  if (!wrap) return;
+  if (!_parcAtleten.length) {
+    wrap.innerHTML = '<div style="padding:14px;text-align:center;color:var(--t3);font-size:12px;background:var(--bg-soft);border-radius:6px">Nog geen atleten. Klik <b>+ Atleet toevoegen</b>.</div>';
+    return;
+  }
+  wrap.innerHTML = _parcAtleten.map((a, idx) => `
+    <div style="border:1px solid var(--border);border-radius:6px;padding:10px;margin-bottom:8px;background:#fff">
+      <div class="fg2" style="margin-bottom:6px">
+        <div class="fg" style="margin-bottom:0"><label style="font-size:10px">Naam</label><input type="text" value="${escAttr(a.naam||'')}" oninput="updateAtleet(${idx},'naam',this.value)" placeholder="Atleet naam"></div>
+        <div class="fg" style="margin-bottom:0"><label style="font-size:10px">Verwachting</label><input type="text" value="${escAttr(a.verwachting||'')}" oninput="updateAtleet(${idx},'verwachting',this.value)" placeholder="bijv. Top 3 favoriet"></div>
+      </div>
+      <div class="fg" style="margin-bottom:6px"><label style="font-size:10px">Achtergrond / verhaal voor speaker</label><textarea oninput="updateAtleet(${idx},'verhaal',this.value)" style="min-height:50px" placeholder="1-3 zinnen voor speaker">${escHtml(a.verhaal||'')}</textarea></div>
+      <button class="btn btn-out btn-xs" type="button" onclick="removeAtleet(${idx})" style="color:var(--red);border-color:rgba(220,53,70,.3)">✕ Verwijder</button>
+    </div>`).join('');
+}
+
+function addAtleet() {
+  _parcAtleten.push({ naam: '', verwachting: '', verhaal: '' });
+  renderAtletenList();
+}
+
+function updateAtleet(idx, field, val) {
+  if (!_parcAtleten[idx]) return;
+  _parcAtleten[idx][field] = val;
+}
+
+function removeAtleet(idx) {
+  _parcAtleten.splice(idx, 1);
+  renderAtletenList();
+}
+
 function saveParc() {
   const afstand = (document.getElementById('parc-afstand').value||'').trim();
   if (!afstand) { alert('Vul een afstand in.'); return; }
-  const data = { afstand, naam:document.getElementById('parc-naam').value.trim(), startLoc:document.getElementById('parc-start').value.trim(), finishLoc:document.getElementById('parc-finish').value.trim(), route:document.getElementById('parc-route').value.trim(), winnaarstijd:document.getElementById('parc-tijd').value.trim(), deelnemers:document.getElementById('parc-deeln').value, bijzonderheden:document.getElementById('parc-biz').value.trim() };
+
+  const g = (id) => { const el = document.getElementById(id); return el ? (el.value||'').trim() : ''; };
+
+  // Sponsor: dropdown of vrij
+  const sponSel = document.getElementById('parc-sponsor-sel');
+  const sponsorNaam = (sponSel && sponSel.value) ? sponSel.value : g('parc-sponsor-vrij');
+
+  // Locaties: dropdown of vrij
+  const startSel = document.getElementById('parc-start-sel');
+  const finishSel = document.getElementById('parc-finish-sel');
+  const startLoc  = (startSel && startSel.value)  ? startSel.value  : g('parc-start');
+  const finishLoc = (finishSel && finishSel.value) ? finishSel.value : g('parc-finish');
+
+  // Atleten — gooi lege regels weg
+  const atleten = _parcAtleten.filter(a => (a.naam||'').trim() || (a.verhaal||'').trim());
+
+  const data = {
+    afstand,
+    naam:                g('parc-naam'),
+    starttijd:           g('parc-starttijd'),
+    deelnemers:          g('parc-deeln'),
+    sponsorNaam:         sponsorNaam,
+    sponsorInfo:         g('parc-sponsor-info'),
+    startLoc:            startLoc,
+    finishLoc:           finishLoc,
+    route:               g('parc-route'),
+    winnaarstijd:        g('parc-tijd'),
+    vorigJaar:           g('parc-vorig'),
+    wavesAantal:         g('parc-waves-aantal'),
+    wavesInterval:       g('parc-waves-interval'),
+    wavesBijzonderheden: g('parc-waves-biz'),
+    klassementen:        g('parc-klass'),
+    atleten:             atleten,
+    speakerTekst:        g('parc-speaker'),
+    avCues:              g('parc-av'),
+    bijzonderheden:      g('parc-biz'),
+  };
+
   if (!S.parcoursen) S.parcoursen = [];
-  if (_parcEditId) { const i=S.parcoursen.findIndex(x=>x.id===_parcEditId); if(i!==-1)S.parcoursen[i]={...S.parcoursen[i],...data}; }
-  else S.parcoursen.push({ id:S.nextId++, ...data });
+  if (_parcEditId) {
+    const i = S.parcoursen.findIndex(x=>x.id===_parcEditId);
+    if (i !== -1) S.parcoursen[i] = { ...S.parcoursen[i], ...data };
+  } else {
+    S.parcoursen.push({ id: S.nextId++, ...data });
+  }
   save(); closeParcModal(); renderParc(); updateBadges();
 }
-function delParc() { if(!confirm('Parcours verwijderen?'))return; S.parcoursen=S.parcoursen.filter(x=>x.id!==_parcEditId); save(); closeParcModal(); renderParc(); updateBadges(); }
+
+function delParc() {
+  if (!confirm('Afstand verwijderen?')) return;
+  S.parcoursen = S.parcoursen.filter(x => x.id !== _parcEditId);
+  save(); closeParcModal(); renderParc(); updateBadges();
+}
 
 /* ── CONTACTEN ── */
 let _contEditId = null;

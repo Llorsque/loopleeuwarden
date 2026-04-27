@@ -54,7 +54,7 @@
     <div class="sb-lbl">Databron</div>
     <div class="nv" id="ni-info"    onclick="gv('info',this)"><span class="ic">📋</span> Event-info</div>
     <div class="nv" id="ni-spon"    onclick="gv('spon',this)"><span class="ic">🤝</span> Sponsoren <span class="bdg bdg-y" id="nb-spon" style="display:none">0</span></div>
-    <div class="nv" id="ni-parc"    onclick="gv('parc',this)"><span class="ic">🗺</span> Parcoursen <span class="bdg bdg-y" id="nb-parc" style="display:none">0</span></div>
+    <div class="nv" id="ni-parc"    onclick="gv('parc',this)"><span class="ic">🏃</span> Afstanden <span class="bdg bdg-y" id="nb-parc" style="display:none">0</span></div>
     <div class="nv" id="ni-cont"    onclick="gv('cont',this)"><span class="ic">📞</span> Contacten <span class="bdg bdg-y" id="nb-cont" style="display:none">0</span></div>
     <div class="nv" id="ni-loc"     onclick="gv('loc',this)"><span class="ic">📍</span> Locaties <span class="bdg bdg-y" id="nb-loc" style="display:none">0</span></div>
     <div class="sb-lbl">Output</div>
@@ -302,10 +302,13 @@
   <!-- PARCOURSEN -->
   <div class="view" id="view-parc">
     <div class="page-hd">
-      <h1>Parcoursen</h1>
-      <div class="ml"><button class="btn btn-y btn-sm" onclick="openParcModal()">+ Parcours toevoegen</button></div>
+      <h1>Afstanden</h1>
+      <div class="ml"><button class="btn btn-y btn-sm" onclick="openParcModal()">+ Afstand toevoegen</button></div>
     </div>
-    <div class="db-body"><div id="parc-list"></div></div>
+    <div class="db-body">
+      <div style="font-size:12px;color:var(--t3);margin-bottom:14px">Per afstand: parcours, sponsor, waves, klassementen, atleten en speaker-tekst. Alle velden zijn optioneel — vul aan zodra je info hebt.</div>
+      <div id="parc-list"></div>
+    </div>
   </div>
 
   <!-- CONTACTEN -->
@@ -375,23 +378,67 @@
 
 <!-- PARCOURS MODAL -->
 <div class="ovl" id="parc-ovl">
-  <div class="modal-box" style="max-width:520px">
-    <div class="modal-hd"><h3 id="parc-modal-title">Parcours toevoegen</h3></div>
-    <div class="modal-body">
-      <div class="fg2">
-        <div class="fg"><label>Afstand *</label><input type="text" id="parc-afstand" placeholder="bijv. 21km"></div>
-        <div class="fg"><label>Naam</label><input type="text" id="parc-naam" placeholder="bijv. Halve Marathon"></div>
+  <div class="modal-box" style="max-width:680px">
+    <div class="modal-hd"><h3 id="parc-modal-title">Afstand toevoegen</h3></div>
+    <div id="parc-modal-tabs" style="display:flex;gap:0;padding:0 26px;border-bottom:1px solid var(--border);background:var(--bg-soft)">
+      <button class="lib-modal-tab active" onclick="parcT('basis',this)">Basis</button>
+      <button class="lib-modal-tab" onclick="parcT('parcours',this)">Parcours</button>
+      <button class="lib-modal-tab" onclick="parcT('waves',this)">Waves & klassementen</button>
+      <button class="lib-modal-tab" onclick="parcT('atleten',this)">Atleten</button>
+      <button class="lib-modal-tab" onclick="parcT('speaker',this)">Speaker & AV</button>
+    </div>
+    <div class="modal-body" style="max-height:60vh;overflow-y:auto">
+
+      <!-- BASIS -->
+      <div class="lib-modal-pane active" id="parcp-basis">
+        <div class="fg2">
+          <div class="fg"><label>Afstand *</label><input type="text" id="parc-afstand" placeholder="bijv. 21,1 km"></div>
+          <div class="fg"><label>Naam</label><input type="text" id="parc-naam" placeholder="bijv. Dewulf Halve Marathon"></div>
+        </div>
+        <div class="fg2">
+          <div class="fg"><label>Starttijd</label><input type="text" id="parc-starttijd" placeholder="bijv. 09:30"></div>
+          <div class="fg"><label>Aantal deelnemers</label><input type="number" id="parc-deeln" placeholder="0" min="0"></div>
+        </div>
+        <div class="fg"><label>Sponsor (titel-sponsor)</label><select id="parc-sponsor-sel"><option value="">— Geen / vrije invoer —</option></select><input type="text" id="parc-sponsor-vrij" placeholder="Of typ vrije sponsor-naam" style="margin-top:6px"></div>
+        <div class="fg"><label>Sponsorinfo voor speaker</label><textarea id="parc-sponsor-info" style="min-height:60px" placeholder="Wat zegt de speaker over deze sponsor? Bv. 'Dewulf is al jaren trotse hoofdsponsor van de halve marathon...'"></textarea></div>
       </div>
-      <div class="fg2">
-        <div class="fg"><label>Start locatie</label><input type="text" id="parc-start" placeholder="bijv. Groeneweg"></div>
-        <div class="fg"><label>Finish locatie</label><input type="text" id="parc-finish" placeholder="bijv. Wilhelminaplein"></div>
+
+      <!-- PARCOURS -->
+      <div class="lib-modal-pane" id="parcp-parcours">
+        <div class="fg"><label>Start locatie</label><select id="parc-start-sel" onchange="parcLocChange('start')"><option value="">— Geen / vrije invoer —</option></select><input type="text" id="parc-start" placeholder="Of vrije invoer..." style="margin-top:6px"></div>
+        <div class="fg"><label>Finish locatie</label><select id="parc-finish-sel" onchange="parcLocChange('finish')"><option value="">— Geen / vrije invoer —</option></select><input type="text" id="parc-finish" placeholder="Of vrije invoer..." style="margin-top:6px"></div>
+        <div class="fg"><label>Route beschrijving</label><textarea id="parc-route" style="min-height:90px" placeholder="Beschrijving van het parcours — handig voor speaker. Bv. 'Vanaf het Wilhelminaplein langs de Achmeatoren, over de vernieuwde Westersingel naar het Rengerspark...'"></textarea></div>
+        <div class="fg2">
+          <div class="fg"><label>Verwachte winnaarstijd</label><input type="text" id="parc-tijd" placeholder="bijv. 1:05:00"></div>
+          <div class="fg"><label>Vorig jaar gewonnen door</label><input type="text" id="parc-vorig" placeholder="Naam + tijd"></div>
+        </div>
+        <div class="fg"><label>Routekaart (afbeelding)</label><div style="font-size:11px;color:var(--t3);padding:6px 0">Optie volgt — komt later. Voorlopig kan je verwijzen via route-beschrijving.</div></div>
       </div>
-      <div class="fg"><label>Route beschrijving</label><textarea id="parc-route" style="min-height:80px" placeholder="Beschrijving van het parcours..."></textarea></div>
-      <div class="fg2">
-        <div class="fg"><label>Verwachte winnaarstijd</label><input type="text" id="parc-tijd" placeholder="bijv. 1:05:00"></div>
-        <div class="fg"><label>Aantal deelnemers</label><input type="number" id="parc-deeln" placeholder="0" min="0"></div>
+
+      <!-- WAVES & KLASSEMENTEN -->
+      <div class="lib-modal-pane" id="parcp-waves">
+        <div class="fg2">
+          <div class="fg"><label>Aantal waves</label><input type="number" id="parc-waves-aantal" placeholder="bijv. 5" min="0"></div>
+          <div class="fg"><label>Interval tussen waves</label><input type="text" id="parc-waves-interval" placeholder="bijv. 3 minuten"></div>
+        </div>
+        <div class="fg"><label>Bijzonderheden waves</label><textarea id="parc-waves-biz" style="min-height:70px" placeholder="Bv. 'Wave 1: wedstrijdlopers en Atletiekunie-leden vooraan. Wave 2: studentenwave (500 studenten). Startvakken open om 09:15.'"></textarea></div>
+        <div class="fg"><label>Klassementen op deze afstand</label><textarea id="parc-klass" style="min-height:70px" placeholder="Bv. 'Bentacera Business LOOP — strijd om de wisselbokaal voor de drie snelste teams' of 'Leeuwarden Student City Klassement (wave 2)'"></textarea></div>
       </div>
-      <div class="fg"><label>Bijzonderheden</label><textarea id="parc-biz" style="min-height:60px" placeholder="Speciale regels, tijdlimieten..."></textarea></div>
+
+      <!-- ATLETEN -->
+      <div class="lib-modal-pane" id="parcp-atleten">
+        <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Atleten om te noemen of bijzondere deelnemers. De speaker gebruikt deze info tijdens de race.</div>
+        <div id="parc-atleten-list"></div>
+        <button class="btn btn-out btn-sm" type="button" onclick="addAtleet()" style="margin-top:8px">+ Atleet toevoegen</button>
+      </div>
+
+      <!-- SPEAKER & AV -->
+      <div class="lib-modal-pane" id="parcp-speaker">
+        <div class="fg"><label>Speaker-tekst — algemene introductie</label><textarea id="parc-speaker" style="min-height:90px" placeholder="Wat zegt de speaker bij de start van deze afstand? Bv. 'Welkom bij de Dewulf Halve Marathon van LOOP Leeuwarden 2026, dé klassieker van Fryslân...'"></textarea></div>
+        <div class="fg"><label>AV-cues / techniek voor deze afstand</label><textarea id="parc-av" style="min-height:80px" placeholder="Specifieke instructies voor AV-team. Bv. 'Start: kanonschot + ledscherm sponsor-banner Dewulf 5 sec. Bij wave 2: studentenwave-banner.'"></textarea></div>
+        <div class="fg"><label>Bijzonderheden / overige</label><textarea id="parc-biz" style="min-height:60px" placeholder="Tijdlimiet, regels, andere relevante info"></textarea></div>
+      </div>
+
     </div>
     <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
       <button class="btn btn-del btn-sm" id="parc-del-btn" style="display:none;margin-right:auto" onclick="delParc()">Verwijder</button>
