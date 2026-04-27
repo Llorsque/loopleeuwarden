@@ -47,7 +47,7 @@
     <div class="nv"        id="ni-td"  onclick="gv('td',this)"><span class="ic">✓</span> To-do's <span class="bdg bdg-y" id="nb-td" style="display:none">0</span></div>
     <div class="nv"        id="ni-fin" onclick="gv('fin',this)"><span class="ic">€</span> Financieel <span class="bdg bdg-y" id="nb-fin" style="display:none">0</span></div>
     <div class="sb-lbl">Bibliotheek</div>
-    <div class="nv" id="ni-ent" onclick="gv('ent',this)"><span class="ic">🎭</span> Entertainment <span class="bdg bdg-y" id="nb-ent" style="display:none">0</span></div>
+    <div class="nv" id="ni-ent" onclick="gv('ent',this)"><span class="ic">🎭</span> Acts & Crew <span class="bdg bdg-y" id="nb-ent" style="display:none">0</span></div>
     <div class="nv" id="ni-hul" onclick="gv('hul',this)"><span class="ic">🏆</span> Huldigingen <span class="bdg bdg-y" id="nb-hul" style="display:none">0</span></div>
     <div class="nv" id="ni-prix" onclick="gv('prix',this)"><span class="ic">🥇</span> Prijsuitreikingen</div>
     <div class="nv" id="ni-vrij" onclick="gv('vrij',this)"><span class="ic">👥</span> Vrijwilligers <span class="bdg bdg-y" id="nb-vrij" style="display:none">0</span></div>
@@ -61,6 +61,7 @@
     <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad</div>
     <div class="nv" id="ni-cf" onclick="gv('rp',document.getElementById('ni-rp'));setTimeout(()=>{cfPanelOpen=true;renderRPTable();document.getElementById('cf-panel-wrap').scrollIntoView({behavior:'smooth'});},150)"><span class="ic">⚠</span> Conflicten <span class="bdg bdg-r" id="nb-cf" style="display:none">0</span></div>
     <div class="nv" id="ni-draaiboek" onclick="genereerDraaiboek()" title="Download een compleet Word-draaiboek met alle data"><span class="ic">📄</span> Draaiboek (.docx)</div>
+    <div class="nv" id="ni-eenmalig" onclick="openEenmaligeCallsheet()" title="Maak een eenmalige callsheet zonder iets op te slaan"><span class="ic">🆕</span> Eenmalige callsheet</div>
   </div>
   <div class="sb-foot">
     <button class="sb-btn new-ev" onclick="openNewEvModal()">＋ Nieuw event</button>
@@ -220,7 +221,7 @@
 
   <!-- ENTERTAINMENT -->
   <div class="view" id="view-ent">
-    <div class="page-hd"><h1>Entertainment</h1><div class="ml"><button class="btn btn-y btn-sm" onclick="openLibModal('ent')">+ Act toevoegen</button></div></div>
+    <div class="page-hd"><h1>Acts & Crew</h1><div class="ml"><button class="btn btn-y btn-sm" onclick="openLibModal('ent')">+ Toevoegen</button></div></div>
     <div class="lib-body"><div class="lib-grid" id="ent-grid"></div></div>
   </div>
 
@@ -466,11 +467,19 @@
         Velden uit het entertainment-item zijn al ingevuld. Vul hieronder de callsheet-specifieke info aan en klik <b>Genereer</b>.
       </div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:4px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Locatie & melden</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:4px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Werklocatie</div>
       <div class="fg"><label>Kies locatie uit lijst</label><select id="cs-loc-sel" onchange="csLocChange()"><option value="">— Geen / vrije invoer —</option></select><div style="font-size:11px;color:var(--t3);margin-top:4px">Beheer de lijst via <b>Databron → 📍 Locaties</b></div></div>
       <div class="fg"><label>Adres</label><input type="text" id="cs-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
       <div class="fg"><label>Google Maps link</label><input type="text" id="cs-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
-      <div class="fg"><label>Melden bij</label><input type="text" id="cs-melden" placeholder="Naam contactpersoon op locatie — laat leeg voor 'n.v.t.'"></div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Meldlocatie <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">— laat leeg als gelijk aan werklocatie</span></div>
+      <div class="fg"><label>Kies meldlocatie uit lijst</label><select id="cs-meld-sel" onchange="csMeldChange()"><option value="">— Geen / gelijk aan werklocatie —</option></select></div>
+      <div class="fg"><label>Adres meldlocatie</label><input type="text" id="cs-meld-adres" placeholder="Alleen invullen als anders dan werklocatie"></div>
+      <div class="fg"><label>Google Maps link meldlocatie</label><input type="text" id="cs-meld-maps" placeholder="https://maps.app.goo.gl/..."></div>
+      <div class="fg2">
+        <div class="fg"><label>Melden bij (naam)</label><input type="text" id="cs-melden" placeholder="Naam contactpersoon"></div>
+        <div class="fg"><label>Tijd melden</label><input type="text" id="cs-meld-tijd" placeholder="bijv. 07:30"></div>
+      </div>
 
       <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Tijden</div>
       <div id="cs-tijden-hint" style="font-size:11px;color:var(--t3);margin-bottom:8px;display:none"></div>
@@ -506,6 +515,75 @@
       <button class="btn btn-out btn-sm" onclick="closeCsModal()">Annuleren</button>
       <button class="btn btn-out btn-sm" onclick="saveCallsheetData()">💾 Opslaan</button>
       <button class="btn btn-y btn-sm" onclick="saveAndPreviewCallsheet()">👁 Opslaan & voorbeeld</button>
+    </div>
+  </div>
+</div>
+
+<!-- EENMALIGE CALLSHEET MODAL — losse callsheet zonder data op te slaan -->
+<div class="ovl" id="ec-ovl">
+  <div class="modal-box" style="max-width:680px">
+    <div class="modal-hd"><h3>🆕 Eenmalige callsheet</h3></div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+
+      <div style="background:var(--bg);border-left:3px solid var(--y);padding:10px 14px;font-size:12px;color:var(--t2);margin-bottom:14px;border-radius:4px">
+        Voor een losse callsheet die je <b>niet wilt opslaan</b> in je acts/crew-lijst. Vul in en bekijk het voorbeeld direct.
+      </div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:4px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Voor wie</div>
+      <div class="fg"><label>Naam *</label><input type="text" id="ec-naam" placeholder="bijv. Catering BV — Jan de Vries"></div>
+      <div class="fg2">
+        <div class="fg"><label>Type / rol</label><input type="text" id="ec-type" placeholder="bijv. Catering"></div>
+        <div class="fg"><label>Aantal personen</label><input type="number" id="ec-pers" min="1" placeholder="1"></div>
+      </div>
+      <div class="fg2">
+        <div class="fg"><label>Contactpersoon</label><input type="text" id="ec-contact" placeholder="Naam"></div>
+        <div class="fg"><label>Telefoon</label><input type="text" id="ec-tel" placeholder="06-…"></div>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Werklocatie</div>
+      <div class="fg"><label>Kies locatie uit lijst</label><select id="ec-loc-sel" onchange="ecLocChange()"><option value="">— Geen / vrije invoer —</option></select></div>
+      <div class="fg"><label>Adres</label><input type="text" id="ec-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
+      <div class="fg"><label>Google Maps link</label><input type="text" id="ec-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Meldlocatie <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">— laat leeg als gelijk aan werklocatie</span></div>
+      <div class="fg"><label>Kies meldlocatie uit lijst</label><select id="ec-meld-sel" onchange="ecMeldChange()"><option value="">— Geen / gelijk aan werklocatie —</option></select></div>
+      <div class="fg"><label>Adres meldlocatie</label><input type="text" id="ec-meld-adres" placeholder="Alleen invullen als anders dan werklocatie"></div>
+      <div class="fg"><label>Google Maps link meldlocatie</label><input type="text" id="ec-meld-maps" placeholder="https://maps.app.goo.gl/..."></div>
+      <div class="fg2">
+        <div class="fg"><label>Melden bij (naam)</label><input type="text" id="ec-melden" placeholder="Naam contactpersoon"></div>
+        <div class="fg"><label>Tijd melden</label><input type="text" id="ec-meld-tijd" placeholder="bijv. 07:30"></div>
+      </div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Tijden</div>
+      <div class="fg2">
+        <div class="fg"><label>Aanwezig vanaf</label><input type="text" id="ec-t-aanwezig" placeholder="bijv. 08:30"></div>
+        <div class="fg"><label>Start</label><input type="text" id="ec-t-start" placeholder="bijv. 09:00"></div>
+      </div>
+      <div class="fg"><label>Einde verwacht</label><input type="text" id="ec-t-einde" placeholder="bijv. 14:30"></div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Opdracht & faciliteiten</div>
+      <div class="fg"><label>Beschrijving opdracht</label><textarea id="ec-opdracht" style="min-height:70px" placeholder="Wat ga je doen op de dag?"></textarea></div>
+      <div class="fg"><label>Catering</label><textarea id="ec-catering" style="min-height:50px"></textarea></div>
+      <div class="fg"><label>Stroom / techniek</label><textarea id="ec-stroom" style="min-height:50px"></textarea></div>
+      <div class="fg"><label>Notities (aanrijden, parkeren, etc.)</label><textarea id="ec-notities" style="min-height:60px"></textarea></div>
+      <div class="fg"><label>Vergoeding (optioneel)</label><input type="text" id="ec-gage" placeholder="bijv. €750 excl. btw, of: vrijwilliger / niet van toepassing"></div>
+
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Contact organisatie (event-breed)</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Wordt overgenomen uit instellingen — wijzigingen tellen ook door op andere callsheets.</div>
+      <div class="fg2">
+        <div class="fg"><label>Contactpersoon</label><input type="text" id="ec-org-naam"></div>
+        <div class="fg"><label>Telefoon</label><input type="text" id="ec-org-tel"></div>
+      </div>
+      <div class="fg"><label>E-mail</label><input type="text" id="ec-org-email"></div>
+      <div class="fg2">
+        <div class="fg"><label>Noodcontact (naam)</label><input type="text" id="ec-nood-naam"></div>
+        <div class="fg"><label>Noodcontact telefoon</label><input type="text" id="ec-nood-tel"></div>
+      </div>
+
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-out btn-sm" onclick="closeEcModal()">Annuleren</button>
+      <button class="btn btn-y btn-sm" onclick="genereerEenmaligeCallsheet()">👁 Voorbeeld</button>
     </div>
   </div>
 </div>

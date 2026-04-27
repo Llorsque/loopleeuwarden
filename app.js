@@ -953,7 +953,7 @@ function openLibModal(type,editId){
       '<div class="lib-modal-pane active" id="lmp-basis">'+
         '<div class="fg"><label>Naam act / artiest *</label><input type="text" id="lm-naam" placeholder="bijv. Dweilorkest Jan Dupon"></div>'+
         '<div class="fg2">'+
-          '<div class="fg"><label>Type</label><select id="lm-type"><option>Muziek</option><option>DJ</option><option>Spreker</option><option>Theater</option><option>Dans</option><option>Overige</option></select></div>'+
+          '<div class="fg"><label>Type</label><select id="lm-type"><optgroup label="Entertainment"><option>Muziek</option><option>DJ</option><option>Spreker</option><option>Theater</option><option>Dans</option></optgroup><optgroup label="Crew / leverancier"><option>Vrijwilliger</option><option>Catering</option><option>AV-techniek</option><option>Beveiliging</option><option>Productie</option><option>Materiaal/leverancier</option></optgroup><option>Overige</option></select></div>'+
           '<div class="fg"><label>Aantal personen</label><input type="number" id="lm-pers" min="1" placeholder="1"></div>'+
         '</div>'+
         '<div class="fg"><label>Locatie (standaard)</label><select id="lm-loc-sel" onchange="lmLocChange()"><option value="">— Geen / vrije invoer —</option></select><input type="text" id="lm-loc" placeholder="Of typ vrije locatie…" style="margin-top:6px"></div>'+
@@ -961,7 +961,7 @@ function openLibModal(type,editId){
           '<div class="fg"><label>Contactpersoon</label><input type="text" id="lm-contact" placeholder="Naam"></div>'+
           '<div class="fg"><label>Telefoon</label><input type="text" id="lm-tel" placeholder="06-…"></div>'+
         '</div>'+
-        '<div class="fg"><label>Status</label><select id="lm-status"><option value="aangevraagd">Aangevraagd</option><option value="optie">Optie</option><option value="bevestigd">Bevestigd</option></select></div>'+
+        '<div class="fg"><label>Status</label><select id="lm-status"><option value="bevestigd">Bevestigd</option><option value="aangevraagd">Aangevraagd</option><option value="optie">Optie</option></select></div>'+
         '<div class="fg"><label>Bijzonderheden</label><textarea id="lm-biz" placeholder="Extra info…"></textarea></div>'+
       '</div>'+
       '<div class="lib-modal-pane" id="lmp-rider">'+
@@ -990,7 +990,7 @@ function openLibModal(type,editId){
       document.getElementById("lm-loc").style.display = (locSel.value === "") ? "block" : "none";
       document.getElementById("lm-contact").value=item.contactpersoon||"";
       document.getElementById("lm-tel").value=item.telefoon||"";
-      document.getElementById("lm-status").value=item.status||"aangevraagd";
+      document.getElementById("lm-status").value=item.status||"bevestigd";
       document.getElementById("lm-biz").value=item.bijzonderheden||"";
       document.getElementById("lm-rider").value=item.rider||"";
       document.getElementById("lm-bed").value=item.bedrag||"";
@@ -1054,7 +1054,7 @@ function saveLibItem(){
   const locTxt = document.getElementById("lm-loc");
   const locatie = (locSel && locSel.value) ? locSel.value : ((locTxt && locTxt.value) || "");
   if(_libType==="ent"){
-    const data={naam:naam,type:(document.getElementById("lm-type")||{}).value||"Muziek",aantalPersonen:parseInt((document.getElementById("lm-pers")||{}).value)||0,locatie:locatie,contactpersoon:(document.getElementById("lm-contact")||{}).value||"",telefoon:(document.getElementById("lm-tel")||{}).value||"",status:(document.getElementById("lm-status")||{}).value||"aangevraagd",bijzonderheden:(document.getElementById("lm-biz")||{}).value||"",rider:(document.getElementById("lm-rider")||{}).value||"",bedrag:(document.getElementById("lm-bed")||{}).value||"",korting:(document.getElementById("lm-kor")||{}).value||""};
+    const data={naam:naam,type:(document.getElementById("lm-type")||{}).value||"Muziek",aantalPersonen:parseInt((document.getElementById("lm-pers")||{}).value)||0,locatie:locatie,contactpersoon:(document.getElementById("lm-contact")||{}).value||"",telefoon:(document.getElementById("lm-tel")||{}).value||"",status:(document.getElementById("lm-status")||{}).value||"bevestigd",bijzonderheden:(document.getElementById("lm-biz")||{}).value||"",rider:(document.getElementById("lm-rider")||{}).value||"",bedrag:(document.getElementById("lm-bed")||{}).value||"",korting:(document.getElementById("lm-kor")||{}).value||""};
     if(_libEditId){const i=list.findIndex(function(x){return x.id===_libEditId;});if(i!==-1)list[i]=Object.assign({},list[i],data);}
     else list.push(Object.assign({id:S.nextId++},data));
   } else {
@@ -2725,7 +2725,19 @@ function openCallsheetModal(entId) {
   // Adres + Maps: gebruik bestaande callsheet-data, val terug op gekoppelde locatie
   v('cs-loc-adres', cs.locAdres || (gekoppeldeLoc ? gekoppeldeLoc.adres : ''));
   v('cs-loc-maps',  cs.locMaps  || (gekoppeldeLoc ? gekoppeldeLoc.mapsUrl : ''));
-  v('cs-melden',      cs.meldenBij);
+
+  // Meldlocatie dropdown vullen
+  const csMeldSel = document.getElementById('cs-meld-sel');
+  let gekoppeldeMeldLoc = null;
+  if (csMeldSel) {
+    csMeldSel.innerHTML = locDropdownOptions(cs.meldLocNaam || '');
+    if (cs.meldLocNaam) gekoppeldeMeldLoc = findLocByNaam(cs.meldLocNaam);
+  }
+  v('cs-meld-adres', cs.meldLocAdres || (gekoppeldeMeldLoc ? gekoppeldeMeldLoc.adres : ''));
+  v('cs-meld-maps',  cs.meldLocMaps  || (gekoppeldeMeldLoc ? gekoppeldeMeldLoc.mapsUrl : ''));
+  v('cs-melden',     cs.meldenBij);
+  v('cs-meld-tijd',  cs.meldTijd);
+
   v('cs-t-aanwezig',  cs.tijdAanwezig);
   v('cs-t-start',     cs.tijdStart);
   v('cs-t-einde',     cs.tijdEinde);
@@ -2782,14 +2794,19 @@ function closeCsModal() { document.getElementById('cs-ovl').classList.remove('op
 
 // ── Callsheet-data opslaan zonder genereren ──
 function _csCollectFormData() {
-  const g = (id) => (document.getElementById(id).value || '').trim();
+  const g = (id) => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
   const locSel = document.getElementById('cs-loc-sel');
+  const meldSel = document.getElementById('cs-meld-sel');
   return {
     cs: {
       locNaam:      locSel ? locSel.value : '',
       locAdres:     g('cs-loc-adres'),
       locMaps:      g('cs-loc-maps'),
+      meldLocNaam:  meldSel ? meldSel.value : '',
+      meldLocAdres: g('cs-meld-adres'),
+      meldLocMaps:  g('cs-meld-maps'),
       meldenBij:    g('cs-melden'),
+      meldTijd:     g('cs-meld-tijd'),
       tijdAanwezig: g('cs-t-aanwezig'),
       tijdStart:    g('cs-t-start'),
       tijdEinde:    g('cs-t-einde'),
@@ -2845,7 +2862,8 @@ function openCallsheetPreview(entId) {
   win.document.close();
 }
 
-function buildCallsheetHTML(ent) {
+function buildCallsheetHTML(ent, opts) {
+  opts = opts || {};
   const ev   = S.event || {};
   const evi  = S.eventInfo || {};
   const defs = (evi.callsheetDefaults || {});
@@ -2869,6 +2887,15 @@ function buildCallsheetHTML(ent) {
   const mapsUrl = cs.locMaps || (gekoppeldeLoc ? gekoppeldeLoc.mapsUrl : '');
   const locNaam = cs.locNaam || ent.locatie || (gekoppeldeLoc ? gekoppeldeLoc.naam : '');
 
+  // Meldlocatie — fallback naar gekoppelde locatie uit lijst, anders leeg (= meldlocatie = werklocatie)
+  const gekoppeldeMeldLoc = cs.meldLocNaam ? findLocByNaam(cs.meldLocNaam) : null;
+  const meldAdres = cs.meldLocAdres || (gekoppeldeMeldLoc ? gekoppeldeMeldLoc.adres : '');
+  const meldMapsUrl = cs.meldLocMaps || (gekoppeldeMeldLoc ? gekoppeldeMeldLoc.mapsUrl : '');
+  const meldLocNaam = cs.meldLocNaam || (gekoppeldeMeldLoc ? gekoppeldeMeldLoc.naam : '');
+  const meldMapsLink = meldMapsUrl
+    ? '<a href="' + esc(meldMapsUrl) + '" target="_blank" rel="noopener" class="maps-btn">📍 Open in Google Maps</a>'
+    : '';
+
   const mapsLink = mapsUrl
     ? '<a href="' + esc(mapsUrl) + '" target="_blank" rel="noopener" class="maps-btn">📍 Open in Google Maps</a>'
     : '';
@@ -2888,9 +2915,11 @@ function buildCallsheetHTML(ent) {
     return '<tr><td class="lbl">' + esc(label) + '</td><td class="val">' + esc(value) + '</td></tr>';
   };
 
-  const gageStr = ent.bedrag
-    ? '€' + ent.bedrag + ' excl. btw' + (ent.korting ? '  (' + ent.korting + '% korting)' : '')
-    : '';
+  const gageStr = opts.gageFree
+    ? opts.gageFree
+    : (ent.bedrag
+      ? '€' + ent.bedrag + ' excl. btw' + (ent.korting ? '  (' + ent.korting + '% korting)' : '')
+      : '');
 
   return `<!DOCTYPE html>
 <html lang="nl">
@@ -3157,7 +3186,7 @@ function buildCallsheetHTML(ent) {
     </div>
   </div>
 
-  <!-- DUO: contact + locatie -->
+  <!-- DUO: contact + werklocatie -->
   <div class="duo">
     <div class="col">
       <div class="panel-title">Jouw contactgegevens</div>
@@ -3168,15 +3197,33 @@ function buildCallsheetHTML(ent) {
       </table>
     </div>
     <div class="col">
-      <div class="panel-title">Locatie</div>
+      <div class="panel-title">Werklocatie</div>
       <table>
         ${lblRow('Naam', locNaam)}
         ${lblRow('Adres', adres)}
-        ${lblRow('Melden bij', cs.meldenBij || 'n.v.t.')}
       </table>
       ${mapsLink}
     </div>
   </div>
+
+  ${(meldLocNaam || meldAdres || meldMapsUrl || cs.meldenBij || cs.meldTijd) ? `
+  <div class="duo">
+    <div class="col" style="background:#fffaf0">
+      <div class="panel-title" style="color:#d97706">📍 Eerst melden bij</div>
+      <table>
+        ${lblRow('Naam', meldLocNaam || locNaam)}
+        ${lblRow('Adres', meldAdres || adres)}
+      </table>
+      ${meldMapsLink || mapsLink}
+    </div>
+    <div class="col" style="background:#fffaf0">
+      <div class="panel-title" style="color:#d97706">Bij wie & wanneer</div>
+      <table>
+        ${lblRow('Bij', cs.meldenBij || 'n.v.t.')}
+        ${lblRow('Tijd', cs.meldTijd || cs.tijdAanwezig || '')}
+      </table>
+    </div>
+  </div>` : ''}
 
   ${cs.opdracht ? `
   <div class="panel">
@@ -3357,4 +3404,161 @@ function csLocChange() {
   }
   if (loc.adres) adresEl.value = loc.adres;
   if (loc.mapsUrl) mapsEl.value = loc.mapsUrl;
+}
+
+function csMeldChange() {
+  const sel = document.getElementById('cs-meld-sel');
+  if (!sel || !sel.value) return;
+  const loc = findLocByNaam(sel.value);
+  if (!loc) return;
+  const adresEl = document.getElementById('cs-meld-adres');
+  const mapsEl = document.getElementById('cs-meld-maps');
+  const adresLeeg = !adresEl.value.trim();
+  const mapsLeeg = !mapsEl.value.trim();
+  if (!adresLeeg || !mapsLeeg) {
+    if (!confirm('Adres en/of Maps-link meldlocatie zijn al ingevuld. Overschrijven met gegevens van "' + loc.naam + '"?')) return;
+  }
+  if (loc.adres) adresEl.value = loc.adres;
+  if (loc.mapsUrl) mapsEl.value = loc.mapsUrl;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   EENMALIGE CALLSHEET — losse callsheet zonder data op te slaan
+   ═══════════════════════════════════════════════════════════════ */
+
+function openEenmaligeCallsheet() {
+  // Vul dropdowns
+  const locSel = document.getElementById('ec-loc-sel');
+  const meldSel = document.getElementById('ec-meld-sel');
+  if (locSel) locSel.innerHTML = locDropdownOptions('');
+  if (meldSel) meldSel.innerHTML = locDropdownOptions('');
+
+  // Reset alle velden
+  const fields = ['ec-naam','ec-type','ec-pers','ec-contact','ec-tel',
+                  'ec-loc-adres','ec-loc-maps','ec-meld-adres','ec-meld-maps','ec-melden','ec-meld-tijd',
+                  'ec-t-aanwezig','ec-t-start','ec-t-einde',
+                  'ec-opdracht','ec-catering','ec-stroom','ec-notities','ec-gage'];
+  fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+
+  // Org-contact + noodcontact: vul vanuit eventInfo defaults
+  const defs = (S.eventInfo && S.eventInfo.callsheetDefaults) || {};
+  const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
+  v('ec-org-naam',  defs.orgNaam);
+  v('ec-org-tel',   defs.orgTel);
+  v('ec-org-email', defs.orgEmail);
+  v('ec-nood-naam', defs.noodNaam);
+  v('ec-nood-tel',  defs.noodTel);
+
+  document.getElementById('ec-ovl').classList.add('open');
+}
+
+function closeEcModal() { document.getElementById('ec-ovl').classList.remove('open'); }
+
+function ecLocChange() {
+  const sel = document.getElementById('ec-loc-sel');
+  if (!sel || !sel.value) return;
+  const loc = findLocByNaam(sel.value);
+  if (!loc) return;
+  const adresEl = document.getElementById('ec-loc-adres');
+  const mapsEl = document.getElementById('ec-loc-maps');
+  const adresLeeg = !adresEl.value.trim();
+  const mapsLeeg = !mapsEl.value.trim();
+  if (!adresLeeg || !mapsLeeg) {
+    if (!confirm('Adres en/of Maps-link zijn al ingevuld. Overschrijven met "' + loc.naam + '"?')) return;
+  }
+  if (loc.adres) adresEl.value = loc.adres;
+  if (loc.mapsUrl) mapsEl.value = loc.mapsUrl;
+}
+
+function ecMeldChange() {
+  const sel = document.getElementById('ec-meld-sel');
+  if (!sel || !sel.value) return;
+  const loc = findLocByNaam(sel.value);
+  if (!loc) return;
+  const adresEl = document.getElementById('ec-meld-adres');
+  const mapsEl = document.getElementById('ec-meld-maps');
+  const adresLeeg = !adresEl.value.trim();
+  const mapsLeeg = !mapsEl.value.trim();
+  if (!adresLeeg || !mapsLeeg) {
+    if (!confirm('Adres en/of Maps-link meldlocatie zijn al ingevuld. Overschrijven met "' + loc.naam + '"?')) return;
+  }
+  if (loc.adres) adresEl.value = loc.adres;
+  if (loc.mapsUrl) mapsEl.value = loc.mapsUrl;
+}
+
+function genereerEenmaligeCallsheet() {
+  const naam = (document.getElementById('ec-naam').value || '').trim();
+  if (!naam) { alert('Vul een naam in.'); return; }
+
+  const g = (id) => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
+  const locSel = document.getElementById('ec-loc-sel');
+  const meldSel = document.getElementById('ec-meld-sel');
+
+  // Bouw een tijdelijk "ent" object (alsof het een entertainment-act is)
+  const tempEnt = {
+    naam: naam,
+    type: g('ec-type'),
+    aantalPersonen: parseInt(g('ec-pers')) || 0,
+    contactpersoon: g('ec-contact'),
+    telefoon: g('ec-tel'),
+    locatie: locSel ? locSel.value : '',
+    rider: '',
+    bedrag: '',
+    korting: '',
+    callsheet: {
+      locNaam:      locSel ? locSel.value : '',
+      locAdres:     g('ec-loc-adres'),
+      locMaps:      g('ec-loc-maps'),
+      meldLocNaam:  meldSel ? meldSel.value : '',
+      meldLocAdres: g('ec-meld-adres'),
+      meldLocMaps:  g('ec-meld-maps'),
+      meldenBij:    g('ec-melden'),
+      meldTijd:     g('ec-meld-tijd'),
+      tijdAanwezig: g('ec-t-aanwezig'),
+      tijdStart:    g('ec-t-start'),
+      tijdEinde:    g('ec-t-einde'),
+      opdracht:     g('ec-opdracht'),
+      catering:     g('ec-catering'),
+      stroom:       g('ec-stroom'),
+      notities:     g('ec-notities'),
+    }
+  };
+
+  // Als er een gage is ingevuld die niet €-prefix heeft → behandel als vrije tekst (bv. "vrijwilliger")
+  const gage = g('ec-gage');
+  if (gage) {
+    // Voor de buildCallsheetHTML moet gage via ent.bedrag binnenkomen
+    // Zet vrije tekst direct als bedrag — buildCallsheetHTML voegt dan '€' toe
+    // Dit is niet ideaal: voor "vrijwilliger" willen we geen "€"-prefix
+    // Oplossing: detecteer of de string een getal lijkt
+    if (/^\s*\d/.test(gage)) {
+      tempEnt.bedrag = gage.replace(/^€\s*/, '').replace(/\s*excl.*$/, '').trim();
+    } else {
+      // Vrije tekst: sla op in een speciaal veld
+      tempEnt._gageFree = gage;
+    }
+  }
+
+  // Update event-brede org-contact & noodcontact (zoals in normale callsheet)
+  if (!S.eventInfo) S.eventInfo = {};
+  S.eventInfo.callsheetDefaults = {
+    orgNaam:   g('ec-org-naam'),
+    orgTel:    g('ec-org-tel'),
+    orgEmail:  g('ec-org-email'),
+    noodNaam:  g('ec-nood-naam'),
+    noodTel:   g('ec-nood-tel'),
+  };
+  save();
+
+  closeEcModal();
+
+  // Bouw HTML — gebruik aangepaste versie als _gageFree gezet is
+  const html = buildCallsheetHTML(tempEnt, { gageFree: tempEnt._gageFree });
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Pop-up geblokkeerd. Sta pop-ups toe voor deze site om de voorbeeldweergave te zien.');
+    return;
+  }
+  win.document.write(html);
+  win.document.close();
 }
