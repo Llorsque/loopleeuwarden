@@ -2207,9 +2207,18 @@ function delCont() { if(!confirm('Contact verwijderen?'))return; S.contacten=S.c
    ═══════════════════════════════════════════════════════════════ */
 
 async function genereerDraaiboek() {
-  // Check of de library is geladen
+  showToast('📄 Draaiboek wordt voorbereid…');
+
+  // Lazy-load docx library bij eerste klik
+  try {
+    await window.loadDocxLibrary();
+  } catch (e) {
+    alert('Kon Word-library niet laden:\n\n' + e.message + '\n\nCheck je internet of probeer opnieuw.');
+    return;
+  }
+
   if (typeof docx === 'undefined') {
-    alert('Word-library nog niet geladen. Wacht een paar seconden en probeer opnieuw.');
+    alert('Word-library niet beschikbaar. Probeer de pagina te verversen (Cmd+Shift+R) en opnieuw.');
     return;
   }
 

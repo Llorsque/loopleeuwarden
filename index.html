@@ -6,8 +6,26 @@
 <title>Regie</title>
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="style.css">
-<script src="https://cdnjs.cloudflare.com/ajax/libs/docx/8.5.0/docx.umd.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/file-saver@2.0.5/dist/FileSaver.min.js"></script>
+<script>
+  // Lazy-load docx.js library lokaal uit de repo (./docx.umd.js)
+  // Pas laden bij eerste klik op "Draaiboek" — voorkomt blokkade bij startup
+  window._docxLoading = null;
+  window.loadDocxLibrary = function() {
+    if (window.docx) return Promise.resolve();
+    if (window._docxLoading) return window._docxLoading;
+    window._docxLoading = new Promise((resolve, reject) => {
+      const s = document.createElement('script');
+      s.src = './docx.umd.js?_=' + Date.now();
+      s.onload = () => {
+        if (window.docx) resolve();
+        else reject(new Error('docx.umd.js geladen maar window.docx niet beschikbaar'));
+      };
+      s.onerror = () => reject(new Error('Kon ./docx.umd.js niet laden — staat het bestand in dezelfde folder als index.html?'));
+      document.head.appendChild(s);
+    });
+    return window._docxLoading;
+  };
+</script>
 </head>
 <body>
 <div class="app">
