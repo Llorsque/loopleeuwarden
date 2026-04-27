@@ -886,9 +886,10 @@ function renderLib(type){
           (item.rider?'<div class="lib-row"><span class="lib-row-lbl">Rider</span><span style="color:var(--t3)">'+item.rider+"</span></div>":"")+
           (f.bedrag?'<div class="lib-row"><span class="lib-row-lbl">Financieel</span><b style="font-family:var(--ui);font-weight:600">'+euro(f.netto)+'</b><span style="color:var(--t3);font-size:10px"> excl. btw'+(f.korting?" ("+f.korting+"% korting)":"")+"</span></div>":"")+
         '</div>'+
-        '<div class="lib-card-foot">'+
+        '<div class="lib-card-foot" style="display:flex;gap:6px;align-items:center">'+
           '<button class="lib-add-btn lib-add-ent" onclick="openAts(\'ent\','+item.id+')">+ Inplannen</button>'+
-          '<button class="btn btn-out btn-xs" style="margin-left:auto" onclick="openCallsheetModal('+item.id+')" title="Genereer callsheet voor deze act">📄 Callsheet</button>'+
+          '<div style="flex:1"></div>'+
+          '<button class="btn btn-out btn-xs" onclick="openCallsheetModal('+item.id+')" title="Genereer callsheet voor deze act">📄 Callsheet</button>'+
           '<button class="btn btn-out btn-xs" onclick="openLibModal(\'ent\','+item.id+')">✏ Bewerk</button>'+
         '</div>';
     } else {
@@ -2738,301 +2739,297 @@ function vulTijdenUitRegiepad(itemId) {
 
 function closeCsModal() { document.getElementById('cs-ovl').classList.remove('open'); }
 
-async function saveAndGenerateCallsheet() {
-  const ent = (S.entertainment || []).find(x => x.id === _csEditEntId);
-  if (!ent) { alert('Act niet gevonden.'); return; }
 
+// ── Callsheet-data opslaan zonder genereren ──
+function _csCollectFormData() {
   const g = (id) => (document.getElementById(id).value || '').trim();
-
-  // Sla callsheet-velden op IN het entertainment-item
-  ent.callsheet = {
-    locAdres:     g('cs-loc-adres'),
-    locMaps:      g('cs-loc-maps'),
-    meldenBij:    g('cs-melden'),
-    tijdAanwezig: g('cs-t-aanwezig'),
-    tijdStart:    g('cs-t-start'),
-    tijdEinde:    g('cs-t-einde'),
-    opdracht:     g('cs-opdracht'),
-    catering:     g('cs-catering'),
-    stroom:       g('cs-stroom'),
-    notities:     g('cs-notities'),
+  return {
+    cs: {
+      locAdres:     g('cs-loc-adres'),
+      locMaps:      g('cs-loc-maps'),
+      meldenBij:    g('cs-melden'),
+      tijdAanwezig: g('cs-t-aanwezig'),
+      tijdStart:    g('cs-t-start'),
+      tijdEinde:    g('cs-t-einde'),
+      opdracht:     g('cs-opdracht'),
+      catering:     g('cs-catering'),
+      stroom:       g('cs-stroom'),
+      notities:     g('cs-notities'),
+    },
+    defs: {
+      orgNaam:   g('cs-org-naam'),
+      orgTel:    g('cs-org-tel'),
+      orgEmail:  g('cs-org-email'),
+      noodNaam:  g('cs-nood-naam'),
+      noodTel:   g('cs-nood-tel'),
+    }
   };
-
-  // Sla event-brede defaults op
-  if (!S.eventInfo) S.eventInfo = {};
-  S.eventInfo.callsheetDefaults = {
-    orgNaam:   g('cs-org-naam'),
-    orgTel:    g('cs-org-tel'),
-    orgEmail:  g('cs-org-email'),
-    noodNaam:  g('cs-nood-naam'),
-    noodTel:   g('cs-nood-tel'),
-  };
-
-  save();
-  closeCsModal();
-
-  // Direct genereren
-  await genereerCallsheetVoorEnt(_csEditEntId);
 }
 
-async function genereerCallsheetVoorEnt(entId) {
+function saveCallsheetData() {
+  const ent = (S.entertainment || []).find(x => x.id === _csEditEntId);
+  if (!ent) { alert('Act niet gevonden.'); return; }
+  const { cs, defs } = _csCollectFormData();
+  ent.callsheet = cs;
+  if (!S.eventInfo) S.eventInfo = {};
+  S.eventInfo.callsheetDefaults = defs;
+  save();
+  closeCsModal();
+  showToast('✓ Callsheet-gegevens opgeslagen voor ' + ent.naam);
+}
+
+function saveAndPreviewCallsheet() {
+  const ent = (S.entertainment || []).find(x => x.id === _csEditEntId);
+  if (!ent) { alert('Act niet gevonden.'); return; }
+  const { cs, defs } = _csCollectFormData();
+  ent.callsheet = cs;
+  if (!S.eventInfo) S.eventInfo = {};
+  S.eventInfo.callsheetDefaults = defs;
+  save();
+  closeCsModal();
+  openCallsheetPreview(_csEditEntId);
+}
+
+function openCallsheetPreview(entId) {
   const ent = (S.entertainment || []).find(x => x.id === entId);
   if (!ent) { alert('Act niet gevonden.'); return; }
-
-  showToast('📄 Callsheet wordt voorbereid…');
-
-  try {
-    await window.loadDocxLibrary();
-  } catch (e) {
-    alert('Kon Word-library niet laden:\n\n' + e.message);
+  const html = buildCallsheetHTML(ent);
+  const win = window.open('', '_blank');
+  if (!win) {
+    alert('Pop-up geblokkeerd. Sta pop-ups toe voor deze site om de voorbeeldweergave te zien.');
     return;
   }
-  if (typeof docx === 'undefined') {
-    alert('Word-library niet beschikbaar. Probeer Cmd+Shift+R en opnieuw.');
-    return;
+  win.document.write(html);
+  win.document.close();
+}
+
+function buildCallsheetHTML(ent) {
+  const ev   = S.event || {};
+  const evi  = S.eventInfo || {};
+  const defs = (evi.callsheetDefaults || {});
+  const cs   = ent.callsheet || {};
+
+  const eventNaam  = ev.name  || evi.naam  || 'Event';
+  const eventDatum = ev.date  || evi.datum || '';
+
+  const esc = (s) => String(s == null ? '' : s)
+    .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
+
+  // helper: row alleen tonen als waarde bestaat
+  const row = (label, value, opts) => {
+    if (!value || !String(value).trim()) return '';
+    const v = (opts && opts.html) ? value : esc(value);
+    return `<tr><td class="lbl">${esc(label)}</td><td class="val">${v}</td></tr>`;
+  };
+
+  // helper: multiline tekst
+  const multi = (text) => {
+    if (!text) return '';
+    return esc(text).replace(/\n+/g,'<br>');
+  };
+
+  // Maps link met klikbare knop
+  const mapsLink = cs.locMaps
+    ? `<a href="${esc(cs.locMaps)}" target="_blank" rel="noopener" class="maps-btn">📍 Open in Google Maps</a>`
+    : '';
+
+  // Logo URL — direct van loopleeuwarden.frl
+  const logoUrl = 'https://www.loopleeuwarden.frl/wp-content/themes/hello-elementor-child/assets/LogoLoopLWD.svg';
+
+  // Bouw hoofdsectie HTML
+  const tijden = [
+    cs.tijdAanwezig && `<b>${esc(cs.tijdAanwezig)}</b> aanwezig`,
+    cs.tijdStart    && `<b>${esc(cs.tijdStart)}</b> start`,
+    cs.tijdEinde    && `<b>${esc(cs.tijdEinde)}</b> einde`,
+  ].filter(Boolean).join('<br>') || '—';
+
+  const generationDate = new Date().toLocaleDateString('nl-NL', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  return `<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8">
+<title>Callsheet — ${esc(ent.naam)} — ${esc(eventNaam)}</title>
+<style>
+  @page { size: A4; margin: 12mm; }
+  * { box-sizing: border-box; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a; margin: 0; background: #f5f5f5; padding: 20px; }
+  .toolbar { max-width: 800px; margin: 0 auto 18px; display: flex; gap: 10px; align-items: center; }
+  .toolbar h2 { margin: 0; font-size: 14px; font-weight: 600; color: #555; flex: 1; }
+  .toolbar button { background: #1a1a1a; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  .toolbar button:hover { background: #333; }
+  .toolbar .secondary { background: #fff; color: #1a1a1a; border: 1px solid #ccc; }
+
+  .sheet { max-width: 800px; margin: 0 auto; background: #fff; padding: 24px 28px; border: 1px solid #d0d0d0; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+
+  .header { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; padding-bottom: 14px; border-bottom: 2px solid #1a1a1a; margin-bottom: 16px; }
+  .header-left { font-size: 11px; color: #555; line-height: 1.5; }
+  .header-left .org-naam { font-weight: 700; color: #1a1a1a; font-size: 12px; margin-bottom: 4px; }
+  .header-mid { text-align: center; }
+  .header-mid img { max-height: 56px; max-width: 200px; }
+  .header-mid .fallback-title { font-weight: 800; font-size: 22px; letter-spacing: -.5px; color: #1a1a1a; }
+  .header-right { text-align: right; }
+  .header-right .label { font-size: 10px; letter-spacing: 1.5px; color: #777; text-transform: uppercase; font-weight: 700; }
+  .header-right .title { font-size: 22px; font-weight: 800; color: #1a1a1a; line-height: 1; margin-top: 2px; }
+  .header-right .date { font-size: 11px; color: #444; margin-top: 6px; }
+
+  .act-bar { background: #fafafa; border: 1px solid #e0e0e0; padding: 12px 16px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
+  .act-bar .act-name { font-size: 18px; font-weight: 700; line-height: 1.1; }
+  .act-bar .act-type { font-size: 11px; color: #777; margin-top: 2px; }
+  .act-bar .act-times { text-align: right; font-size: 12px; color: #1a1a1a; line-height: 1.4; }
+
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #d0d0d0; margin-bottom: 14px; }
+  .grid-2 > .panel { padding: 10px 14px; }
+  .grid-2 > .panel + .panel { border-left: 1px solid #d0d0d0; }
+
+  .panel-title { font-size: 9px; letter-spacing: 1.5px; color: #777; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+
+  table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  table td { padding: 4px 0; vertical-align: top; }
+  table td.lbl { color: #777; font-weight: 600; width: 110px; padding-right: 10px; font-size: 11px; }
+  table td.val { color: #1a1a1a; line-height: 1.4; }
+
+  .section { margin-bottom: 14px; border: 1px solid #d0d0d0; padding: 10px 14px; }
+  .section .panel-title { margin-bottom: 8px; }
+  .section-text { font-size: 12px; line-height: 1.5; color: #1a1a1a; }
+
+  .maps-btn { display: inline-block; background: #1a73e8; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; text-decoration: none; font-weight: 600; }
+  .maps-btn:hover { background: #1557b0; }
+
+  .nood { background: #fff5f5; border: 1px solid #fecaca; padding: 10px 14px; }
+  .nood .panel-title { color: #c0392b; }
+  .nood table td.val { font-weight: 600; }
+
+  .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 22px; padding-top: 14px; border-top: 1px solid #d0d0d0; font-size: 10px; color: #888; }
+  .footer .gen-info { font-style: italic; }
+  .signature { border-top: 1px solid #999; padding-top: 4px; margin-top: 30px; font-size: 10px; color: #555; text-align: center; }
+
+  @media print {
+    body { background: #fff; padding: 0; }
+    .toolbar { display: none; }
+    .sheet { max-width: none; margin: 0; padding: 0; border: none; box-shadow: none; }
+    .maps-btn { background: none; color: #1a73e8; padding: 0; }
+    .maps-btn::after { content: " (" attr(href) ")"; font-size: 9px; word-break: break-all; }
   }
+</style>
+</head>
+<body>
 
-  showToast('📄 Callsheet wordt gegenereerd…');
+<div class="toolbar">
+  <h2>Voorbeeld callsheet — ${esc(ent.naam)}</h2>
+  <button class="secondary" onclick="window.close()">Sluiten</button>
+  <button onclick="window.print()">🖨 Print / opslaan als PDF</button>
+</div>
 
-  try {
-    const {
-      Document, Packer, Paragraph, TextRun, AlignmentType,
-      BorderStyle, ExternalHyperlink, Header, Footer, PageNumber
-    } = docx;
+<div class="sheet">
 
-    const ev = S.event || {};
-    const evi = S.eventInfo || {};
-    const defs = (evi.callsheetDefaults || {});
-    const cs = ent.callsheet || {};
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="org-naam">${esc(eventNaam)}</div>
+      ${defs.orgNaam ? `<div>${esc(defs.orgNaam)}</div>` : ''}
+      ${defs.orgTel  ? `<div>${esc(defs.orgTel)}</div>` : ''}
+      ${defs.orgEmail? `<div>${esc(defs.orgEmail)}</div>` : ''}
+    </div>
+    <div class="header-mid">
+      <img src="${logoUrl}" alt="LOOP Leeuwarden" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
+      <div class="fallback-title" style="display:none">LOOP LEEUWARDEN</div>
+    </div>
+    <div class="header-right">
+      <div class="label">Callsheet</div>
+      <div class="title">${esc(eventDatum || '')}</div>
+      <div class="date">Versie: ${esc(generationDate)}</div>
+    </div>
+  </div>
 
-    const eventNaam = ev.name || evi.naam || 'Event';
-    const eventDatum = ev.date || evi.datum || '';
+  <!-- ACT BAR -->
+  <div class="act-bar">
+    <div>
+      <div class="act-name">${esc(ent.naam)}</div>
+      ${ent.type ? `<div class="act-type">${esc(ent.type)}${ent.aantalPersonen ? ' · ' + ent.aantalPersonen + ' personen' : ''}</div>` : ''}
+    </div>
+    <div class="act-times">${tijden}</div>
+  </div>
 
-    // ── helpers ──
-    const T = (text, opts={}) => new TextRun({ text: String(text||''), ...opts });
-    const empty = () => new Paragraph({ children: [new TextRun('')] });
+  <!-- GRID: contact + locatie -->
+  <div class="grid-2">
+    <div class="panel">
+      <div class="panel-title">Jouw contactgegevens</div>
+      <table>
+        ${row('Contactpersoon', ent.contactpersoon)}
+        ${row('Telefoon',       ent.telefoon)}
+        ${row('Aantal personen', ent.aantalPersonen ? String(ent.aantalPersonen) : '')}
+      </table>
+    </div>
+    <div class="panel">
+      <div class="panel-title">Locatie</div>
+      <table>
+        ${row('Locatie',  ent.locatie)}
+        ${row('Adres',    cs.locAdres)}
+        ${cs.locMaps ? row('Route', mapsLink, {html:true}) : ''}
+        ${row('Melden bij', cs.meldenBij || 'n.v.t.')}
+      </table>
+    </div>
+  </div>
 
-    const SH = (text) => new Paragraph({
-      children: [new TextRun({ text: text.toUpperCase(), bold: true, size: 18, color: '666666', characterSpacing: 30 })],
-      spacing: { before: 280, after: 100 },
-      border: { bottom: { color: 'CCCCCC', space: 4, style: BorderStyle.SINGLE, size: 4 } }
-    });
+  ${cs.opdracht ? `
+  <div class="section">
+    <div class="panel-title">Opdracht</div>
+    <div class="section-text">${multi(cs.opdracht)}</div>
+  </div>` : ''}
 
-    const LV = (label, value) => {
-      if (!value || !String(value).trim()) return null;
-      return new Paragraph({
-        children: [
-          new TextRun({ text: label + ': ', bold: true, size: 20 }),
-          new TextRun({ text: String(value), size: 20 })
-        ],
-        spacing: { after: 80 }
-      });
-    };
+  ${(cs.catering || cs.stroom || ent.rider) ? `
+  <div class="grid-2">
+    ${cs.catering ? `
+    <div class="panel">
+      <div class="panel-title">Catering</div>
+      <div class="section-text">${multi(cs.catering)}</div>
+    </div>` : '<div class="panel"><div class="panel-title">Catering</div><div class="section-text" style="color:#999">—</div></div>'}
+    ${cs.stroom ? `
+    <div class="panel">
+      <div class="panel-title">Stroom</div>
+      <div class="section-text">${multi(cs.stroom)}</div>
+    </div>` : (ent.rider ? `
+    <div class="panel">
+      <div class="panel-title">Stroom / Rider</div>
+      <div class="section-text">${multi(ent.rider)}</div>
+    </div>` : '<div class="panel"><div class="panel-title">Stroom</div><div class="section-text" style="color:#999">—</div></div>')}
+  </div>` : ''}
 
-    const LVmulti = (label, value) => {
-      if (!value || !String(value).trim()) return null;
-      const lines = String(value).split(/\n+/).filter(s => s.trim());
-      const paras = [];
-      if (label) {
-        paras.push(new Paragraph({
-          children: [new TextRun({ text: label, bold: true, size: 20 })],
-          spacing: { after: 40 }
-        }));
-      }
-      lines.forEach(line => {
-        paras.push(new Paragraph({
-          children: [new TextRun({ text: line, size: 20 })],
-          spacing: { after: 40 }
-        }));
-      });
-      return paras;
-    };
+  ${cs.notities ? `
+  <div class="section">
+    <div class="panel-title">Aanrijden, parkeren & notities</div>
+    <div class="section-text">${multi(cs.notities)}</div>
+  </div>` : ''}
 
-    const linkParagraph = (label, url) => {
-      if (!url || !String(url).trim()) return null;
-      return new Paragraph({
-        children: [
-          new TextRun({ text: label + ': ', bold: true, size: 20 }),
-          new ExternalHyperlink({
-            link: url,
-            children: [new TextRun({ text: 'Open in Google Maps →', color: '0066CC', underline: {}, size: 20 })]
-          })
-        ],
-        spacing: { after: 80 }
-      });
-    };
+  ${ent.bedrag ? `
+  <div class="section">
+    <div class="panel-title">Vergoeding</div>
+    <table>
+      ${row('Afgesproken gage', '€' + ent.bedrag + ' excl. btw' + (ent.korting ? '  (' + ent.korting + '% korting)' : ''))}
+    </table>
+  </div>` : ''}
 
-    const filter = (arr) => arr.filter(x => x !== null);
+  ${(defs.noodNaam || defs.noodTel) ? `
+  <div class="nood">
+    <div class="panel-title">Noodcontact op de dag</div>
+    <table>
+      ${row('Naam',     defs.noodNaam)}
+      ${row('Telefoon', defs.noodTel)}
+    </table>
+  </div>` : ''}
 
-    // ── Body ──
-    const children = [];
+  <!-- FOOTER -->
+  <div class="footer">
+    <div class="gen-info">Gegenereerd op ${esc(generationDate)}</div>
+    <div style="text-align:right">${esc(eventNaam)} — Callsheet ${esc(ent.naam)}</div>
+  </div>
 
-    // VOORHOOFD
-    children.push(new Paragraph({
-      children: [new TextRun({ text: 'CALLSHEET', size: 22, color: '999999', bold: true, characterSpacing: 60 })],
-      spacing: { after: 80 }
-    }));
+</div>
 
-    children.push(new Paragraph({
-      children: [new TextRun({ text: ent.naam, bold: true, size: 44 })],
-      spacing: { after: 100 }
-    }));
-
-    if (ent.type) {
-      children.push(new Paragraph({
-        children: [new TextRun({ text: ent.type, size: 24, color: '666666' })],
-        spacing: { after: 200 }
-      }));
-    }
-
-    children.push(new Paragraph({
-      children: [
-        new TextRun({ text: 'Voor: ', bold: true, size: 20 }),
-        new TextRun({ text: eventNaam + (eventDatum ? '  ·  ' + eventDatum : ''), size: 20 })
-      ],
-      spacing: { after: 80 }
-    }));
-
-    // Jouw contactgegevens (uit entertainment-item)
-    if (ent.contactpersoon || ent.telefoon) {
-      children.push(SH('Jouw contactgegevens'));
-      filter([
-        LV('Contactpersoon', ent.contactpersoon),
-        LV('Telefoon', ent.telefoon),
-        LV('Aantal personen in groep', ent.aantalPersonen ? String(ent.aantalPersonen) : '')
-      ]).forEach(p => children.push(p));
-    }
-
-    // Locatie (combo van ent.locatie + cs.locAdres)
-    if (ent.locatie || cs.locAdres || cs.locMaps || cs.meldenBij) {
-      children.push(SH('Locatie'));
-      filter([
-        LV('Locatie', ent.locatie),
-        LV('Adres', cs.locAdres),
-        linkParagraph('Route', cs.locMaps),
-        LV('Melden bij', cs.meldenBij || 'n.v.t.')
-      ]).forEach(p => children.push(p));
-    }
-
-    // Tijden
-    if (cs.tijdAanwezig || cs.tijdStart || cs.tijdEinde) {
-      children.push(SH('Tijden'));
-      filter([
-        LV('Aanwezig vanaf', cs.tijdAanwezig),
-        LV('Start', cs.tijdStart),
-        LV('Einde verwacht', cs.tijdEinde)
-      ]).forEach(p => children.push(p));
-    }
-
-    // Opdracht
-    if (cs.opdracht) {
-      children.push(SH('Opdracht'));
-      const m = LVmulti('Wat ga je doen?', cs.opdracht);
-      if (m) m.forEach(p => children.push(p));
-    }
-
-    // Faciliteiten — stroom, catering, en eventueel rider als extra
-    const heeftFac = cs.catering || cs.stroom || ent.rider;
-    if (heeftFac) {
-      children.push(SH('Faciliteiten op locatie'));
-      const c = LVmulti('Catering', cs.catering); if (c) c.forEach(p => children.push(p));
-      const s = LVmulti('Stroom', cs.stroom);     if (s) s.forEach(p => children.push(p));
-      // Rider (uit entertainment-item) — alleen als deze niet al in 'stroom' is overgenomen
-      if (ent.rider && ent.rider !== cs.stroom) {
-        const r = LVmulti('Technische rider (overig)', ent.rider);
-        if (r) r.forEach(p => children.push(p));
-      }
-    }
-
-    // Notities
-    if (cs.notities) {
-      children.push(SH('Aanrijden, parkeren & notities'));
-      const n = LVmulti('', cs.notities);
-      if (n) n.forEach(p => children.push(p));
-    }
-
-    // Vergoeding (uit entertainment-item)
-    if (ent.bedrag) {
-      children.push(SH('Vergoeding'));
-      let gageStr = '€' + ent.bedrag + ' excl. btw';
-      if (ent.korting) gageStr += '  (' + ent.korting + '% korting)';
-      const g = LV('Afgesproken gage', gageStr);
-      if (g) children.push(g);
-    }
-
-    // Contact organisatie + noodcontact
-    if (defs.orgNaam || defs.orgTel || defs.orgEmail || defs.noodNaam || defs.noodTel) {
-      children.push(SH('Contact organisatie'));
-      filter([
-        LV('Contactpersoon', defs.orgNaam),
-        LV('Telefoon', defs.orgTel),
-        LV('E-mail', defs.orgEmail),
-      ]).forEach(p => children.push(p));
-
-      if (defs.noodNaam || defs.noodTel) {
-        children.push(empty());
-        children.push(new Paragraph({
-          children: [new TextRun({ text: 'Noodcontact op de dag:', bold: true, size: 20, color: 'A03030' })],
-          spacing: { after: 40 }
-        }));
-        filter([
-          LV('Naam', defs.noodNaam),
-          LV('Telefoon', defs.noodTel)
-        ]).forEach(p => children.push(p));
-      }
-    }
-
-    // ── Document ──
-    const doc = new Document({
-      creator: 'Regie',
-      title: `Callsheet — ${ent.naam}`,
-      description: 'Callsheet voor entertainment-act',
-      styles: { default: { document: { run: { font: 'Calibri', size: 20 } } } },
-      sections: [{
-        properties: { page: { margin: { top: 1000, right: 1100, bottom: 1000, left: 1100 } } },
-        headers: {
-          default: new Header({
-            children: [new Paragraph({
-              alignment: AlignmentType.RIGHT,
-              children: [new TextRun({ text: eventNaam + ' — Callsheet ' + ent.naam, size: 16, color: '888888' })]
-            })]
-          })
-        },
-        footers: {
-          default: new Footer({
-            children: [new Paragraph({
-              alignment: AlignmentType.CENTER,
-              children: [
-                new TextRun({ text: 'Gegenereerd op ' + new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }) + '  ·  pagina ', size: 14, color: '999999' }),
-                new TextRun({ children: [PageNumber.CURRENT], size: 14, color: '999999' })
-              ]
-            })]
-          })
-        },
-        children
-      }]
-    });
-
-    const blob = await Packer.toBlob(doc);
-    const slug = (ent.naam || 'act').toLowerCase()
-      .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 40);
-    const filename = `callsheet-${slug}.docx`;
-
-    if (typeof saveAs !== 'undefined') {
-      saveAs(blob, filename);
-    } else {
-      const url = URL.createObjectURL(blob);
-      const a = document.createElement('a');
-      a.href = url;
-      a.download = filename;
-      a.click();
-      URL.revokeObjectURL(url);
-    }
-
-    showToast('✓ Callsheet gedownload: ' + filename);
-
-  } catch (err) {
-    console.error('Callsheet-fout:', err);
-    alert('Fout bij genereren callsheet:\n\n' + err.message);
-  }
+</body>
+</html>`;
 }

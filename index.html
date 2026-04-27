@@ -409,6 +409,20 @@
   </div>
 </div>
 
+<!-- LIB MODAL (entertainment + huldigingen — toevoegen/bewerken) -->
+<div class="ovl" id="lib-ovl">
+  <div class="modal-box" style="max-width:560px">
+    <div class="modal-hd"><h3 id="lib-modal-title">Toevoegen</h3></div>
+    <div id="lib-modal-tabs" style="display:flex;gap:0;padding:0 26px;border-bottom:1px solid var(--border);background:var(--bg-soft)"></div>
+    <div class="modal-body" id="lib-modal-body" style="max-height:60vh;overflow-y:auto"></div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-del btn-sm" id="lib-del-btn" style="display:none;margin-right:auto" onclick="delLibItem()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeLibModal()">Annuleren</button>
+      <button class="btn btn-y btn-sm" onclick="saveLibItem()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
 <!-- CALLSHEET MODAL (voor entertainment-acts) -->
 <div class="ovl" id="cs-ovl">
   <div class="modal-box" style="max-width:680px">
@@ -457,7 +471,8 @@
     </div>
     <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
       <button class="btn btn-out btn-sm" onclick="closeCsModal()">Annuleren</button>
-      <button class="btn btn-y btn-sm" onclick="saveAndGenerateCallsheet()">📄 Opslaan & genereren</button>
+      <button class="btn btn-out btn-sm" onclick="saveCallsheetData()">💾 Opslaan</button>
+      <button class="btn btn-y btn-sm" onclick="saveAndPreviewCallsheet()">👁 Opslaan & voorbeeld</button>
     </div>
   </div>
 </div>
