@@ -2738,6 +2738,13 @@ function openCallsheetModal(entId) {
   v('cs-melden',     cs.meldenBij);
   v('cs-meld-tijd',  cs.meldTijd);
 
+  // Meldlocatie checkbox: aan als meldActief true is, of als er al data is (backward compat)
+  const heeftMeldData = !!(cs.meldLocNaam || cs.meldLocAdres || cs.meldLocMaps || cs.meldenBij || cs.meldTijd);
+  const meldCb = document.getElementById('cs-meld-toggle');
+  const meldBlock = document.getElementById('cs-meld-block');
+  if (meldCb) meldCb.checked = !!cs.meldActief || heeftMeldData;
+  if (meldBlock) meldBlock.style.display = meldCb && meldCb.checked ? 'block' : 'none';
+
   v('cs-t-aanwezig',  cs.tijdAanwezig);
   v('cs-t-start',     cs.tijdStart);
   v('cs-t-einde',     cs.tijdEinde);
@@ -2797,16 +2804,19 @@ function _csCollectFormData() {
   const g = (id) => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
   const locSel = document.getElementById('cs-loc-sel');
   const meldSel = document.getElementById('cs-meld-sel');
+  const meldCb = document.getElementById('cs-meld-toggle');
+  const meldActief = meldCb ? !!meldCb.checked : false;
   return {
     cs: {
       locNaam:      locSel ? locSel.value : '',
       locAdres:     g('cs-loc-adres'),
       locMaps:      g('cs-loc-maps'),
-      meldLocNaam:  meldSel ? meldSel.value : '',
-      meldLocAdres: g('cs-meld-adres'),
-      meldLocMaps:  g('cs-meld-maps'),
-      meldenBij:    g('cs-melden'),
-      meldTijd:     g('cs-meld-tijd'),
+      meldActief:   meldActief,
+      meldLocNaam:  meldActief ? (meldSel ? meldSel.value : '') : '',
+      meldLocAdres: meldActief ? g('cs-meld-adres') : '',
+      meldLocMaps:  meldActief ? g('cs-meld-maps') : '',
+      meldenBij:    meldActief ? g('cs-melden') : '',
+      meldTijd:     meldActief ? g('cs-meld-tijd') : '',
       tijdAanwezig: g('cs-t-aanwezig'),
       tijdStart:    g('cs-t-start'),
       tijdEinde:    g('cs-t-einde'),
@@ -3206,10 +3216,10 @@ function buildCallsheetHTML(ent, opts) {
     </div>
   </div>
 
-  ${(meldLocNaam || meldAdres || meldMapsUrl || cs.meldenBij || cs.meldTijd) ? `
+  ${((cs.meldActief !== false) && (meldLocNaam || meldAdres || meldMapsUrl || cs.meldenBij || cs.meldTijd)) ? `
   <div class="duo">
     <div class="col" style="background:#fffaf0">
-      <div class="panel-title" style="color:#d97706">📍 Eerst melden bij</div>
+      <div class="panel-title" style="color:#d97706">Meldlocatie</div>
       <table>
         ${lblRow('Naam', meldLocNaam || locNaam)}
         ${lblRow('Adres', meldAdres || adres)}
@@ -3217,9 +3227,9 @@ function buildCallsheetHTML(ent, opts) {
       ${meldMapsLink || mapsLink}
     </div>
     <div class="col" style="background:#fffaf0">
-      <div class="panel-title" style="color:#d97706">Bij wie & wanneer</div>
+      <div class="panel-title" style="color:#d97706">Melden bij</div>
       <table>
-        ${lblRow('Bij', cs.meldenBij || 'n.v.t.')}
+        ${lblRow('Naam', cs.meldenBij || 'n.v.t.')}
         ${lblRow('Tijd', cs.meldTijd || cs.tijdAanwezig || '')}
       </table>
     </div>
@@ -3440,6 +3450,12 @@ function openEenmaligeCallsheet() {
                   'ec-opdracht','ec-catering','ec-stroom','ec-notities','ec-gage'];
   fields.forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
 
+  // Reset meldlocatie toggle (standaard uit)
+  const meldCb = document.getElementById('ec-meld-toggle');
+  const meldBlock = document.getElementById('ec-meld-block');
+  if (meldCb) meldCb.checked = false;
+  if (meldBlock) meldBlock.style.display = 'none';
+
   // Org-contact + noodcontact: vul vanuit eventInfo defaults
   const defs = (S.eventInfo && S.eventInfo.callsheetDefaults) || {};
   const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
@@ -3493,6 +3509,8 @@ function genereerEenmaligeCallsheet() {
   const g = (id) => { const el = document.getElementById(id); return el ? (el.value || '').trim() : ''; };
   const locSel = document.getElementById('ec-loc-sel');
   const meldSel = document.getElementById('ec-meld-sel');
+  const meldCb = document.getElementById('ec-meld-toggle');
+  const meldActief = meldCb ? !!meldCb.checked : false;
 
   // Bouw een tijdelijk "ent" object (alsof het een entertainment-act is)
   const tempEnt = {
@@ -3509,11 +3527,12 @@ function genereerEenmaligeCallsheet() {
       locNaam:      locSel ? locSel.value : '',
       locAdres:     g('ec-loc-adres'),
       locMaps:      g('ec-loc-maps'),
-      meldLocNaam:  meldSel ? meldSel.value : '',
-      meldLocAdres: g('ec-meld-adres'),
-      meldLocMaps:  g('ec-meld-maps'),
-      meldenBij:    g('ec-melden'),
-      meldTijd:     g('ec-meld-tijd'),
+      meldActief:   meldActief,
+      meldLocNaam:  meldActief ? (meldSel ? meldSel.value : '') : '',
+      meldLocAdres: meldActief ? g('ec-meld-adres') : '',
+      meldLocMaps:  meldActief ? g('ec-meld-maps') : '',
+      meldenBij:    meldActief ? g('ec-melden') : '',
+      meldTijd:     meldActief ? g('ec-meld-tijd') : '',
       tijdAanwezig: g('ec-t-aanwezig'),
       tijdStart:    g('ec-t-start'),
       tijdEinde:    g('ec-t-einde'),
@@ -3561,4 +3580,20 @@ function genereerEenmaligeCallsheet() {
   }
   win.document.write(html);
   win.document.close();
+}
+
+// Toggle meldlocatie blok (gewone callsheet modal)
+function csMeldToggle() {
+  const cb = document.getElementById('cs-meld-toggle');
+  const block = document.getElementById('cs-meld-block');
+  if (!cb || !block) return;
+  block.style.display = cb.checked ? 'block' : 'none';
+}
+
+// Toggle meldlocatie blok (eenmalige callsheet modal)
+function ecMeldToggle() {
+  const cb = document.getElementById('ec-meld-toggle');
+  const block = document.getElementById('ec-meld-block');
+  if (!cb || !block) return;
+  block.style.display = cb.checked ? 'block' : 'none';
 }

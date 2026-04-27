@@ -472,13 +472,22 @@
       <div class="fg"><label>Adres</label><input type="text" id="cs-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
       <div class="fg"><label>Google Maps link</label><input type="text" id="cs-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Meldlocatie <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">— laat leeg als gelijk aan werklocatie</span></div>
-      <div class="fg"><label>Kies meldlocatie uit lijst</label><select id="cs-meld-sel" onchange="csMeldChange()"><option value="">— Geen / gelijk aan werklocatie —</option></select></div>
-      <div class="fg"><label>Adres meldlocatie</label><input type="text" id="cs-meld-adres" placeholder="Alleen invullen als anders dan werklocatie"></div>
-      <div class="fg"><label>Google Maps link meldlocatie</label><input type="text" id="cs-meld-maps" placeholder="https://maps.app.goo.gl/..."></div>
-      <div class="fg2">
-        <div class="fg"><label>Melden bij (naam)</label><input type="text" id="cs-melden" placeholder="Naam contactpersoon"></div>
-        <div class="fg"><label>Tijd melden</label><input type="text" id="cs-meld-tijd" placeholder="bijv. 07:30"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 6px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:10px;justify-content:space-between">
+        <span>Meldlocatie</span>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;cursor:pointer;color:var(--t2)">
+          <input type="checkbox" id="cs-meld-toggle" onchange="csMeldToggle()" style="margin:0">
+          <span>van toepassing</span>
+        </label>
+      </div>
+      <div id="cs-meld-block" style="display:none">
+        <div style="font-size:11px;color:var(--t3);margin:0 0 10px">Vul in als de leverancier zich ergens anders moet melden voordat ze naar de werklocatie gaan.</div>
+        <div class="fg"><label>Kies meldlocatie uit lijst</label><select id="cs-meld-sel" onchange="csMeldChange()"><option value="">— Geen / vrije invoer —</option></select></div>
+        <div class="fg"><label>Adres meldlocatie</label><input type="text" id="cs-meld-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
+        <div class="fg"><label>Google Maps link meldlocatie</label><input type="text" id="cs-meld-maps" placeholder="https://maps.app.goo.gl/..."></div>
+        <div class="fg2">
+          <div class="fg"><label>Melden bij (naam)</label><input type="text" id="cs-melden" placeholder="Naam contactpersoon"></div>
+          <div class="fg"><label>Tijd melden</label><input type="text" id="cs-meld-tijd" placeholder="bijv. 07:30"></div>
+        </div>
       </div>
 
       <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Tijden</div>
@@ -545,13 +554,22 @@
       <div class="fg"><label>Adres</label><input type="text" id="ec-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
       <div class="fg"><label>Google Maps link</label><input type="text" id="ec-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Meldlocatie <span style="color:var(--t3);font-weight:400;text-transform:none;letter-spacing:0;font-size:11px">— laat leeg als gelijk aan werklocatie</span></div>
-      <div class="fg"><label>Kies meldlocatie uit lijst</label><select id="ec-meld-sel" onchange="ecMeldChange()"><option value="">— Geen / gelijk aan werklocatie —</option></select></div>
-      <div class="fg"><label>Adres meldlocatie</label><input type="text" id="ec-meld-adres" placeholder="Alleen invullen als anders dan werklocatie"></div>
-      <div class="fg"><label>Google Maps link meldlocatie</label><input type="text" id="ec-meld-maps" placeholder="https://maps.app.goo.gl/..."></div>
-      <div class="fg2">
-        <div class="fg"><label>Melden bij (naam)</label><input type="text" id="ec-melden" placeholder="Naam contactpersoon"></div>
-        <div class="fg"><label>Tijd melden</label><input type="text" id="ec-meld-tijd" placeholder="bijv. 07:30"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 6px;border-bottom:1px solid var(--border);padding-bottom:6px;display:flex;align-items:center;gap:10px;justify-content:space-between">
+        <span>Meldlocatie</span>
+        <label style="display:flex;align-items:center;gap:6px;font-weight:400;text-transform:none;letter-spacing:0;font-size:12px;cursor:pointer;color:var(--t2)">
+          <input type="checkbox" id="ec-meld-toggle" onchange="ecMeldToggle()" style="margin:0">
+          <span>van toepassing</span>
+        </label>
+      </div>
+      <div id="ec-meld-block" style="display:none">
+        <div style="font-size:11px;color:var(--t3);margin:0 0 10px">Vul in als de leverancier zich ergens anders moet melden voordat ze naar de werklocatie gaan.</div>
+        <div class="fg"><label>Kies meldlocatie uit lijst</label><select id="ec-meld-sel" onchange="ecMeldChange()"><option value="">— Geen / vrije invoer —</option></select></div>
+        <div class="fg"><label>Adres meldlocatie</label><input type="text" id="ec-meld-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
+        <div class="fg"><label>Google Maps link meldlocatie</label><input type="text" id="ec-meld-maps" placeholder="https://maps.app.goo.gl/..."></div>
+        <div class="fg2">
+          <div class="fg"><label>Melden bij (naam)</label><input type="text" id="ec-melden" placeholder="Naam contactpersoon"></div>
+          <div class="fg"><label>Tijd melden</label><input type="text" id="ec-meld-tijd" placeholder="bijv. 07:30"></div>
+        </div>
       </div>
 
       <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Tijden</div>
