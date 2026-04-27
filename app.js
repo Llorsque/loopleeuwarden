@@ -2200,3 +2200,447 @@ function saveCont() {
 }
 function delCont() { if(!confirm('Contact verwijderen?'))return; S.contacten=S.contacten.filter(x=>x.id!==_contEditId); save(); closeContModal(); renderCont(); updateBadges(); }
 
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAAIBOEK-EXPORT (Word/.docx)
+   Genereert een compleet draaiboek uit alle data in S
+   ═══════════════════════════════════════════════════════════════ */
+
+async function genereerDraaiboek() {
+  // Check of de library is geladen
+  if (typeof docx === 'undefined') {
+    alert('Word-library nog niet geladen. Wacht een paar seconden en probeer opnieuw.');
+    return;
+  }
+
+  showToast('📄 Draaiboek wordt gegenereerd…');
+
+  try {
+    const {
+      Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
+      Table, TableRow, TableCell, WidthType, BorderStyle, PageBreak,
+      Header, Footer, PageNumber, LevelFormat
+    } = docx;
+
+    // ── helpers ──────────────────────────────────────────────────
+    const ev = S.event || {};
+    const evi = S.eventInfo || {};
+    const datumStr = ev.date || evi.datum || '';
+    const naamStr = ev.name || evi.naam || 'Draaiboek';
+
+    const T = (text, opts={}) => new TextRun({ text: String(text||''), ...opts });
+    const P = (children, opts={}) => new Paragraph({ children: Array.isArray(children) ? children : [children], ...opts });
+    const empty = () => new Paragraph({ children: [new TextRun('')] });
+    const brk = () => new Paragraph({ children: [new PageBreak()] });
+
+    const H1 = (text) => new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [new TextRun({ text: String(text||''), bold: true, size: 36 })],
+      spacing: { before: 400, after: 200 },
+      pageBreakBefore: true
+    });
+    const H2 = (text) => new Paragraph({
+      heading: HeadingLevel.HEADING_2,
+      children: [new TextRun({ text: String(text||''), bold: true, size: 28 })],
+      spacing: { before: 300, after: 150 }
+    });
+    const H3 = (text) => new Paragraph({
+      heading: HeadingLevel.HEADING_3,
+      children: [new TextRun({ text: String(text||''), bold: true, size: 22 })],
+      spacing: { before: 200, after: 100 }
+    });
+
+    const labelValue = (label, value) => new Paragraph({
+      children: [
+        new TextRun({ text: label + ': ', bold: true }),
+        new TextRun({ text: String(value || '—') })
+      ],
+      spacing: { after: 60 }
+    });
+
+    const tableCell = (content, opts={}) => new TableCell({
+      width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+      shading: opts.shading ? { fill: opts.shading } : undefined,
+      children: [new Paragraph({
+        children: [new TextRun({ text: String(content||''), bold: !!opts.bold, size: opts.size || 18 })],
+        alignment: opts.align || AlignmentType.LEFT
+      })]
+    });
+
+    // ── secties opbouwen ─────────────────────────────────────────
+    const sections = [];
+
+    // ── 1. VOORPAGINA ────────────────────────────────────────────
+    const voorpagina = [
+      new Paragraph({ children: [new TextRun('')], spacing: { before: 2000 } }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'DRAAIBOEK', bold: true, size: 56, color: '666666' })],
+        spacing: { after: 400 }
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: naamStr, bold: true, size: 72 })],
+        spacing: { after: 200 }
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: datumStr, size: 32 })],
+        spacing: { after: 1200 }
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'Status: concept', size: 20, color: '888888' })],
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'Gegenereerd op ' + new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }), size: 18, color: '888888' })],
+      })
+    ];
+
+    // ── 2. EVENT-INFO ────────────────────────────────────────────
+    const eventInfo = [H1('1. Event-info')];
+    if (evi.editie) eventInfo.push(labelValue('Editie', evi.editie));
+    if (evi.datum) eventInfo.push(labelValue('Datum', evi.datum));
+    if (evi.locatie) eventInfo.push(labelValue('Locatie', evi.locatie));
+    if (evi.startInfo) {
+      eventInfo.push(empty());
+      eventInfo.push(H3('Start-info'));
+      eventInfo.push(P(T(evi.startInfo)));
+    }
+    if (evi.inleiding) {
+      eventInfo.push(empty());
+      eventInfo.push(H3('Inleiding'));
+      evi.inleiding.split(/\n+/).filter(Boolean).forEach(p => eventInfo.push(P(T(p))));
+    }
+    if (evi.noemen) {
+      eventInfo.push(empty());
+      eventInfo.push(H3('Noemenswaardig'));
+      evi.noemen.split(/\n+/).filter(Boolean).forEach(p => eventInfo.push(P(T(p))));
+    }
+    if (evi.deelnemers && evi.deelnemers.length) {
+      eventInfo.push(empty());
+      eventInfo.push(H3('Deelnemers / aantallen'));
+      evi.deelnemers.forEach(d => {
+        if (typeof d === 'object') {
+          eventInfo.push(labelValue(d.label || d.afstand || '', d.aantal || ''));
+        } else {
+          eventInfo.push(P(T('• ' + d)));
+        }
+      });
+    }
+
+    // ── 3. PARCOURSEN ────────────────────────────────────────────
+    const parcoursen = [];
+    if (S.parcoursen && S.parcoursen.length) {
+      parcoursen.push(H1('2. Parcoursen'));
+      S.parcoursen.forEach(p => {
+        parcoursen.push(H2(p.naam || p.afstand || 'Parcours'));
+        if (p.afstand) parcoursen.push(labelValue('Afstand', p.afstand));
+        if (p.startLoc) parcoursen.push(labelValue('Start', p.startLoc));
+        if (p.finishLoc) parcoursen.push(labelValue('Finish', p.finishLoc));
+        if (p.deelnemers) parcoursen.push(labelValue('Deelnemers', p.deelnemers));
+        if (p.winnaarstijd) parcoursen.push(labelValue('Winnaarstijd', p.winnaarstijd));
+        if (p.route) {
+          parcoursen.push(empty());
+          parcoursen.push(P([new TextRun({ text: 'Route: ', bold: true }), T(p.route)]));
+        }
+      });
+    }
+
+    // ── 4. SPONSOREN ─────────────────────────────────────────────
+    const sponsoren = [];
+    if (S.sponsoren && S.sponsoren.length) {
+      sponsoren.push(H1('3. Sponsoren'));
+      // Groepeer op categorie
+      const cats = {};
+      S.sponsoren.forEach(s => {
+        const c = s.categorie || 'Sponsor';
+        if (!cats[c]) cats[c] = [];
+        cats[c].push(s);
+      });
+      const catOrder = ['Hoofdsponsor', 'Sponsor', 'Mediapartner', 'Overige'];
+      const catKeys = catOrder.filter(c => cats[c]).concat(Object.keys(cats).filter(c => !catOrder.includes(c)));
+
+      catKeys.forEach(cat => {
+        sponsoren.push(H2(cat + 'en'));
+        cats[cat].forEach(s => {
+          sponsoren.push(H3(s.naam || 'Sponsor'));
+          if (s.bijdrage) sponsoren.push(labelValue('Bijdrage', s.bijdrage));
+          if (s.vermelding) sponsoren.push(labelValue('Vermelding', s.vermelding));
+          if (s.contact) sponsoren.push(labelValue('Contact', s.contact));
+        });
+      });
+    }
+
+    // ── 5. CONTACTEN ─────────────────────────────────────────────
+    const contacten = [];
+    if (S.contacten && S.contacten.length) {
+      contacten.push(H1('4. Contacten'));
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Naam', { bold: true, shading: 'EEEEEE', width: 25 }),
+          tableCell('Functie', { bold: true, shading: 'EEEEEE', width: 25 }),
+          tableCell('Telefoon', { bold: true, shading: 'EEEEEE', width: 20 }),
+          tableCell('Email', { bold: true, shading: 'EEEEEE', width: 30 })
+        ]
+      });
+      const rows = [headerRow];
+      S.contacten.forEach(c => {
+        rows.push(new TableRow({
+          children: [
+            tableCell(c.naam || ''),
+            tableCell((c.functie || '') + (c.organisatie ? ' — ' + c.organisatie : '')),
+            tableCell(c.telefoon || ''),
+            tableCell(c.email || '')
+          ]
+        }));
+      });
+      contacten.push(new Table({
+        rows,
+        width: { size: 100, type: WidthType.PERCENTAGE }
+      }));
+    }
+
+    // ── 6. VRIJWILLIGERS ─────────────────────────────────────────
+    const vrijwilligers = [];
+    if (S.vrijwilligers && S.vrijwilligers.length) {
+      vrijwilligers.push(H1('5. Vrijwilligers'));
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Naam', { bold: true, shading: 'EEEEEE', width: 30 }),
+          tableCell('Functie', { bold: true, shading: 'EEEEEE', width: 30 }),
+          tableCell('Locatie', { bold: true, shading: 'EEEEEE', width: 25 }),
+          tableCell('Bijz.', { bold: true, shading: 'EEEEEE', width: 15 })
+        ]
+      });
+      const rows = [headerRow];
+      S.vrijwilligers.forEach(v => {
+        rows.push(new TableRow({
+          children: [
+            tableCell(v.naam || ''),
+            tableCell(v.functie || ''),
+            tableCell(v.locatie || ''),
+            tableCell(v.bijzonderheden || '')
+          ]
+        }));
+      });
+      vrijwilligers.push(new Table({
+        rows,
+        width: { size: 100, type: WidthType.PERCENTAGE }
+      }));
+    }
+
+    // ── 7. ENTERTAINMENT ────────────────────────────────────────
+    const entertainment = [];
+    if (S.entertainment && S.entertainment.length) {
+      entertainment.push(H1('6. Entertainment'));
+      S.entertainment.forEach(e => {
+        entertainment.push(H3(e.naam || e.title || 'Entertainment'));
+        if (e.duur) entertainment.push(labelValue('Duur', e.duur));
+        if (e.beschrijving) entertainment.push(P(T(e.beschrijving)));
+        if (e.techniek) entertainment.push(labelValue('Techniek', e.techniek));
+      });
+    }
+
+    // ── 8. HULDIGINGEN / PRIJSUITREIKINGEN ──────────────────────
+    const huldigingen = [];
+    if (S.huldigingen && S.huldigingen.length) {
+      huldigingen.push(H1('7. Huldigingen'));
+      S.huldigingen.forEach(h => {
+        huldigingen.push(H3(h.naam || 'Huldiging'));
+        if (h.wieReiktUit) huldigingen.push(labelValue('Wie reikt uit', h.wieReiktUit));
+        if (h.locatie) huldigingen.push(labelValue('Locatie', h.locatie));
+        if (h.sponsor) huldigingen.push(labelValue('Sponsor', h.sponsor));
+        if (h.items) huldigingen.push(labelValue('Benodigdheden', h.items));
+        if (h.bijzonderheden) huldigingen.push(labelValue('Bijzonderheden', h.bijzonderheden));
+      });
+    }
+
+    // ── 9. REGIEPAD (TIJDSCHEMA) ────────────────────────────────
+    const regiepad = [H1('8. Regiepad — tijdschema')];
+    regiepad.push(P(T('Het complete regiepad in chronologische volgorde, gegroepeerd per sectie.', { italics: true })));
+    regiepad.push(empty());
+
+    // Bouw items per sectie op (dezelfde groepering als de tool)
+    let currentSepName = null;
+    const itemsBySep = { _nosep: { name: '', items: [] } };
+    const sepOrder = ['_nosep'];
+    let lastSepKey = '_nosep';
+    S.items.forEach(item => {
+      if (item.type === 'sep') {
+        const k = 'sep_' + item.id;
+        itemsBySep[k] = { name: item.name || 'Sectie', items: [] };
+        sepOrder.push(k);
+        lastSepKey = k;
+      } else if (item.type === 'item' || item.type === 'cue') {
+        itemsBySep[lastSepKey].items.push(item);
+      }
+    });
+
+    // Sorteer items binnen elke sectie op tijd
+    const t2m = (t) => { if(!t) return 9999; const [h,m] = t.split(':').map(Number); return (h||0)*60+(m||0); };
+
+    sepOrder.forEach(k => {
+      const grp = itemsBySep[k];
+      if (!grp.items.length) return;
+      const sorted = grp.items.slice().sort((a,b) => t2m(a.start) - t2m(b.start));
+
+      if (grp.name) regiepad.push(H2(grp.name));
+
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Tijd', { bold: true, shading: 'D0D0D0', width: 12 }),
+          tableCell('Onderdeel', { bold: true, shading: 'D0D0D0', width: 35 }),
+          tableCell('Wie', { bold: true, shading: 'D0D0D0', width: 18 }),
+          tableCell('Locatie', { bold: true, shading: 'D0D0D0', width: 20 }),
+          tableCell('Type', { bold: true, shading: 'D0D0D0', width: 15 })
+        ]
+      });
+      const rows = [headerRow];
+      sorted.forEach(item => {
+        const tijd = item.start + (item.eind ? '\n→ ' + item.eind : '');
+        const type = item.type === 'cue' ? 'CUE' : (item.label || '');
+        const omschrijving = (item.omschrijving || '') + (item.fixed ? ' [vast]' : '');
+        rows.push(new TableRow({
+          children: [
+            tableCell(tijd, { size: 16 }),
+            tableCell(omschrijving, { bold: item.type === 'cue', size: 18 }),
+            tableCell(item.wie || '', { size: 16 }),
+            tableCell(item.locatie || '', { size: 16 }),
+            tableCell(type, { size: 14, shading: item.type === 'cue' ? 'F3E8FF' : undefined })
+          ]
+        }));
+      });
+      regiepad.push(new Table({
+        rows,
+        width: { size: 100, type: WidthType.PERCENTAGE }
+      }));
+      regiepad.push(empty());
+    });
+
+    // ── 10. ONDERDELEN — DETAILS ────────────────────────────────
+    const details = [H1('9. Onderdelen — details')];
+    details.push(P(T('Per onderdeel: script, technische instructies, DJ-info, bijzonderheden.', { italics: true })));
+    details.push(empty());
+
+    const allItems = S.items.filter(i => i.type === 'item' || i.type === 'cue');
+    const sortedAll = allItems.slice().sort((a,b) => t2m(a.start) - t2m(b.start));
+
+    sortedAll.forEach(item => {
+      const titel = (item.start || '?:??') + ' — ' + (item.omschrijving || 'Onderdeel');
+      details.push(H3(titel));
+      if (item.type === 'cue') details.push(P(T('TYPE: CUE', { bold: true, color: '7C3AED' })));
+      if (item.wie) details.push(labelValue('Wie', item.wie));
+      if (item.locatie) details.push(labelValue('Locatie', item.locatie));
+      if (item.label) details.push(labelValue('Label', item.label));
+      if (item.eind) details.push(labelValue('Eindtijd', item.eind));
+      if (item.bijzonderheden) {
+        details.push(empty());
+        details.push(P([new TextRun({ text: 'Bijzonderheden: ', bold: true })]));
+        item.bijzonderheden.split(/\n+/).filter(Boolean).forEach(p => details.push(P(T(p))));
+      }
+      if (item.script) {
+        details.push(empty());
+        details.push(P([new TextRun({ text: 'Script: ', bold: true })]));
+        item.script.split(/\n+/).filter(Boolean).forEach(p => details.push(P(T(p))));
+      }
+      if (item.techniek) {
+        details.push(empty());
+        details.push(P([new TextRun({ text: 'Technische instructies: ', bold: true })]));
+        item.techniek.split(/\n+/).filter(Boolean).forEach(p => details.push(P(T(p))));
+      }
+      if (item.dj) {
+        details.push(empty());
+        details.push(P([new TextRun({ text: 'DJ / Muziek: ', bold: true })]));
+        item.dj.split(/\n+/).filter(Boolean).forEach(p => details.push(P(T(p))));
+      }
+      details.push(empty());
+    });
+
+    // ── ALLE SECTIES SAMENVOEGEN ────────────────────────────────
+    const allChildren = [
+      ...voorpagina,
+      ...eventInfo,
+      ...parcoursen,
+      ...sponsoren,
+      ...contacten,
+      ...vrijwilligers,
+      ...entertainment,
+      ...huldigingen,
+      ...regiepad,
+      ...details
+    ];
+
+    // ── DOCUMENT MAKEN ──────────────────────────────────────────
+    const doc = new Document({
+      creator: 'Regie',
+      title: naamStr + ' — Draaiboek',
+      description: 'Gegenereerd draaiboek',
+      styles: {
+        default: {
+          document: {
+            run: { font: 'Calibri', size: 20 }
+          }
+        }
+      },
+      sections: [{
+        properties: {
+          page: {
+            margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
+          }
+        },
+        headers: {
+          default: new Header({
+            children: [new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [new TextRun({ text: naamStr + ' — Draaiboek', size: 16, color: '888888' })]
+            })]
+          })
+        },
+        footers: {
+          default: new Footer({
+            children: [new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: 'pagina ', size: 16, color: '888888' }),
+                new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '888888' }),
+                new TextRun({ text: ' van ', size: 16, color: '888888' }),
+                new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, color: '888888' })
+              ]
+            })]
+          })
+        },
+        children: allChildren
+      }]
+    });
+
+    // ── PACKER → BLOB → DOWNLOAD ────────────────────────────────
+    const blob = await Packer.toBlob(doc);
+    const eventSlug = (naamStr || 'draaiboek').toLowerCase()
+      .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 30);
+    const datumSlug = new Date().toISOString().slice(0, 10);
+    const filename = `draaiboek-${eventSlug}-${datumSlug}.docx`;
+
+    if (typeof saveAs !== 'undefined') {
+      saveAs(blob, filename);
+    } else {
+      // Fallback zonder file-saver
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    showToast('✓ Draaiboek gedownload: ' + filename);
+
+  } catch (err) {
+    console.error('Draaiboek-fout:', err);
+    alert('Fout bij genereren draaiboek:\n\n' + err.message + '\n\nCheck de browser-console (Cmd+Opt+I) voor details.');
+  }
+}
