@@ -2713,14 +2713,18 @@ function openCallsheetModal(entId) {
 
   // Locatie-dropdown vullen — match op cs.locNaam (gekoppelde locatie) of ent.locatie als fallback
   const csLocSel = document.getElementById('cs-loc-sel');
+  let gekoppeldeLoc = null;
   if (csLocSel) {
     const huidigeLocNaam = cs.locNaam || ent.locatie || '';
     csLocSel.innerHTML = locDropdownOptions(huidigeLocNaam);
+    if (huidigeLocNaam) gekoppeldeLoc = findLocByNaam(huidigeLocNaam);
   }
 
   const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
-  v('cs-loc-adres',   cs.locAdres);
-  v('cs-loc-maps',    cs.locMaps);
+
+  // Adres + Maps: gebruik bestaande callsheet-data, val terug op gekoppelde locatie
+  v('cs-loc-adres', cs.locAdres || (gekoppeldeLoc ? gekoppeldeLoc.adres : ''));
+  v('cs-loc-maps',  cs.locMaps  || (gekoppeldeLoc ? gekoppeldeLoc.mapsUrl : ''));
   v('cs-melden',      cs.meldenBij);
   v('cs-t-aanwezig',  cs.tijdAanwezig);
   v('cs-t-start',     cs.tijdStart);
@@ -2854,37 +2858,39 @@ function buildCallsheetHTML(ent) {
     .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
     .replace(/"/g,'&quot;').replace(/'/g,'&#39;');
 
-  // helper: row alleen tonen als waarde bestaat
-  const row = (label, value, opts) => {
-    if (!value || !String(value).trim()) return '';
-    const v = (opts && opts.html) ? value : esc(value);
-    return `<tr><td class="lbl">${esc(label)}</td><td class="val">${v}</td></tr>`;
-  };
-
-  // helper: multiline tekst
   const multi = (text) => {
     if (!text) return '';
     return esc(text).replace(/\n+/g,'<br>');
   };
 
-  // Maps link met klikbare knop
-  const mapsLink = cs.locMaps
-    ? `<a href="${esc(cs.locMaps)}" target="_blank" rel="noopener" class="maps-btn">📍 Open in Google Maps</a>`
+  // Sla terug op gekoppelde locatie als adres/maps leeg zijn
+  const gekoppeldeLoc = (cs.locNaam ? findLocByNaam(cs.locNaam) : null) || (ent.locatie ? findLocByNaam(ent.locatie) : null);
+  const adres = cs.locAdres || (gekoppeldeLoc ? gekoppeldeLoc.adres : '');
+  const mapsUrl = cs.locMaps || (gekoppeldeLoc ? gekoppeldeLoc.mapsUrl : '');
+  const locNaam = cs.locNaam || ent.locatie || (gekoppeldeLoc ? gekoppeldeLoc.naam : '');
+
+  const mapsLink = mapsUrl
+    ? '<a href="' + esc(mapsUrl) + '" target="_blank" rel="noopener" class="maps-btn">📍 Open in Google Maps</a>'
     : '';
 
-  // Logo URL — direct van loopleeuwarden.frl
   const logoUrl = 'https://www.loopleeuwarden.frl/wp-content/themes/hello-elementor-child/assets/LogoLoopLWD.svg';
 
-  // Bouw hoofdsectie HTML
-  const tijden = [
-    cs.tijdAanwezig && `<b>${esc(cs.tijdAanwezig)}</b> aanwezig`,
-    cs.tijdStart    && `<b>${esc(cs.tijdStart)}</b> start`,
-    cs.tijdEinde    && `<b>${esc(cs.tijdEinde)}</b> einde`,
-  ].filter(Boolean).join('<br>') || '—';
+  // CALL TIME = aanwezig vanaf — dat is het belangrijkste
+  const callTime = cs.tijdAanwezig || cs.tijdStart || '';
 
   const generationDate = new Date().toLocaleDateString('nl-NL', {
     weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
   });
+
+  // Helper voor labelregel
+  const lblRow = (label, value) => {
+    if (!value) return '';
+    return '<tr><td class="lbl">' + esc(label) + '</td><td class="val">' + esc(value) + '</td></tr>';
+  };
+
+  const gageStr = ent.bedrag
+    ? '€' + ent.bedrag + ' excl. btw' + (ent.korting ? '  (' + ent.korting + '% korting)' : '')
+    : '';
 
   return `<!DOCTYPE html>
 <html lang="nl">
@@ -2892,65 +2898,202 @@ function buildCallsheetHTML(ent) {
 <meta charset="UTF-8">
 <title>Callsheet — ${esc(ent.naam)} — ${esc(eventNaam)}</title>
 <style>
-  @page { size: A4; margin: 12mm; }
+  @page { size: A4; margin: 0; }
   * { box-sizing: border-box; }
-  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif; color: #1a1a1a; margin: 0; background: #f5f5f5; padding: 20px; }
-  .toolbar { max-width: 800px; margin: 0 auto 18px; display: flex; gap: 10px; align-items: center; }
-  .toolbar h2 { margin: 0; font-size: 14px; font-weight: 600; color: #555; flex: 1; }
-  .toolbar button { background: #1a1a1a; color: #fff; border: none; padding: 10px 18px; border-radius: 6px; font-size: 13px; font-weight: 600; cursor: pointer; font-family: inherit; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, Arial, sans-serif;
+    color: #1a1a1a;
+    background: #e5e5e5;
+    padding: 20px 0;
+  }
+
+  /* Toolbar buiten de pagina */
+  .toolbar {
+    width: 210mm;
+    margin: 0 auto 18px;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 0 4mm;
+  }
+  .toolbar h2 { margin: 0; font-size: 13px; font-weight: 600; color: #555; flex: 1; }
+  .toolbar button {
+    background: #1a1a1a; color: #fff; border: none;
+    padding: 9px 16px; border-radius: 6px;
+    font-size: 13px; font-weight: 600;
+    cursor: pointer; font-family: inherit;
+  }
   .toolbar button:hover { background: #333; }
   .toolbar .secondary { background: #fff; color: #1a1a1a; border: 1px solid #ccc; }
 
-  .sheet { max-width: 800px; margin: 0 auto; background: #fff; padding: 24px 28px; border: 1px solid #d0d0d0; box-shadow: 0 2px 10px rgba(0,0,0,.06); }
+  /* A4 pagina exact — 210x297mm */
+  .sheet {
+    width: 210mm;
+    height: 297mm;
+    margin: 0 auto;
+    background: #fff;
+    padding: 14mm 14mm;
+    box-shadow: 0 2px 14px rgba(0,0,0,.12);
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+  }
 
-  .header { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; padding-bottom: 14px; border-bottom: 2px solid #1a1a1a; margin-bottom: 16px; }
-  .header-left { font-size: 11px; color: #555; line-height: 1.5; }
-  .header-left .org-naam { font-weight: 700; color: #1a1a1a; font-size: 12px; margin-bottom: 4px; }
+  /* HEADER — 3 koloms */
+  .header {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 14px;
+    align-items: start;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #1a1a1a;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+  .header-left { font-size: 10px; color: #555; line-height: 1.5; }
+  .header-left .org-naam { font-weight: 700; color: #1a1a1a; font-size: 11px; margin-bottom: 3px; }
   .header-mid { text-align: center; }
-  .header-mid img { max-height: 56px; max-width: 200px; }
-  .header-mid .fallback-title { font-weight: 800; font-size: 22px; letter-spacing: -.5px; color: #1a1a1a; }
+  .header-mid img { max-height: 50px; max-width: 180px; }
+  .header-mid .fallback-title { font-weight: 800; font-size: 18px; color: #1a1a1a; }
   .header-right { text-align: right; }
-  .header-right .label { font-size: 10px; letter-spacing: 1.5px; color: #777; text-transform: uppercase; font-weight: 700; }
-  .header-right .title { font-size: 22px; font-weight: 800; color: #1a1a1a; line-height: 1; margin-top: 2px; }
-  .header-right .date { font-size: 11px; color: #444; margin-top: 6px; }
+  .header-right .label { font-size: 9px; letter-spacing: 1.5px; color: #777; text-transform: uppercase; font-weight: 700; }
+  .header-right .title { font-size: 18px; font-weight: 800; color: #1a1a1a; line-height: 1; margin-top: 2px; }
+  .header-right .date { font-size: 10px; color: #444; margin-top: 4px; }
 
-  .act-bar { background: #fafafa; border: 1px solid #e0e0e0; padding: 12px 16px; margin-bottom: 14px; display: grid; grid-template-columns: 1fr auto; gap: 12px; align-items: center; }
-  .act-bar .act-name { font-size: 18px; font-weight: 700; line-height: 1.1; }
-  .act-bar .act-type { font-size: 11px; color: #777; margin-top: 2px; }
-  .act-bar .act-times { text-align: right; font-size: 12px; color: #1a1a1a; line-height: 1.4; }
+  /* CALL TIME — extreem prominent, naast act-naam */
+  .topblock {
+    display: grid;
+    grid-template-columns: 1fr auto;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 12px;
+    flex-shrink: 0;
+  }
+  .topblock .act-block {
+    background: #fafafa;
+    border: 1px solid #d0d0d0;
+    padding: 10px 14px;
+  }
+  .topblock .act-block .act-name {
+    font-size: 17px; font-weight: 700; line-height: 1.1;
+  }
+  .topblock .act-block .act-type {
+    font-size: 11px; color: #777; margin-top: 3px;
+  }
 
-  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid #d0d0d0; margin-bottom: 14px; }
-  .grid-2 > .panel { padding: 10px 14px; }
-  .grid-2 > .panel + .panel { border-left: 1px solid #d0d0d0; }
+  .calltime-box {
+    background: #1a1a1a;
+    color: #fff;
+    padding: 8px 18px;
+    text-align: center;
+    min-width: 130px;
+  }
+  .calltime-box .label {
+    font-size: 9px; letter-spacing: 2px; text-transform: uppercase;
+    font-weight: 700; opacity: .7;
+  }
+  .calltime-box .time {
+    font-size: 32px; font-weight: 800; line-height: 1; margin-top: 2px;
+    font-variant-numeric: tabular-nums;
+  }
+  .calltime-box .label-sub {
+    font-size: 9px; letter-spacing: 1px; text-transform: uppercase;
+    font-weight: 600; opacity: .65; margin-top: 3px;
+  }
 
-  .panel-title { font-size: 9px; letter-spacing: 1.5px; color: #777; text-transform: uppercase; font-weight: 700; margin-bottom: 6px; padding-bottom: 4px; border-bottom: 1px solid #eee; }
+  /* Algemene panel-styles */
+  .panel { border: 1px solid #d0d0d0; padding: 8px 12px; margin-bottom: 10px; }
+  .panel-title {
+    font-size: 9px; letter-spacing: 1.5px; color: #777;
+    text-transform: uppercase; font-weight: 700;
+    margin-bottom: 5px; padding-bottom: 3px;
+    border-bottom: 1px solid #eee;
+  }
+  .panel-text { font-size: 11.5px; line-height: 1.4; color: #1a1a1a; }
 
-  table { width: 100%; border-collapse: collapse; font-size: 12px; }
-  table td { padding: 4px 0; vertical-align: top; }
-  table td.lbl { color: #777; font-weight: 600; width: 110px; padding-right: 10px; font-size: 11px; }
-  table td.val { color: #1a1a1a; line-height: 1.4; }
+  /* Schedule-tabel — tijden + locatie */
+  .schedule-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 0;
+    border: 1px solid #d0d0d0;
+    margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .schedule-row > .col {
+    padding: 8px 12px;
+  }
+  .schedule-row > .col + .col { border-left: 1px solid #d0d0d0; }
+  .schedule-row .col-time { background: #fafafa; }
+  .schedule-row .col-time .panel-title { color: #555; }
+  .schedule-row .col-time .time-line {
+    font-size: 13px; font-variant-numeric: tabular-nums;
+    margin-top: 3px; line-height: 1.4;
+  }
+  .schedule-row .col-time .time-line b { color: #000; }
 
-  .section { margin-bottom: 14px; border: 1px solid #d0d0d0; padding: 10px 14px; }
-  .section .panel-title { margin-bottom: 8px; }
-  .section-text { font-size: 12px; line-height: 1.5; color: #1a1a1a; }
+  /* Contact + Locatie als 2-koloms */
+  .duo {
+    display: grid; grid-template-columns: 1fr 1fr; gap: 0;
+    border: 1px solid #d0d0d0; margin-bottom: 10px;
+    flex-shrink: 0;
+  }
+  .duo > .col { padding: 8px 12px; }
+  .duo > .col + .col { border-left: 1px solid #d0d0d0; }
 
-  .maps-btn { display: inline-block; background: #1a73e8; color: #fff; padding: 4px 10px; border-radius: 4px; font-size: 11px; text-decoration: none; font-weight: 600; }
+  /* Tabel binnen panels */
+  table { width: 100%; border-collapse: collapse; font-size: 11px; }
+  table td { padding: 2.5px 0; vertical-align: top; }
+  table td.lbl { color: #777; font-weight: 600; width: 100px; padding-right: 8px; font-size: 10px; }
+  table td.val { color: #1a1a1a; line-height: 1.35; }
+
+  /* Maps knop */
+  .maps-btn {
+    display: inline-block; background: #1a73e8; color: #fff;
+    padding: 3px 8px; border-radius: 3px;
+    font-size: 10px; text-decoration: none; font-weight: 600;
+    margin-top: 3px;
+  }
   .maps-btn:hover { background: #1557b0; }
 
-  .nood { background: #fff5f5; border: 1px solid #fecaca; padding: 10px 14px; }
+  /* Noodcontact apart, opvallend */
+  .nood {
+    background: #fff5f5; border: 1px solid #fecaca;
+    padding: 8px 12px; margin-bottom: 10px;
+    flex-shrink: 0;
+  }
   .nood .panel-title { color: #c0392b; }
   .nood table td.val { font-weight: 600; }
 
-  .footer { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; margin-top: 22px; padding-top: 14px; border-top: 1px solid #d0d0d0; font-size: 10px; color: #888; }
+  /* Footer onderaan, blijft op pagina */
+  .footer {
+    margin-top: auto;
+    padding-top: 10px;
+    border-top: 1px solid #d0d0d0;
+    font-size: 9px;
+    color: #888;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 30px;
+    flex-shrink: 0;
+  }
   .footer .gen-info { font-style: italic; }
-  .signature { border-top: 1px solid #999; padding-top: 4px; margin-top: 30px; font-size: 10px; color: #555; text-align: center; }
+
+  /* Auto-grow content section */
+  .content-flow { flex: 1; display: flex; flex-direction: column; }
 
   @media print {
     body { background: #fff; padding: 0; }
     .toolbar { display: none; }
-    .sheet { max-width: none; margin: 0; padding: 0; border: none; box-shadow: none; }
+    .sheet {
+      box-shadow: none;
+      width: 210mm;
+      height: 297mm;
+      margin: 0;
+    }
     .maps-btn { background: none; color: #1a73e8; padding: 0; }
-    .maps-btn::after { content: " (" attr(href) ")"; font-size: 9px; word-break: break-all; }
+    .maps-btn::after { content: " (" attr(href) ")"; font-size: 8px; word-break: break-all; }
   }
 </style>
 </head>
@@ -2968,9 +3111,9 @@ function buildCallsheetHTML(ent) {
   <div class="header">
     <div class="header-left">
       <div class="org-naam">${esc(eventNaam)}</div>
-      ${defs.orgNaam ? `<div>${esc(defs.orgNaam)}</div>` : ''}
-      ${defs.orgTel  ? `<div>${esc(defs.orgTel)}</div>` : ''}
-      ${defs.orgEmail? `<div>${esc(defs.orgEmail)}</div>` : ''}
+      ${defs.orgNaam ? '<div>' + esc(defs.orgNaam) + '</div>' : ''}
+      ${defs.orgTel  ? '<div>' + esc(defs.orgTel) + '</div>' : ''}
+      ${defs.orgEmail? '<div>' + esc(defs.orgEmail) + '</div>' : ''}
     </div>
     <div class="header-mid">
       <img src="${logoUrl}" alt="LOOP Leeuwarden" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">
@@ -2983,94 +3126,111 @@ function buildCallsheetHTML(ent) {
     </div>
   </div>
 
-  <!-- ACT BAR -->
-  <div class="act-bar">
-    <div>
+  <!-- TOP: act + CALL TIME -->
+  <div class="topblock">
+    <div class="act-block">
       <div class="act-name">${esc(ent.naam)}</div>
-      ${ent.type ? `<div class="act-type">${esc(ent.type)}${ent.aantalPersonen ? ' · ' + ent.aantalPersonen + ' personen' : ''}</div>` : ''}
+      ${ent.type ? '<div class="act-type">' + esc(ent.type) + (ent.aantalPersonen ? ' · ' + ent.aantalPersonen + ' personen' : '') + '</div>' : ''}
     </div>
-    <div class="act-times">${tijden}</div>
+    <div class="calltime-box">
+      <div class="label">Call Time</div>
+      <div class="time">${esc(callTime || '—')}</div>
+      <div class="label-sub">aanwezig op locatie</div>
+    </div>
   </div>
 
-  <!-- GRID: contact + locatie -->
-  <div class="grid-2">
-    <div class="panel">
+  <div class="content-flow">
+
+  <!-- SCHEDULE: tijden + start + einde -->
+  <div class="schedule-row">
+    <div class="col col-time">
+      <div class="panel-title">Aanwezig</div>
+      <div class="time-line"><b>${esc(cs.tijdAanwezig || '—')}</b></div>
+    </div>
+    <div class="col col-time">
+      <div class="panel-title">Start</div>
+      <div class="time-line"><b>${esc(cs.tijdStart || '—')}</b></div>
+    </div>
+    <div class="col col-time">
+      <div class="panel-title">Einde verwacht</div>
+      <div class="time-line"><b>${esc(cs.tijdEinde || '—')}</b></div>
+    </div>
+  </div>
+
+  <!-- DUO: contact + locatie -->
+  <div class="duo">
+    <div class="col">
       <div class="panel-title">Jouw contactgegevens</div>
       <table>
-        ${row('Contactpersoon', ent.contactpersoon)}
-        ${row('Telefoon',       ent.telefoon)}
-        ${row('Aantal personen', ent.aantalPersonen ? String(ent.aantalPersonen) : '')}
+        ${lblRow('Contact', ent.contactpersoon)}
+        ${lblRow('Telefoon', ent.telefoon)}
+        ${lblRow('Personen', ent.aantalPersonen ? String(ent.aantalPersonen) : '')}
       </table>
     </div>
-    <div class="panel">
+    <div class="col">
       <div class="panel-title">Locatie</div>
       <table>
-        ${row('Locatie',  ent.locatie)}
-        ${row('Adres',    cs.locAdres)}
-        ${cs.locMaps ? row('Route', mapsLink, {html:true}) : ''}
-        ${row('Melden bij', cs.meldenBij || 'n.v.t.')}
+        ${lblRow('Naam', locNaam)}
+        ${lblRow('Adres', adres)}
+        ${lblRow('Melden bij', cs.meldenBij || 'n.v.t.')}
       </table>
+      ${mapsLink}
     </div>
   </div>
 
   ${cs.opdracht ? `
-  <div class="section">
-    <div class="panel-title">Opdracht</div>
-    <div class="section-text">${multi(cs.opdracht)}</div>
+  <div class="panel">
+    <div class="panel-title">Opdracht — wat ga je doen?</div>
+    <div class="panel-text">${multi(cs.opdracht)}</div>
   </div>` : ''}
 
-  ${(cs.catering || cs.stroom || ent.rider) ? `
-  <div class="grid-2">
-    ${cs.catering ? `
-    <div class="panel">
-      <div class="panel-title">Catering</div>
-      <div class="section-text">${multi(cs.catering)}</div>
-    </div>` : '<div class="panel"><div class="panel-title">Catering</div><div class="section-text" style="color:#999">—</div></div>'}
-    ${cs.stroom ? `
-    <div class="panel">
-      <div class="panel-title">Stroom</div>
-      <div class="section-text">${multi(cs.stroom)}</div>
-    </div>` : (ent.rider ? `
-    <div class="panel">
-      <div class="panel-title">Stroom / Rider</div>
-      <div class="section-text">${multi(ent.rider)}</div>
-    </div>` : '<div class="panel"><div class="panel-title">Stroom</div><div class="section-text" style="color:#999">—</div></div>')}
+  ${cs.catering ? `
+  <div class="panel">
+    <div class="panel-title">Catering</div>
+    <div class="panel-text">${multi(cs.catering)}</div>
+  </div>` : ''}
+
+  ${(cs.stroom || ent.rider) ? `
+  <div class="panel">
+    <div class="panel-title">Stroom & techniek</div>
+    <div class="panel-text">${multi(cs.stroom || ent.rider)}</div>
   </div>` : ''}
 
   ${cs.notities ? `
-  <div class="section">
+  <div class="panel">
     <div class="panel-title">Aanrijden, parkeren & notities</div>
-    <div class="section-text">${multi(cs.notities)}</div>
+    <div class="panel-text">${multi(cs.notities)}</div>
   </div>` : ''}
 
-  ${ent.bedrag ? `
-  <div class="section">
+  ${gageStr ? `
+  <div class="panel">
     <div class="panel-title">Vergoeding</div>
-    <table>
-      ${row('Afgesproken gage', '€' + ent.bedrag + ' excl. btw' + (ent.korting ? '  (' + ent.korting + '% korting)' : ''))}
-    </table>
+    <div class="panel-text"><b>${esc(gageStr)}</b></div>
   </div>` : ''}
 
   ${(defs.noodNaam || defs.noodTel) ? `
   <div class="nood">
     <div class="panel-title">Noodcontact op de dag</div>
     <table>
-      ${row('Naam',     defs.noodNaam)}
-      ${row('Telefoon', defs.noodTel)}
+      ${lblRow('Naam', defs.noodNaam)}
+      ${lblRow('Telefoon', defs.noodTel)}
     </table>
   </div>` : ''}
 
   <!-- FOOTER -->
   <div class="footer">
     <div class="gen-info">Gegenereerd op ${esc(generationDate)}</div>
-    <div style="text-align:right">${esc(eventNaam)} — Callsheet ${esc(ent.naam)}</div>
+    <div style="text-align:right">${esc(eventNaam)} — ${esc(ent.naam)}</div>
   </div>
+
+  </div><!-- content-flow -->
 
 </div>
 
 </body>
 </html>`;
 }
+
 
 /* ═══════════════════════════════════════════════════════════════
    LOCATIES — centrale lijst, koppelbaar aan entertainment & callsheet
