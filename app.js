@@ -39,6 +39,7 @@ async function init(){
   if(!S.sponsoren)S.sponsoren=[];
   if(!S.parcoursen)S.parcoursen=[];
   if(!S.contacten)S.contacten=[];
+  if(!S.locaties)seedLocaties();
   renderRightPanel();
   renderBoList();
   updateBadges();
@@ -116,6 +117,7 @@ function gv(id,el){
   if(id==='spon')renderSpon();
   if(id==='parc')renderParc();
   if(id==='cont')renderCont();
+  if(id==='loc')renderLoc();
 }
 function updateBadges(){
   const cf=conflicts();
@@ -132,6 +134,7 @@ function updateBadges(){
   const nsEl=document.getElementById('nb-spon');if(nsEl){nsEl.textContent=(S.sponsoren||[]).length;nsEl.style.display=(S.sponsoren||[]).length?'inline':'none';}
   const npEl=document.getElementById('nb-parc');if(npEl){npEl.textContent=(S.parcoursen||[]).length;npEl.style.display=(S.parcoursen||[]).length?'inline':'none';}
   const ncEl=document.getElementById('nb-cont');if(ncEl){ncEl.textContent=(S.contacten||[]).length;ncEl.style.display=(S.contacten||[]).length?'inline':'none';}
+  const nlocEl=document.getElementById('nb-loc');if(nlocEl){nlocEl.textContent=(S.locaties||[]).length;nlocEl.style.display=(S.locaties||[]).length?'inline':'none';}
 }
 
 /* ═══ BO LIST ═══ */
@@ -842,6 +845,19 @@ function seedHuldigingen(){
   ];
 }
 
+function seedLocaties(){
+  S.locaties = [
+    {id:S.nextId++, naam:"Start Wilhelminaplein", adres:"Wilhelminaplein, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/4MtQZ8PZPfKdpTFaA"},
+    {id:S.nextId++, naam:"Garmin Cheerzone Noorderbrug", adres:"Noorderbrug, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/FTDac32MfDU8vKQN9"},
+    {id:S.nextId++, naam:"VP2 Havankpark", adres:"Havankpark, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/mBArfmTBPNpNCf2T6"},
+    {id:S.nextId++, naam:"VP3 Rengerspark", adres:"Rengerspark, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/ZJs4fGdbbQaC8RXQ8"},
+    {id:S.nextId++, naam:"Finish Hardlopen Groeneweg", adres:"Groeneweg, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/T71BcDoeHvzLWMxt6"},
+    {id:S.nextId++, naam:"Finish Wandelen Oldehoofsterkerkhof", adres:"Oldehoofsterkerkhof, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/T71BcDoeHvzLWMxt6"},
+    {id:S.nextId++, naam:"Huldigingspodium Oldehoofsterkerkhof", adres:"Oldehoofsterkerkhof, Leeuwarden", mapsUrl:"https://maps.app.goo.gl/ZvsSxdUHspnoVyKt7"},
+    {id:S.nextId++, naam:"Event Office, Gemeentehuis Leeuwarden", adres:"Gemeentehuis Leeuwarden", mapsUrl:"https://maps.app.goo.gl/Tp2WTCW42Fk6hEDv6"},
+  ];
+}
+
 /* INITIALS helper */
 function initials(name){
   if(!name)return'?';
@@ -940,7 +956,7 @@ function openLibModal(type,editId){
           '<div class="fg"><label>Type</label><select id="lm-type"><option>Muziek</option><option>DJ</option><option>Spreker</option><option>Theater</option><option>Dans</option><option>Overige</option></select></div>'+
           '<div class="fg"><label>Aantal personen</label><input type="number" id="lm-pers" min="1" placeholder="1"></div>'+
         '</div>'+
-        '<div class="fg"><label>Locatie (standaard)</label><input type="text" id="lm-loc" placeholder="Plein, Podium…"></div>'+
+        '<div class="fg"><label>Locatie (standaard)</label><select id="lm-loc-sel" onchange="lmLocChange()"><option value="">— Geen / vrije invoer —</option></select><input type="text" id="lm-loc" placeholder="Of typ vrije locatie…" style="margin-top:6px"></div>'+
         '<div class="fg2">'+
           '<div class="fg"><label>Contactpersoon</label><input type="text" id="lm-contact" placeholder="Naam"></div>'+
           '<div class="fg"><label>Telefoon</label><input type="text" id="lm-tel" placeholder="06-…"></div>'+
@@ -967,7 +983,11 @@ function openLibModal(type,editId){
       document.getElementById("lm-naam").value=item.naam||"";
       document.getElementById("lm-type").value=item.type||"Muziek";
       document.getElementById("lm-pers").value=item.aantalPersonen||"";
-      document.getElementById("lm-loc").value=item.locatie||"";
+      // Locatie: vul dropdown, match bestaande waarde
+      const locSel = document.getElementById("lm-loc-sel");
+      locSel.innerHTML = locDropdownOptions(item.locatie || "");
+      document.getElementById("lm-loc").value = (locSel.value === "" && item.locatie) ? item.locatie : "";
+      document.getElementById("lm-loc").style.display = (locSel.value === "") ? "block" : "none";
       document.getElementById("lm-contact").value=item.contactpersoon||"";
       document.getElementById("lm-tel").value=item.telefoon||"";
       document.getElementById("lm-status").value=item.status||"aangevraagd";
@@ -976,6 +996,11 @@ function openLibModal(type,editId){
       document.getElementById("lm-bed").value=item.bedrag||"";
       document.getElementById("lm-kor").value=item.korting||"";
       updLmFin();
+    } else {
+      // Nieuw item: vul dropdown leeg
+      const locSel = document.getElementById("lm-loc-sel");
+      locSel.innerHTML = locDropdownOptions("");
+      document.getElementById("lm-loc").style.display = "block";
     }
   } else {
     tabs.innerHTML="";
@@ -1024,8 +1049,12 @@ function saveLibItem(){
   const naam=((document.getElementById("lm-naam")||{}).value||"").trim();
   if(!naam){alert("Vul een naam in.");return;}
   const list=_libType==="ent"?S.entertainment:S.huldigingen;
+  // Locatie: pak waarde uit dropdown (als gekozen) of uit vrij veld
+  const locSel = document.getElementById("lm-loc-sel");
+  const locTxt = document.getElementById("lm-loc");
+  const locatie = (locSel && locSel.value) ? locSel.value : ((locTxt && locTxt.value) || "");
   if(_libType==="ent"){
-    const data={naam:naam,type:(document.getElementById("lm-type")||{}).value||"Muziek",aantalPersonen:parseInt((document.getElementById("lm-pers")||{}).value)||0,locatie:(document.getElementById("lm-loc")||{}).value||"",contactpersoon:(document.getElementById("lm-contact")||{}).value||"",telefoon:(document.getElementById("lm-tel")||{}).value||"",status:(document.getElementById("lm-status")||{}).value||"aangevraagd",bijzonderheden:(document.getElementById("lm-biz")||{}).value||"",rider:(document.getElementById("lm-rider")||{}).value||"",bedrag:(document.getElementById("lm-bed")||{}).value||"",korting:(document.getElementById("lm-kor")||{}).value||""};
+    const data={naam:naam,type:(document.getElementById("lm-type")||{}).value||"Muziek",aantalPersonen:parseInt((document.getElementById("lm-pers")||{}).value)||0,locatie:locatie,contactpersoon:(document.getElementById("lm-contact")||{}).value||"",telefoon:(document.getElementById("lm-tel")||{}).value||"",status:(document.getElementById("lm-status")||{}).value||"aangevraagd",bijzonderheden:(document.getElementById("lm-biz")||{}).value||"",rider:(document.getElementById("lm-rider")||{}).value||"",bedrag:(document.getElementById("lm-bed")||{}).value||"",korting:(document.getElementById("lm-kor")||{}).value||""};
     if(_libEditId){const i=list.findIndex(function(x){return x.id===_libEditId;});if(i!==-1)list[i]=Object.assign({},list[i],data);}
     else list.push(Object.assign({id:S.nextId++},data));
   } else {
@@ -2682,6 +2711,13 @@ function openCallsheetModal(entId) {
   document.getElementById('cs-modal-title').textContent = 'Callsheet — ' + ent.naam;
   document.getElementById('cs-actname').textContent = ent.naam + (ent.type ? ' · ' + ent.type : '');
 
+  // Locatie-dropdown vullen — match op cs.locNaam (gekoppelde locatie) of ent.locatie als fallback
+  const csLocSel = document.getElementById('cs-loc-sel');
+  if (csLocSel) {
+    const huidigeLocNaam = cs.locNaam || ent.locatie || '';
+    csLocSel.innerHTML = locDropdownOptions(huidigeLocNaam);
+  }
+
   const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val || ''; };
   v('cs-loc-adres',   cs.locAdres);
   v('cs-loc-maps',    cs.locMaps);
@@ -2743,8 +2779,10 @@ function closeCsModal() { document.getElementById('cs-ovl').classList.remove('op
 // ── Callsheet-data opslaan zonder genereren ──
 function _csCollectFormData() {
   const g = (id) => (document.getElementById(id).value || '').trim();
+  const locSel = document.getElementById('cs-loc-sel');
   return {
     cs: {
+      locNaam:      locSel ? locSel.value : '',
       locAdres:     g('cs-loc-adres'),
       locMaps:      g('cs-loc-maps'),
       meldenBij:    g('cs-melden'),
@@ -3032,4 +3070,131 @@ function buildCallsheetHTML(ent) {
 
 </body>
 </html>`;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   LOCATIES — centrale lijst, koppelbaar aan entertainment & callsheet
+   ═══════════════════════════════════════════════════════════════ */
+
+function escHtml(s) {
+  return String(s == null ? '' : s)
+    .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+function escAttr(s) { return String(s||'').replace(/&/g,'&amp;').replace(/"/g,'&quot;'); }
+
+function renderLoc() {
+  updateBadges();
+  const tb = document.getElementById('loc-tb');
+  if (!tb) return;
+  const list = S.locaties || [];
+  if (!list.length) {
+    tb.innerHTML = '<tr><td colspan="4" style="text-align:center;padding:30px;color:var(--t3);font-size:13px">Nog geen locaties. Klik <b>+ Locatie toevoegen</b>.</td></tr>';
+    return;
+  }
+  tb.innerHTML = list.map(function(l){
+    const mapsCell = l.mapsUrl
+      ? '<a href="'+escAttr(l.mapsUrl)+'" target="_blank" rel="noopener" onclick="event.stopPropagation()" style="color:#1a73e8;text-decoration:none;font-size:11px">📍 Open</a>'
+      : '<span style="color:var(--t3)">—</span>';
+    return '<tr onclick="openLocModal('+l.id+')">'+
+      '<td><b>'+escHtml(l.naam||'')+'</b></td>'+
+      '<td style="color:var(--t2);font-size:12px">'+escHtml(l.adres||'')+'</td>'+
+      '<td>'+mapsCell+'</td>'+
+      '<td><button class="ib del" onclick="event.stopPropagation();delLocById('+l.id+')" title="Verwijder">✕</button></td>'+
+    '</tr>';
+  }).join('');
+}
+
+let _locEditId = null;
+function openLocModal(editId) {
+  _locEditId = editId || null;
+  const l = editId ? (S.locaties||[]).find(function(x){return x.id===editId;}) : null;
+  document.getElementById('loc-modal-title').textContent = editId ? 'Locatie bewerken' : 'Locatie toevoegen';
+  document.getElementById('loc-del-btn').style.display = editId ? 'inline-flex' : 'none';
+  document.getElementById('loc-naam').value  = l ? (l.naam  || '') : '';
+  document.getElementById('loc-adres').value = l ? (l.adres || '') : '';
+  document.getElementById('loc-maps').value  = l ? (l.mapsUrl || '') : '';
+  document.getElementById('loc-ovl').classList.add('open');
+}
+
+function closeLocModal() { document.getElementById('loc-ovl').classList.remove('open'); }
+
+function saveLoc() {
+  const naam = (document.getElementById('loc-naam').value || '').trim();
+  if (!naam) { alert('Vul een naam in.'); return; }
+  const data = {
+    naam: naam,
+    adres: (document.getElementById('loc-adres').value || '').trim(),
+    mapsUrl: (document.getElementById('loc-maps').value || '').trim()
+  };
+  if (!S.locaties) S.locaties = [];
+  if (_locEditId) {
+    const i = S.locaties.findIndex(function(x){return x.id===_locEditId;});
+    if (i !== -1) S.locaties[i] = Object.assign({}, S.locaties[i], data);
+  } else {
+    S.locaties.push(Object.assign({id: S.nextId++}, data));
+  }
+  save(); closeLocModal(); renderLoc(); updateBadges();
+}
+
+function delLoc() {
+  if (!confirm('Locatie verwijderen?\n\nLet op: acts/callsheets die naar deze locatie verwijzen blijven hun gegevens behouden, maar de koppeling gaat verloren.')) return;
+  S.locaties = (S.locaties||[]).filter(function(x){return x.id !== _locEditId;});
+  save(); closeLocModal(); renderLoc(); updateBadges();
+}
+
+function delLocById(id) {
+  if (!confirm('Locatie verwijderen?')) return;
+  S.locaties = (S.locaties||[]).filter(function(x){return x.id !== id;});
+  save(); renderLoc(); updateBadges();
+}
+
+// Helper: zoek locatie op naam (gebruikt voor entertainment.locatie matching)
+function findLocByNaam(naam) {
+  if (!naam || !S.locaties) return null;
+  return S.locaties.find(function(l){ return l.naam === naam; });
+}
+
+// Helper: render dropdown HTML voor locatie-keuze
+function locDropdownOptions(selectedNaam) {
+  const list = S.locaties || [];
+  let html = '<option value="">— Geen / vrije invoer —</option>';
+  list.forEach(function(l){
+    const sel = (l.naam === selectedNaam) ? ' selected' : '';
+    html += '<option value="'+escAttr(l.naam)+'"'+sel+'>'+escHtml(l.naam)+'</option>';
+  });
+  return html;
+}
+
+// Locatie-dropdown change handler in entertainment modal
+function lmLocChange() {
+  const sel = document.getElementById("lm-loc-sel");
+  const txt = document.getElementById("lm-loc");
+  if (sel.value) {
+    // Locatie gekozen uit lijst → vrij veld wordt verborgen en geleegd
+    txt.style.display = "none";
+    txt.value = "";
+  } else {
+    // 'Geen' gekozen → vrij veld zichtbaar
+    txt.style.display = "block";
+  }
+}
+
+// Callsheet locatie-dropdown change handler
+function csLocChange() {
+  const sel = document.getElementById('cs-loc-sel');
+  if (!sel || !sel.value) return;  // 'Geen' gekozen → niets autovullen
+  const loc = findLocByNaam(sel.value);
+  if (!loc) return;
+  const adresEl = document.getElementById('cs-loc-adres');
+  const mapsEl = document.getElementById('cs-loc-maps');
+  // Alleen overschrijven als velden leeg zijn — anders gebruiker waarschuwen
+  const adresLeeg = !adresEl.value.trim();
+  const mapsLeeg = !mapsEl.value.trim();
+  if (!adresLeeg || !mapsLeeg) {
+    if (!confirm('Adres en/of Maps-link zijn al ingevuld. Overschrijven met gegevens van "' + loc.naam + '"?')) return;
+  }
+  if (loc.adres) adresEl.value = loc.adres;
+  if (loc.mapsUrl) mapsEl.value = loc.mapsUrl;
 }

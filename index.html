@@ -56,6 +56,7 @@
     <div class="nv" id="ni-spon"    onclick="gv('spon',this)"><span class="ic">🤝</span> Sponsoren <span class="bdg bdg-y" id="nb-spon" style="display:none">0</span></div>
     <div class="nv" id="ni-parc"    onclick="gv('parc',this)"><span class="ic">🗺</span> Parcoursen <span class="bdg bdg-y" id="nb-parc" style="display:none">0</span></div>
     <div class="nv" id="ni-cont"    onclick="gv('cont',this)"><span class="ic">📞</span> Contacten <span class="bdg bdg-y" id="nb-cont" style="display:none">0</span></div>
+    <div class="nv" id="ni-loc"     onclick="gv('loc',this)"><span class="ic">📍</span> Locaties <span class="bdg bdg-y" id="nb-loc" style="display:none">0</span></div>
     <div class="sb-lbl">Output</div>
     <div class="nv"        id="ni-rp"  onclick="gv('rp',this)"><span class="ic">▶</span> Regiepad</div>
     <div class="nv" id="ni-cf" onclick="gv('rp',document.getElementById('ni-rp'));setTimeout(()=>{cfPanelOpen=true;renderRPTable();document.getElementById('cf-panel-wrap').scrollIntoView({behavior:'smooth'});},150)"><span class="ic">⚠</span> Conflicten <span class="bdg bdg-r" id="nb-cf" style="display:none">0</span></div>
@@ -320,6 +321,20 @@
     </div>
   </div>
 
+  <!-- LOCATIES -->
+  <div class="view" id="view-loc">
+    <div class="page-hd">
+      <h1>Locaties</h1>
+      <div class="ml"><button class="btn btn-y btn-sm" onclick="openLocModal()">+ Locatie toevoegen</button></div>
+    </div>
+    <div class="db-body">
+      <div class="db-section" style="margin-bottom:20px">
+        <div style="font-size:12px;color:var(--t3);margin-bottom:14px">Centrale lijst van locaties — gebruikt in entertainment-acts en callsheets. Voeg toe of bewerk hier zodat je het maar één keer hoeft in te voeren.</div>
+        <div class="vrij-tcard"><table class="vrij-t"><thead><tr><th>Naam</th><th>Adres</th><th>Maps</th><th style="width:32px"></th></tr></thead><tbody id="loc-tb"></tbody></table></div>
+      </div>
+    </div>
+  </div>
+
 </div>
 </div>
 
@@ -409,6 +424,23 @@
   </div>
 </div>
 
+<!-- LOCATIE MODAL -->
+<div class="ovl" id="loc-ovl">
+  <div class="modal-box" style="max-width:520px">
+    <div class="modal-hd"><h3 id="loc-modal-title">Locatie toevoegen</h3></div>
+    <div class="modal-body">
+      <div class="fg"><label>Naam locatie *</label><input type="text" id="loc-naam" placeholder="bijv. Start Wilhelminaplein"></div>
+      <div class="fg"><label>Adres</label><input type="text" id="loc-adres" placeholder="bijv. Wilhelminaplein, Leeuwarden"></div>
+      <div class="fg"><label>Google Maps link</label><input type="text" id="loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-del btn-sm" id="loc-del-btn" style="display:none;margin-right:auto" onclick="delLoc()">Verwijder</button>
+      <button class="btn btn-out btn-sm" onclick="closeLocModal()">Annuleren</button>
+      <button class="btn btn-y btn-sm" onclick="saveLoc()">Opslaan</button>
+    </div>
+  </div>
+</div>
+
 <!-- LIB MODAL (entertainment + huldigingen — toevoegen/bewerken) -->
 <div class="ovl" id="lib-ovl">
   <div class="modal-box" style="max-width:560px">
@@ -435,6 +467,7 @@
       </div>
 
       <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:4px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Locatie & melden</div>
+      <div class="fg"><label>Kies locatie uit lijst</label><select id="cs-loc-sel" onchange="csLocChange()"><option value="">— Geen / vrije invoer —</option></select><div style="font-size:11px;color:var(--t3);margin-top:4px">Beheer de lijst via <b>Databron → 📍 Locaties</b></div></div>
       <div class="fg"><label>Adres</label><input type="text" id="cs-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
       <div class="fg"><label>Google Maps link</label><input type="text" id="cs-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
       <div class="fg"><label>Melden bij</label><input type="text" id="cs-melden" placeholder="Naam contactpersoon op locatie — laat leeg voor 'n.v.t.'"></div>
