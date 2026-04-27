@@ -1,0 +1,895 @@
+{
+  "_meta": {
+    "versie": "1.0",
+    "app": "Regie",
+    "exportDatum": "27-4-2026, 13:31:33",
+    "event": "Loop Leeuwarden 2026"
+  },
+  "event": {
+    "name": "Loop Leeuwarden 2026",
+    "date": "10 mei 2026"
+  },
+  "items": [
+    {
+      "id": 26,
+      "type": "item",
+      "omschrijving": "Start Kids Run 1km",
+      "start": "09:15",
+      "eind": "09:30",
+      "wie": "Henk en Paul",
+      "locatie": "Groeneweg",
+      "label": "l1",
+      "fixed": true,
+      "bijzonderheden": "",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 27,
+      "type": "item",
+      "omschrijving": "Start Kids Run 2,5km",
+      "start": "10:00",
+      "eind": "10:25",
+      "wie": "Henk en Paul",
+      "locatie": "Groeneweg",
+      "label": "l1",
+      "fixed": true,
+      "bijzonderheden": "",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 28,
+      "type": "item",
+      "omschrijving": "Start Halve Marathon (21KM)",
+      "start": "09:30",
+      "eind": "09:45",
+      "wie": "Jan van der Meulen",
+      "locatie": "Zaailand",
+      "label": "l1",
+      "fixed": true,
+      "bijzonderheden": "",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 29,
+      "type": "item",
+      "omschrijving": "Finish Halve Marathon (21KM)",
+      "start": "10:35",
+      "eind": "12:45",
+      "wie": "Henk en Paul",
+      "locatie": "Groeneweg",
+      "label": "l1",
+      "fixed": true,
+      "bijzonderheden": "",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 38,
+      "type": "item",
+      "omschrijving": "Jan van der Meulen",
+      "start": "11:25",
+      "eind": "12:25",
+      "wie": "",
+      "locatie": "Zaailand/Oldehove",
+      "label": "l3",
+      "fixed": false,
+      "bijzonderheden": "",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "750",
+        "korting": ""
+      }
+    },
+    {
+      "id": 39,
+      "type": "item",
+      "omschrijving": "Huldiging 21KM Mannen",
+      "start": "11:10",
+      "eind": "11:15",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 40,
+      "type": "item",
+      "omschrijving": "Huldiging 21KM Vrouwen",
+      "start": "11:20",
+      "eind": "11:25",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 41,
+      "type": "item",
+      "omschrijving": "Huldiging 10KM Mannen",
+      "start": "14:20",
+      "eind": "14:25",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 42,
+      "type": "item",
+      "omschrijving": "Huldiging 10KM Vrouwen",
+      "start": "14:30",
+      "eind": "14:35",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 43,
+      "type": "item",
+      "omschrijving": "Huldiging 5KM Mannen",
+      "start": "13:05",
+      "eind": "13:10",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 44,
+      "type": "item",
+      "omschrijving": "Huldiging 5KM Vrouwen",
+      "start": "13:15",
+      "eind": "13:20",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 45,
+      "type": "item",
+      "omschrijving": "Huldiging 10KM Mannen Studenten",
+      "start": "14:40",
+      "eind": "14:45",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 46,
+      "type": "item",
+      "omschrijving": "Huldiging 10KM Vrouwen Studenten",
+      "start": "14:45",
+      "eind": "14:50",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 47,
+      "type": "item",
+      "omschrijving": "Huldiging 21KM Business Run",
+      "start": "11:30",
+      "eind": "11:35",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 48,
+      "type": "item",
+      "omschrijving": "Huldiging 10KM Business Run",
+      "start": "15:00",
+      "eind": "15:05",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 49,
+      "type": "item",
+      "omschrijving": "Huldiging 5KM Business Run",
+      "start": "13:30",
+      "eind": "13:35",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 50,
+      "type": "item",
+      "omschrijving": "Cheque JFSC Uitreiking",
+      "start": "",
+      "eind": "",
+      "wie": "Justin, Jan Dupon, Vrijwilliger",
+      "locatie": "Podium",
+      "label": "l2",
+      "fixed": false,
+      "bijzonderheden": "Tunes",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    },
+    {
+      "id": 51,
+      "type": "item",
+      "omschrijving": "Opening van de dag",
+      "start": "09:00",
+      "eind": "09:05",
+      "wie": "Justin, Jan van der Meulen, Henk en Paul",
+      "locatie": "Podium, Groeneweg, Zaailand",
+      "label": "l3",
+      "bijzonderheden": "Naar elkaar toe praten tijdens de opening",
+      "script": "",
+      "techniek": "",
+      "dj": "",
+      "fixed": false,
+      "checklist": {
+        "persoon": false,
+        "script": false,
+        "slide": false,
+        "techniek": false
+      },
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      }
+    }
+  ],
+  "labels": [
+    {
+      "id": "l1",
+      "name": "WEDSTRIJD",
+      "color": "#d63256"
+    },
+    {
+      "id": "l2",
+      "name": "HULDIGING",
+      "color": "#cc9900"
+    },
+    {
+      "id": "l3",
+      "name": "ENTERTAINMENT",
+      "color": "#7c3aed"
+    },
+    {
+      "id": "l4",
+      "name": "ACTIVATIE",
+      "color": "#d97000"
+    },
+    {
+      "id": "l5",
+      "name": "FINISH",
+      "color": "#1a9f5a"
+    },
+    {
+      "id": "l6",
+      "name": "OVERIGE",
+      "color": "#3b82f6"
+    }
+  ],
+  "persons": [
+    "Justin",
+    "Jan",
+    "Race Commentaar",
+    "Daniel",
+    "SHOW TEAM",
+    "Jan Dupon",
+    "Paul"
+  ],
+  "todos": {
+    "global": [
+      {
+        "id": 1,
+        "text": "Procedure huldigingen bevestigen",
+        "done": false
+      },
+      {
+        "id": 2,
+        "text": "Cheque JFSC: bedrag bevestigen",
+        "done": false
+      },
+      {
+        "id": 3,
+        "text": "Briefing sturen naar Justin en Jan",
+        "done": false
+      },
+      {
+        "id": 4,
+        "text": "Ceremonie slides aanleveren bij LED operator",
+        "done": false
+      },
+      {
+        "id": 5,
+        "text": "Geluidscheck plannen met ForLive",
+        "done": false
+      },
+      {
+        "id": 6,
+        "text": "Runsheet delen met Paul",
+        "done": false
+      }
+    ],
+    "items": {
+      "26": [],
+      "27": [],
+      "28": [],
+      "29": [],
+      "39": [],
+      "40": [],
+      "41": [],
+      "42": [],
+      "43": [],
+      "44": [],
+      "45": [],
+      "46": [],
+      "47": [],
+      "48": [],
+      "49": [],
+      "50": [],
+      "51": []
+    }
+  },
+  "entertainment": [
+    {
+      "id": 21,
+      "naam": "Jan Dupon",
+      "type": "DJ",
+      "aantalPersonen": 1,
+      "locatie": "Huldigingspodium Oldehoofsterkerkhof",
+      "contactpersoon": "Jan Dupon",
+      "telefoon": "",
+      "rider": "XLR LR en 220v",
+      "bijzonderheden": "DJ Bij Huldigingspodium",
+      "bedrag": "500",
+      "korting": "100",
+      "status": "bevestigd",
+      "callsheet": {
+        "locNaam": "Huldigingspodium Oldehoofsterkerkhof",
+        "locAdres": "Oldehoofsterkerkhof, Leeuwarden",
+        "locMaps": "https://maps.app.goo.gl/ZvsSxdUHspnoVyKt7",
+        "meldActief": true,
+        "meldLocNaam": "Event Office, Gemeentehuis Leeuwarden",
+        "meldLocAdres": "Gemeentehuis Leeuwarden",
+        "meldLocMaps": "https://maps.app.goo.gl/Tp2WTCW42Fk6hEDv6",
+        "meldenBij": "Justin",
+        "meldTijd": "07:45",
+        "tijdAanwezig": "07:45",
+        "tijdStart": "08:30",
+        "tijdEinde": "16:00",
+        "opdracht": "Ondersteuning bij Huldigingspodium met instarts tijdens huldiging en muziek tijdens gezetten momenten.",
+        "catering": "Catering aanwezig in event office",
+        "stroom": "XLR LR en 220v",
+        "notities": "Parkeren bij Fonteinland. Kleding afhalen bij Event office."
+      }
+    },
+    {
+      "id": 30,
+      "naam": "Paul Clement",
+      "type": "Spreker",
+      "aantalPersonen": 0,
+      "locatie": "Finish Hardlopen Groeneweg",
+      "contactpersoon": "Paul Clement",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "Speaker bij Finish Groeneweg. Speaker Start en Finish Kidsrun",
+      "rider": "1x handheld met extra batterijen",
+      "bedrag": "300",
+      "korting": "",
+      "callsheet": {
+        "locNaam": "Finish Hardlopen Groeneweg",
+        "locAdres": "",
+        "locMaps": "",
+        "meldenBij": "",
+        "tijdAanwezig": "07:45",
+        "tijdStart": "08:30",
+        "tijdEinde": "16:00",
+        "opdracht": "",
+        "catering": "",
+        "stroom": "1x handheld met extra batterijen",
+        "notities": ""
+      }
+    },
+    {
+      "id": 31,
+      "naam": "Henk Kooi",
+      "type": "Spreker",
+      "aantalPersonen": 0,
+      "locatie": "Finish Hardlopen Groeneweg",
+      "contactpersoon": "Henk Kooi",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "Speaker finish Groeneweg. Speaker Start en Finish Kidsrun",
+      "rider": "1x handheld met extra batterijen",
+      "bedrag": "300",
+      "korting": ""
+    },
+    {
+      "id": 32,
+      "naam": "Jan van der Meulen",
+      "type": "Spreker",
+      "aantalPersonen": 0,
+      "locatie": "Start Wilhelminaplein",
+      "contactpersoon": "Jan van der Meulen",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "Speaker bij Start alle events,",
+      "rider": "1x handheld met extra batterijen",
+      "bedrag": "850",
+      "korting": ""
+    },
+    {
+      "id": 33,
+      "naam": "Zeeslag",
+      "type": "Muziek",
+      "aantalPersonen": 0,
+      "locatie": "VP3 Rengerspark",
+      "contactpersoon": "Reinamien",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "Slagwerkgroep verzorgd entertainment bij VP3 Regngerspark",
+      "rider": "Niets",
+      "bedrag": "300",
+      "korting": ""
+    },
+    {
+      "id": 34,
+      "naam": "VetCool Entertainment",
+      "type": "Theater",
+      "aantalPersonen": 2,
+      "locatie": "Finish Wandelen Oldehoofsterkerkhof",
+      "contactpersoon": "Sylvia",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "Rode loper act voor ontvangst wandelaars.",
+      "rider": "",
+      "bedrag": "500",
+      "korting": "",
+      "callsheet": {
+        "locNaam": "Finish Wandelen Oldehoofsterkerkhof",
+        "locAdres": "Oldehoofsterkerkhof, Leeuwarden",
+        "locMaps": "https://maps.app.goo.gl/T71BcDoeHvzLWMxt6",
+        "meldenBij": "",
+        "tijdAanwezig": "",
+        "tijdStart": "",
+        "tijdEinde": "",
+        "opdracht": "",
+        "catering": "",
+        "stroom": "",
+        "notities": ""
+      }
+    },
+    {
+      "id": 37,
+      "naam": "Tjardo Koopman",
+      "type": "DJ",
+      "aantalPersonen": 0,
+      "locatie": "Start Wilhelminaplein",
+      "contactpersoon": "Tjardo Koopman",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "DJ bij start events",
+      "rider": "XLR LR en 220v",
+      "bedrag": "250",
+      "korting": ""
+    },
+    {
+      "id": 53,
+      "naam": "Smartlappenkoor Sipelsjeu",
+      "type": "Muziek",
+      "aantalPersonen": 0,
+      "locatie": "VP2 Havankpark",
+      "contactpersoon": "Janke",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "Entertainment bij VP 2 Wandelen",
+      "rider": "Zelfvoorzienend. Mogelijk 220v",
+      "bedrag": "250",
+      "korting": ""
+    },
+    {
+      "id": 54,
+      "naam": "Gerben Brouwer",
+      "type": "Muziek",
+      "aantalPersonen": 0,
+      "locatie": "Garmin Cheerzone Noorderbrug",
+      "contactpersoon": "Gerben Brouwer",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "DJ bij Garmin Cheerzone laatste KM",
+      "rider": "Audio set via Lammert, XLR en 22V (Via Bouwbedrijf de Vries)\nDJ booth?",
+      "bedrag": "500",
+      "korting": ""
+    },
+    {
+      "id": 63,
+      "naam": "Nynke Marije Attema",
+      "type": "Vrijwilliger",
+      "aantalPersonen": 0,
+      "locatie": "Huldigingspodium Oldehoofsterkerkhof",
+      "contactpersoon": "Justin",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "",
+      "rider": "",
+      "bedrag": "",
+      "korting": ""
+    },
+    {
+      "id": 64,
+      "naam": "Lysbeth Bakker",
+      "type": "Vrijwilliger",
+      "aantalPersonen": 0,
+      "locatie": "Huldigingspodium Oldehoofsterkerkhof",
+      "contactpersoon": "Justin",
+      "telefoon": "",
+      "status": "bevestigd",
+      "bijzonderheden": "",
+      "rider": "",
+      "bedrag": "",
+      "korting": ""
+    }
+  ],
+  "huldigingen": [
+    {
+      "id": 22,
+      "naam": "21km Mannen & Vrouwen",
+      "wieReiktUit": "Justin | Jan",
+      "locatie": "Podium",
+      "items": "Medailles, bloemen, trofee winnaar",
+      "sponsor": "",
+      "bijzonderheden": "Check procedure van tevoren"
+    },
+    {
+      "id": 23,
+      "naam": "21km Student & Business",
+      "wieReiktUit": "Justin | Jan",
+      "locatie": "Podium",
+      "items": "Medailles, bloemen",
+      "sponsor": "",
+      "bijzonderheden": ""
+    },
+    {
+      "id": 24,
+      "naam": "5km Mannen & Vrouwen",
+      "wieReiktUit": "Justin | Jan",
+      "locatie": "Podium",
+      "items": "Medailles, bloemen",
+      "sponsor": "",
+      "bijzonderheden": ""
+    },
+    {
+      "id": 25,
+      "naam": "10km Mannen & Vrouwen",
+      "wieReiktUit": "Justin | Jan",
+      "locatie": "Podium",
+      "items": "Medailles, bloemen",
+      "sponsor": "",
+      "bijzonderheden": ""
+    }
+  ],
+  "vrijwilligers": [],
+  "nextId": 65,
+  "eventInfo": {
+    "naam": "",
+    "datum": "",
+    "locatie": "",
+    "editie": "",
+    "inleiding": "",
+    "noemen": "",
+    "startInfo": "",
+    "deelnemers": [],
+    "callsheetDefaults": {
+      "orgNaam": "Justin",
+      "orgTel": "",
+      "orgEmail": "",
+      "noodNaam": "",
+      "noodTel": ""
+    }
+  },
+  "sponsoren": [],
+  "parcoursen": [],
+  "contacten": [],
+  "leveranciers": [
+    {
+      "id": 52,
+      "naam": "Jan Dupon",
+      "contactPersoon": "Jan Dupon",
+      "rol": "DJ",
+      "telefoon": "",
+      "email": "",
+      "locNaam": "Oldehove",
+      "locAdres": "",
+      "locMaps": "",
+      "meldenBij": "",
+      "tijdAanwezig": "",
+      "tijdStart": "",
+      "tijdEinde": "",
+      "catering": "Beschikbaar",
+      "stroom": "Geregeld",
+      "opdracht": "",
+      "gage": "",
+      "notities": "",
+      "orgNaam": "",
+      "orgTel": "",
+      "orgEmail": "",
+      "noodNaam": "",
+      "noodTel": ""
+    }
+  ],
+  "locaties": [
+    {
+      "id": 55,
+      "naam": "Start Wilhelminaplein",
+      "adres": "Wilhelminaplein, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/4MtQZ8PZPfKdpTFaA"
+    },
+    {
+      "id": 56,
+      "naam": "Garmin Cheerzone Noorderbrug",
+      "adres": "Noorderbrug, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/FTDac32MfDU8vKQN9"
+    },
+    {
+      "id": 57,
+      "naam": "VP2 Havankpark",
+      "adres": "Havankpark, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/mBArfmTBPNpNCf2T6"
+    },
+    {
+      "id": 58,
+      "naam": "VP3 Rengerspark",
+      "adres": "Rengerspark, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/ZJs4fGdbbQaC8RXQ8"
+    },
+    {
+      "id": 59,
+      "naam": "Finish Hardlopen Groeneweg",
+      "adres": "Groeneweg, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/T71BcDoeHvzLWMxt6"
+    },
+    {
+      "id": 60,
+      "naam": "Finish Wandelen Oldehoofsterkerkhof",
+      "adres": "Oldehoofsterkerkhof, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/T71BcDoeHvzLWMxt6"
+    },
+    {
+      "id": 61,
+      "naam": "Huldigingspodium Oldehoofsterkerkhof",
+      "adres": "Oldehoofsterkerkhof, Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/ZvsSxdUHspnoVyKt7"
+    },
+    {
+      "id": 62,
+      "naam": "Event Office, Gemeentehuis Leeuwarden",
+      "adres": "Gemeentehuis Leeuwarden",
+      "mapsUrl": "https://maps.app.goo.gl/Tp2WTCW42Fk6hEDv6"
+    }
+  ]
+}
