@@ -51,7 +51,6 @@
     <div class="nv" id="ni-hul" onclick="gv('hul',this)"><span class="ic">🏆</span> Huldigingen <span class="bdg bdg-y" id="nb-hul" style="display:none">0</span></div>
     <div class="nv" id="ni-prix" onclick="gv('prix',this)"><span class="ic">🥇</span> Prijsuitreikingen</div>
     <div class="nv" id="ni-vrij" onclick="gv('vrij',this)"><span class="ic">👥</span> Vrijwilligers <span class="bdg bdg-y" id="nb-vrij" style="display:none">0</span></div>
-    <div class="nv" id="ni-lev" onclick="gv('lev',this)"><span class="ic">🤝</span> Leveranciers <span class="bdg bdg-y" id="nb-lev" style="display:none">0</span></div>
     <div class="sb-lbl">Databron</div>
     <div class="nv" id="ni-info"    onclick="gv('info',this)"><span class="ic">📋</span> Event-info</div>
     <div class="nv" id="ni-spon"    onclick="gv('spon',this)"><span class="ic">🤝</span> Sponsoren <span class="bdg bdg-y" id="nb-spon" style="display:none">0</span></div>
@@ -253,17 +252,6 @@
     <div class="vrij-body"><div id="vrij-table-wrap"></div></div>
   </div>
 
-  <!-- LEVERANCIERS -->
-  <div class="view" id="view-lev">
-    <div class="page-hd">
-      <h1>Leveranciers</h1>
-      <div class="ml">
-        <button class="btn btn-y btn-sm" onclick="openLevModal()">+ Leverancier</button>
-      </div>
-    </div>
-    <div class="vrij-body"><div id="lev-list-wrap"></div></div>
-  </div>
-
   <!-- EVENT-INFO -->
   <div class="view" id="view-info">
     <div class="page-hd">
@@ -421,62 +409,55 @@
   </div>
 </div>
 
-<!-- LEVERANCIER MODAL -->
-<div class="ovl" id="lev-ovl">
+<!-- CALLSHEET MODAL (voor entertainment-acts) -->
+<div class="ovl" id="cs-ovl">
   <div class="modal-box" style="max-width:680px">
-    <div class="modal-hd"><h3 id="lev-modal-title">Leverancier toevoegen</h3></div>
+    <div class="modal-hd"><h3 id="cs-modal-title">Callsheet voorbereiden</h3></div>
     <div class="modal-body" style="max-height:70vh;overflow-y:auto">
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:4px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Leverancier</div>
-      <div class="fg"><label>Naam leverancier *</label><input type="text" id="lev-naam" placeholder="bijv. AV-Tech BV"></div>
-      <div class="fg2">
-        <div class="fg"><label>Contactpersoon</label><input type="text" id="lev-contact" placeholder="Naam"></div>
-        <div class="fg"><label>Functie / rol</label><input type="text" id="lev-rol" placeholder="bijv. Geluidstechnicus"></div>
-      </div>
-      <div class="fg2">
-        <div class="fg"><label>Telefoon</label><input type="text" id="lev-tel" placeholder="06-…"></div>
-        <div class="fg"><label>E-mail</label><input type="text" id="lev-email" placeholder="naam@leverancier.nl"></div>
+      <div style="background:var(--bg);border-left:3px solid var(--y);padding:10px 14px;font-size:12px;color:var(--t2);margin-bottom:14px;border-radius:4px">
+        <div style="font-weight:600;color:var(--t1);margin-bottom:4px" id="cs-actname">—</div>
+        Velden uit het entertainment-item zijn al ingevuld. Vul hieronder de callsheet-specifieke info aan en klik <b>Genereer</b>.
       </div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Locatie</div>
-      <div class="fg"><label>Naam locatie</label><input type="text" id="lev-loc-naam" placeholder="bijv. Hoofdpodium"></div>
-      <div class="fg"><label>Adres</label><input type="text" id="lev-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
-      <div class="fg"><label>Google Maps link</label><input type="text" id="lev-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
-      <div class="fg"><label>Melden bij</label><input type="text" id="lev-melden" placeholder="Naam — of laat leeg voor 'n.v.t.'"></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:4px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Locatie & melden</div>
+      <div class="fg"><label>Adres</label><input type="text" id="cs-loc-adres" placeholder="Straat 1, 8911 AB Leeuwarden"></div>
+      <div class="fg"><label>Google Maps link</label><input type="text" id="cs-loc-maps" placeholder="https://maps.app.goo.gl/..."></div>
+      <div class="fg"><label>Melden bij</label><input type="text" id="cs-melden" placeholder="Naam contactpersoon op locatie — laat leeg voor 'n.v.t.'"></div>
 
       <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Tijden</div>
+      <div id="cs-tijden-hint" style="font-size:11px;color:var(--t3);margin-bottom:8px;display:none"></div>
       <div class="fg2">
-        <div class="fg"><label>Aanwezig vanaf</label><input type="text" id="lev-t-aanwezig" placeholder="bijv. 08:30"></div>
-        <div class="fg"><label>Start</label><input type="text" id="lev-t-start" placeholder="bijv. 09:00"></div>
+        <div class="fg"><label>Aanwezig vanaf</label><input type="text" id="cs-t-aanwezig" placeholder="bijv. 08:30"></div>
+        <div class="fg"><label>Start</label><input type="text" id="cs-t-start" placeholder="bijv. 09:00"></div>
       </div>
-      <div class="fg"><label>Einde verwacht</label><input type="text" id="lev-t-einde" placeholder="bijv. 14:30"></div>
+      <div class="fg"><label>Einde verwacht</label><input type="text" id="cs-t-einde" placeholder="bijv. 14:30"></div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Faciliteiten</div>
-      <div class="fg"><label>Catering</label><textarea id="lev-catering" style="min-height:50px" placeholder="bijv. Lunch en drinken in crewtent. Of: niet beschikbaar."></textarea></div>
-      <div class="fg"><label>Stroom</label><textarea id="lev-stroom" style="min-height:50px" placeholder="bijv. 32A op locatie. Of: zelf meenemen."></textarea></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Opdracht & faciliteiten</div>
+      <div class="fg"><label>Beschrijving opdracht</label><textarea id="cs-opdracht" style="min-height:70px" placeholder="Wat doet de act op de dag? Specifieker dan rider — wat verwachten we?"></textarea></div>
+      <div class="fg"><label>Catering</label><textarea id="cs-catering" style="min-height:50px" placeholder="bijv. Lunch en drinken in crewtent. Of: niet beschikbaar."></textarea></div>
+      <div class="fg"><label>Stroom</label><textarea id="cs-stroom" style="min-height:50px" placeholder="bijv. 32A op locatie. Of: zelf meenemen."></textarea></div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Opdracht & vergoeding</div>
-      <div class="fg"><label>Beschrijving opdracht</label><textarea id="lev-opdracht" style="min-height:80px" placeholder="Wat doet de leverancier op de dag?"></textarea></div>
-      <div class="fg"><label>Afgesproken gage</label><input type="text" id="lev-gage" placeholder="bijv. €750 excl. btw"></div>
-      <div class="fg"><label>Notities (aanrijroute, parkeren, etc.)</label><textarea id="lev-notities" style="min-height:60px" placeholder="Aanrijroute, parkeren, laad-/loszone, andere bijzonderheden..."></textarea></div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Notities</div>
+      <div class="fg"><label>Aanrijroute, parkeren, laden/lossen, andere bijzonderheden</label><textarea id="cs-notities" style="min-height:70px" placeholder="Aanrijden via Groeneweg, parkeren achter podium..."></textarea></div>
 
-      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Contacten organisatie</div>
+      <div style="font-size:10px;font-weight:700;letter-spacing:2px;text-transform:uppercase;color:var(--t3);margin:18px 0 10px;border-bottom:1px solid var(--border);padding-bottom:6px">Contact organisatie (event-breed)</div>
+      <div style="font-size:11px;color:var(--t3);margin-bottom:10px">Deze gegevens gelden voor álle callsheets — wijzigen werkt door op alle leveranciers.</div>
       <div class="fg2">
-        <div class="fg"><label>Contactpersoon organisatie</label><input type="text" id="lev-org-naam" placeholder="Naam"></div>
-        <div class="fg"><label>Telefoon</label><input type="text" id="lev-org-tel" placeholder="06-…"></div>
+        <div class="fg"><label>Contactpersoon</label><input type="text" id="cs-org-naam" placeholder="Naam"></div>
+        <div class="fg"><label>Telefoon</label><input type="text" id="cs-org-tel" placeholder="06-…"></div>
       </div>
-      <div class="fg"><label>E-mail</label><input type="text" id="lev-org-email" placeholder="contact@organisatie.nl"></div>
+      <div class="fg"><label>E-mail</label><input type="text" id="cs-org-email" placeholder="contact@organisatie.nl"></div>
 
       <div class="fg2">
-        <div class="fg"><label>Noodcontact (naam)</label><input type="text" id="lev-nood-naam" placeholder="Naam — bereikbaar op de dag"></div>
-        <div class="fg"><label>Noodcontact telefoon</label><input type="text" id="lev-nood-tel" placeholder="06-…"></div>
+        <div class="fg"><label>Noodcontact (naam)</label><input type="text" id="cs-nood-naam" placeholder="Naam — bereikbaar op de dag"></div>
+        <div class="fg"><label>Noodcontact telefoon</label><input type="text" id="cs-nood-tel" placeholder="06-…"></div>
       </div>
 
     </div>
     <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
-      <button class="btn btn-del btn-sm" id="lev-del-btn" style="display:none;margin-right:auto" onclick="delLev()">Verwijder</button>
-      <button class="btn btn-out btn-sm" onclick="closeLevModal()">Annuleren</button>
-      <button class="btn btn-y   btn-sm" onclick="saveLev()">Opslaan</button>
+      <button class="btn btn-out btn-sm" onclick="closeCsModal()">Annuleren</button>
+      <button class="btn btn-y btn-sm" onclick="saveAndGenerateCallsheet()">📄 Opslaan & genereren</button>
     </div>
   </div>
 </div>
