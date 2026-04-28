@@ -2,7 +2,7 @@
   "_meta": {
     "versie": "1.0",
     "app": "Regie",
-    "exportDatum": "28-4-2026, 16:17:25",
+    "exportDatum": "28-4-2026, 21:08:32",
     "event": "Loop Leeuwarden 2026"
   },
   "event": {
@@ -11,454 +11,520 @@
   },
   "items": [
     {
-      "id": 26,
       "type": "item",
-      "omschrijving": "Start Kids Run 1km",
-      "start": "09:15",
-      "eind": "09:30",
-      "wie": "Henk en Paul",
-      "locatie": "Groeneweg",
-      "label": "l1",
-      "fixed": true,
-      "bijzonderheden": "",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 27,
-      "type": "item",
-      "omschrijving": "Start Kids Run 2,5km",
-      "start": "10:00",
-      "eind": "10:25",
-      "wie": "Henk en Paul",
-      "locatie": "Groeneweg",
-      "label": "l1",
-      "fixed": true,
-      "bijzonderheden": "",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 28,
-      "type": "item",
-      "omschrijving": "Start Halve Marathon (21KM)",
+      "omschrijving": "Start halve marathon — Dewulf",
       "start": "09:30",
       "eind": "09:45",
       "wie": "Jan van der Meulen",
-      "locatie": "Zaailand",
-      "label": "l1",
+      "locatie": "Wilhelminaplein",
       "fixed": true,
-      "bijzonderheden": "",
-      "script": "",
+      "bijzonderheden": "5 waves, interval 3 minuten. Laatste wave ca. 09:42. Bulk gaat in eerste wave.",
+      "script": "OFFICIEEL STARTMOMENT — eerste wave\n\nHalve Marathon, Dewulf is afstandsponsor.\n\nSponsor aanwezig: Hendrik Kootstra (medewerker Dewulf, hoofdklasse kaatser).\n\nDewulf is met ingang van 2026 betrokken bij LOOP Leeuwarden als partner én meteen als afstandsponsor. Daar zijn we hartstikke blij mee.\n\nMogelijke vragen aan Hendrik:\n• Het is een aanname, maar ik denk niet dat veel mensen direct uit de naam Dewulf halen wat jullie doen — kun je daar iets over vertellen?\n• Hoe ben je bij LOOP Leeuwarden terechtgekomen?\n• Hendrik moet vanmiddag kaatsen — hoe ziet hij zijn kansen voor het komende seizoen? (Partuur: Sipma, van Popta, Kootstra)\n\nVERVOLGWAVES — speaker begeleidt, DJ ondersteunt geluid.\n\n— Bentacera Business LOOP —\nVlak vóór de Business-startwave even het volgende benadrukken:\n\nWe hebben de Bentacera Business LOOP (bedrijventeams) in een nieuw jasje gestoken. De hardlopers hebben hun startnummers opgehaald bij de Bentacera Business Lounge waar ze zich ook konden omkleden en hun spullen achterlaten.\n\nAlle teams strijden nu per afstand voor de titel van HET SNELSTE BUSINESS TEAM. Er staat een enorme wisselbokaal te wachten voor het team dat gemiddeld genomen met de eerste 3 deelnemers de snelste tijd loopt. De wisselbeker van ruim 60 cm mag een jaar bij het bedrijf op kantoor staan pronken!\n\nNa afloop ontvangen we de business-lopers opnieuw in de Bentacera Business Lounge.",
       "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
+      "dj": "Eerste wave: officieel startschot. Vervolgwaves (4 in totaal): muziek + countdown. Interval 3 minuten.",
+      "checklist": {},
+      "fin": {},
+      "id": 3101
     },
     {
-      "id": 29,
       "type": "item",
-      "omschrijving": "Finish Halve Marathon (21KM)",
-      "start": "10:35",
-      "eind": "12:45",
-      "wie": "Henk en Paul",
+      "omschrijving": "Start 18km wandelen — P. de Vries",
+      "start": "10:00",
+      "eind": "11:00",
+      "wie": "Jan van der Meulen",
+      "locatie": "Wilhelminaplein",
+      "fixed": true,
+      "bijzonderheden": "Open startblok 10:00-11:00. Bulk vertrekt aan het begin. Geen waves met interval.",
+      "script": "OFFICIEEL STARTMOMENT — opening van het blok om 10:00\n\n18km wandelen, P. de Vries is afstandsponsor van de langste wandelafstand.\n\nSponsor aanwezig: Jeroen van der Geest (sinds 1 januari 2020 directeur P. de Vries).\n\nP. de Vries is OPNIEUW afstandsponsor van de langste wandelafstand. Het team van P. de Vries bestaat uit professionele en gemotiveerde medewerkers. Zij hebben kennis van en ervaring met alle installatiegebieden. Het complete aanbod en de bundeling van diverse expertises biedt hun klanten veel voordeel. Ze verzorgen alle fases in een project: advies en ontwerp, uitvoering, oplevering en service.\n\nP. de Vries is sponsor bij de 18 kilometer wandelen omdat de meeste collega's hier ook op meelopen.\n\nSpeaker-instructie: 'Handen omhoog voor de wandelaars vanuit P. de Vries?'\n\nNA OPENING — speaker begeleidt het open blok tot 11:00. DJ ondersteunt sfeer.",
+      "techniek": "",
+      "dj": "Bij opening 10:00 startsignaal. Daarna sfeermuziek tot 11:00 (open blok).",
+      "checklist": {},
+      "fin": {},
+      "id": 3102
+    },
+    {
+      "type": "item",
+      "omschrijving": "Start kidsrun 2,5km — Ausnutria",
+      "start": "10:00",
+      "eind": "10:04",
+      "wie": "Paul Clement & Henk Kooi",
       "locatie": "Groeneweg",
-      "label": "l1",
       "fixed": true,
-      "bijzonderheden": "",
-      "script": "",
+      "bijzonderheden": "2 waves, interval 2 minuten. Parallel aan start 18km wandelen op Wilhelminaplein.",
+      "script": "OFFICIEEL STARTMOMENT — eerste wave\n\n2,5km kidsrun, Ausnutria is afstandsponsor.\n\nSponsor aanwezig: An Moorman (Communicatie, ESG & sponsoring bij Ausnutria).\n\nAusnutria is sinds 2022 partner van het evenement en sponsort nu een paar jaar een afstand op de kidsrun. Ausnutria zet zich in voor een duurzame toekomst voor de generaties, door actief bij te dragen aan een betere wereld. Zij produceren zo duurzaam mogelijk en houden rekening met de impact op zowel het milieu als de samenleving. Bijdrage aan kinderen die in beweging komen past daar blijkbaar heel goed bij.\n\nMogelijke vragen aan An:\n• Wat doet Ausnutria precies en waarom past LOOP Leeuwarden zo goed bij hun organisatie?\n• Wat is de link met Leeuwarden?\n\nVERVOLGWAVE — speaker begeleidt, DJ ondersteunt geluid.",
       "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
+      "dj": "Eerste wave: startschot. Tweede wave: muziek + countdown. Interval 2 minuten.",
+      "checklist": {},
+      "fin": {},
+      "id": 3103
     },
     {
-      "id": 38,
       "type": "item",
-      "omschrijving": "Jan van der Meulen",
-      "start": "11:25",
-      "eind": "12:25",
-      "wie": "",
-      "locatie": "Zaailand/Oldehove",
-      "label": "l3",
-      "fixed": false,
-      "bijzonderheden": "",
-      "script": "",
+      "omschrijving": "Start 12km wandelen — Sportcentrum Ursus",
+      "start": "10:30",
+      "eind": "11:30",
+      "wie": "Jan van der Meulen",
+      "locatie": "Wilhelminaplein",
+      "fixed": true,
+      "bijzonderheden": "Open startblok 10:30-11:30. Bulk vertrekt aan het begin. Geen waves met interval.",
+      "script": "OFFICIEEL STARTMOMENT — opening van het blok om 10:30\n\n12km wandelen, Sportcentrum Ursus is afstandsponsor.\n\nSponsor aanwezig: Erwin Boonstra (eigenaar Sportcentrum Ursus).\n\nSportcentrum Ursus is een begrip in Leeuwarden en bestaat al meer dan 50 jaar. De huidige eigenaar Erwin Boonstra is vandaag aanwezig.\n\nMogelijke vragen aan Erwin:\n• Hoe ervaart hij deze startlocatie?\n• Wat heeft hij in zijn eigen organisatie gedaan om zijn klanten hier aan de start te krijgen?\n\nOf je nu wilt werken aan je gezondheid, sterker wilt worden of je conditie wilt verbeteren — URSUS biedt een breed aanbod aan sportprogramma's en faciliteiten voor individuele en groepstrainingen. Op deze locatie alle programma's van LES MILLS, een uitgebreide fitnessruimte, eGYM en een zonnestudio.\n\nVanuit Sportcentrum Ursus doen er vandaag ruim 200 mensen met korting via Ursus mee, waarvan zeker ook een aantal op de 12 kilometer.\n\nNA OPENING — speaker begeleidt het open blok tot 11:30. DJ ondersteunt sfeer.",
       "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "750",
-        "korting": ""
-      }
+      "dj": "Bij opening 10:30 startsignaal. Daarna sfeermuziek tot 11:30 (open blok).",
+      "checklist": {},
+      "fin": {},
+      "id": 3104
     },
     {
-      "id": 39,
       "type": "item",
-      "omschrijving": "Huldiging 21KM Mannen",
-      "start": "11:10",
-      "eind": "11:15",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
+      "omschrijving": "Start 6km wandelen — DeFriesland",
+      "start": "11:00",
+      "eind": "12:00",
+      "wie": "Jan van der Meulen",
+      "locatie": "Wilhelminaplein",
+      "fixed": true,
+      "bijzonderheden": "Open startblok 11:00-12:00. Bulk vertrekt aan het begin. Geen waves met interval. DeFriesland is hoofdsponsor wandelen.",
+      "script": "OFFICIEEL STARTMOMENT — opening van het blok om 11:00\n\n6km wandelen, DeFriesland is afstandsponsor (en hoofdsponsor wandelen).\n\nSponsor aanwezig: Cid Berger (Directeur DeFriesland).\n\nOok dit jaar is DeFriesland trotse partner — bewegen brengt mensen samen en draagt bij aan een gezonde samenleving. Precies waar zij voor staan. DeFriesland doet ongelooflijk veel op het gebied van preventie en het stimuleren van sport en bewegen.\n\nMogelijke vragen aan Cid:\n• Wat zouden we samen nog meer kunnen doen om mensen te bereiken?\n• Volgend jaar een jubileumjaar — wat voegen we toe waardoor we nog beter aansluiten op de behoefte in de samenleving?\n\nNA OPENING — speaker begeleidt het open blok tot 12:00. DJ ondersteunt sfeer.",
       "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
+      "dj": "Bij opening 11:00 startsignaal. Daarna sfeermuziek tot 12:00 (open blok).",
+      "checklist": {},
+      "fin": {},
+      "id": 3105
     },
     {
-      "id": 40,
       "type": "item",
-      "omschrijving": "Huldiging 21KM Vrouwen",
-      "start": "11:20",
-      "eind": "11:25",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
+      "omschrijving": "Start 5km hardlopen — Garmin",
+      "start": "12:30",
+      "eind": "13:00",
+      "wie": "Jan van der Meulen",
+      "locatie": "Wilhelminaplein",
+      "fixed": true,
+      "bijzonderheden": "6 waves, interval 5 minuten. Laatste wave ca. 12:55. Bulk gaat in eerste wave.",
+      "script": "OFFICIEEL STARTMOMENT — eerste wave\n\n5km hardlopen, Garmin Nederland is afstandsponsor.\n\nSponsor aanwezig: Pytrik Zwaagstra.\n\nGarmin Nederland is voor de editie 2026 verbonden aan LOOP Leeuwarden. Dit jaar is een jaar waarin we voor het eerst samenwerken en ontdekken hoe de betrokkenheid van Garmin het evenement kan versterken.\n\nSpeaker-instructie: vraag wie er allemaal met een Garmin-horloge loopt.\n• Veel reactie? 'Kijk eens wat een warm welkom!'\n• Maar de helft? 'Kijk leuk, er is nog veel terrein te winnen!'\n\nPytrik komt uit Leeuwarden — dit moet voelen als een thuiswedstrijd. Maak hier gebruik van.\n\nMogelijke vragen aan Pytrik:\n• Wat vindt hij ervan om Garmin zo terug te zien komen?\n• Waarom past deze betrokkenheid bij Garmin Nederland?\n\nVERVOLGWAVES — speaker begeleidt, DJ ondersteunt geluid.\n\n— Bentacera Business LOOP —\nVlak vóór de Business-startwave even benadrukken: alle teams strijden per afstand voor de titel van HET SNELSTE BUSINESS TEAM. Wisselbokaal van ruim 60 cm voor het winnende team. Na afloop ontvangst in de Bentacera Business Lounge.",
       "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
+      "dj": "Eerste wave: officieel startschot. Vervolgwaves (5 in totaal): muziek + countdown. Interval 5 minuten.",
+      "checklist": {},
+      "fin": {},
+      "id": 3106
     },
     {
-      "id": 41,
       "type": "item",
-      "omschrijving": "Huldiging 10KM Mannen",
-      "start": "14:20",
-      "eind": "14:25",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 42,
-      "type": "item",
-      "omschrijving": "Huldiging 10KM Vrouwen",
-      "start": "14:30",
-      "eind": "14:35",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 43,
-      "type": "item",
-      "omschrijving": "Huldiging 5KM Mannen",
-      "start": "13:05",
-      "eind": "13:10",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 44,
-      "type": "item",
-      "omschrijving": "Huldiging 5KM Vrouwen",
-      "start": "13:15",
-      "eind": "13:20",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 45,
-      "type": "item",
-      "omschrijving": "Huldiging 10KM Mannen Studenten",
-      "start": "14:40",
-      "eind": "14:45",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 46,
-      "type": "item",
-      "omschrijving": "Huldiging 10KM Vrouwen Studenten",
-      "start": "14:45",
-      "eind": "14:50",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 47,
-      "type": "item",
-      "omschrijving": "Huldiging 21KM Business Run",
-      "start": "11:30",
-      "eind": "11:35",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 48,
-      "type": "item",
-      "omschrijving": "Huldiging 10KM Business Run",
-      "start": "15:00",
-      "eind": "15:05",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 49,
-      "type": "item",
-      "omschrijving": "Huldiging 5KM Business Run",
+      "omschrijving": "Start 10km hardlopen — Intersport Luxen / Mizuno",
       "start": "13:30",
-      "eind": "13:35",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
+      "eind": "14:00",
+      "wie": "Jan van der Meulen",
+      "locatie": "Wilhelminaplein",
+      "fixed": true,
+      "bijzonderheden": "6 waves, interval 5 minuten. Laatste wave ca. 13:55. Wave 2 of 3 is de studentenrun. Bulk gaat in eerste wave.",
+      "script": "OFFICIEEL STARTMOMENT — eerste wave\n\n10km hardlopen, Intersport Luxen is afstandsponsor. Mizuno is verbonden via Intersport.\n\nSponsoren aanwezig: Dennis Frankfort (Sales & Marketingmanager Benelux, Mizuno) en Gerrit-Jan Faber (Intersport Luxen).\n\nIntersport Luxen is opnieuw afstandsponsor bij LOOP Leeuwarden. We zijn hartstikke blij dat Intersport en LOOP Leeuwarden bij elkaar horen — samen inspireren we mensen om te bewegen. De samenwerking met Intersport gaat verder dan alleen een afstandsponsorschap; via Intersport verbinden zich ook nieuwe partners aan het evenement, zoals nu met Mizuno.\n\nGerrit-Jan laat het startschot vandaag over aan Dennis Frankfort.\n\nMizuno heeft zich verbonden aan LOOP Leeuwarden, te zien aan de schitterende gesublimeerde shirts die we de hele dag al op het evenement zien. Zowel vorig jaar als dit jaar heeft LOOP Leeuwarden zich kunnen uitleven op het design van het shirt — we zijn erg blij met het resultaat.\n\nMogelijke vragen aan Dennis:\n• Wat maakt het voor Mizuno interessant om zich te verbinden aan LOOP Leeuwarden?\n• Dennis komt speciaal uit het zuiden van het land — wat heeft hij tot nu toe gezien? Wat vindt hij van de uitstraling van het evenement?\n\nLET OP: wave 2 of 3 is de STUDENTENRUN — apart benoemen.\n\nVERVOLGWAVES — speaker begeleidt, DJ ondersteunt geluid.\n\n— Bentacera Business LOOP —\nVlak vóór de Business-startwave even benadrukken: alle teams strijden per afstand voor de titel van HET SNELSTE BUSINESS TEAM. Wisselbokaal van ruim 60 cm voor het winnende team. Na afloop ontvangst in de Bentacera Business Lounge.",
       "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
+      "dj": "Eerste wave: officieel startschot. Vervolgwaves (5 in totaal, waaronder studentenrun): muziek + countdown. Interval 5 minuten.",
+      "checklist": {},
+      "fin": {},
+      "id": 3107
     },
     {
-      "id": 50,
       "type": "item",
-      "omschrijving": "Cheque JFSC Uitreiking",
-      "start": "",
-      "eind": "",
-      "wie": "Justin, Jan Dupon, Vrijwilliger",
-      "locatie": "Podium",
-      "label": "l2",
-      "fixed": false,
-      "bijzonderheden": "Tunes",
-      "script": "",
-      "techniek": "",
-      "dj": "",
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
-      "fin": {
-        "bedrag": "",
-        "korting": ""
-      }
-    },
-    {
-      "id": 51,
-      "type": "item",
-      "omschrijving": "Opening van de dag",
+      "omschrijving": "Start kidsrun 1km wave 1 — Kinderopvang Friesland",
       "start": "09:00",
       "eind": "09:05",
-      "wie": "Justin, Jan van der Meulen, Henk en Paul",
-      "locatie": "Podium, Groeneweg, Zaailand",
-      "label": "l3",
-      "bijzonderheden": "Naar elkaar toe praten tijdens de opening",
-      "script": "",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": true,
+      "bijzonderheden": "OFFICIEEL STARTMOMENT van de kidsrun 1km. Sponsor Anne-Marie Heidstra (Kinderopvang Friesland) aanwezig.",
+      "script": "OFFICIEEL STARTMOMENT — wave 1 van de kidsrun 1km.\n\nKinderopvang Friesland is hoofdsponsor KidsRun.\n\nSponsor aanwezig: Anne-Marie Heidstra.\n\nSKF is trotse hoofdsponsor van de KidsRun. SKF bestaat al ruim 30 jaar en ontstond uit de Stichting Gastouderproject Harlingen-Franeker en omgeving. De organisatie verzorgt professionele kinderopvang: kinderdagverblijf, buitenschoolse opvang, vakantieopvang, gastouderschap, kleinschalige opvang, flexibele opvang en peuteropvang. SKF is actief op verschillende locaties in heel Friesland.\n\nKinderopvang Friesland doet met ruim 600! collega's en aanverwant netwerk mee met LOOP Leeuwarden.\n\nMogelijke vraag aan Anne-Marie: hoe heeft ze dat voor elkaar gekregen?",
       "techniek": "",
-      "dj": "",
+      "dj": "Officieel startschot voor wave 1.",
+      "checklist": {},
+      "fin": {},
+      "id": 3116
+    },
+    {
+      "type": "item",
+      "omschrijving": "Start kidsrun 1km wave 2 — aangepaste sporters",
+      "start": "09:24",
+      "eind": "09:25",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": true,
+      "bijzonderheden": "Aparte wave voor aangepaste sporters. Anne-Marie is mogelijk nog aanwezig — speaker kan vrij beslissen of er nog iets aan haar wordt gevraagd of dat dit een rustige ondersteunende start wordt.",
+      "script": "Wave 2 voor aangepaste sporters.\n\nKorte, ondersteunende start. Speaker bepaalt zelf het moment en de toon.\n\nOptioneel: Anne-Marie (Kinderopvang Friesland) kan nog aanwezig zijn — als de speaker iets wil vragen of haar terug op het podium wil halen, mag dat.",
+      "techniek": "",
+      "dj": "Muziek + countdown voor wave 2.",
+      "checklist": {},
+      "fin": {},
+      "id": 3117
+    },
+    {
+      "type": "item",
+      "omschrijving": "Start kidsrun 1km wave 2 — algemeen",
+      "start": "09:25",
+      "eind": "09:26",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": true,
+      "bijzonderheden": "Tweede algemene wave, direct na de wave voor aangepaste sporters.",
+      "script": "Wave 2 algemeen — directe aansluiting op de wave voor aangepaste sporters.\n\nOptioneel: speaker kan nog een kort woord aan Anne-Marie of Kinderopvang Friesland richten als zij nog aanwezig is.",
+      "techniek": "",
+      "dj": "Muziek + countdown voor wave 2 algemeen.",
+      "checklist": {},
+      "fin": {},
+      "id": 3118
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging Halve Marathon — heren 1, 2, 3",
+      "start": "11:10",
+      "eind": "11:20",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Kees van Anken (voorzitter Stichting Gezonde Stad Leeuwarden). Benodigd: bloemen, prijzen.",
+      "script": "Prijsuitreiking heren halve marathon, 1-2-3.\n\nUitreiker: Kees van Anken, voorzitter Stichting Gezonde Stad Leeuwarden.\n\nLeuk praatje maken over het succes van het evenement en de prestatie van de mensen die op het podium komen.\n\nDirect aansluitend om 11:20 de huldiging dames halve marathon.",
+      "techniek": "",
+      "dj": "Podiummuziek + applausgeluid bij oproep winnaars.",
+      "checklist": {},
+      "fin": {},
+      "id": 3119
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging Halve Marathon — dames 1, 2, 3",
+      "start": "11:20",
+      "eind": "11:30",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Kees van Anken (voorzitter Stichting Gezonde Stad Leeuwarden). Benodigd: bloemen, prijzen.",
+      "script": "Prijsuitreiking dames halve marathon, 1-2-3.\n\nUitreiker: Kees van Anken, voorzitter Stichting Gezonde Stad Leeuwarden.\n\nLeuk praatje maken over het succes van het evenement en de prestatie van de mensen die op het podium komen.",
+      "techniek": "",
+      "dj": "Podiummuziek + applausgeluid bij oproep winnaars.",
+      "checklist": {},
+      "fin": {},
+      "id": 3120
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging Halve Marathon — Business Team",
+      "start": "11:40",
+      "eind": "11:45",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Kees van Anken. Benodigd: wisselbokaal Bentacera Business LOOP. Aansluitend cheque-uitreiking Jeugdfonds.",
+      "script": "Prijsuitreiking snelste Business Team Halve Marathon.\n\nUitreiker: Kees van Anken, voorzitter Stichting Gezonde Stad Leeuwarden.\n\nWisselbokaal van ruim 60 cm voor het winnende team — mag een jaar bij het bedrijf op kantoor pronken.\n\nDirect aansluitend om 11:45 de cheque-overhandiging Jeugdfonds.",
+      "techniek": "",
+      "dj": "Podiummuziek + applaus.",
+      "checklist": {},
+      "fin": {},
+      "id": 3121
+    },
+    {
+      "type": "item",
+      "omschrijving": "Cheque-overhandiging Jeugdfonds Sport & Cultuur",
+      "start": "11:45",
+      "eind": "11:55",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Lieuwe Krol (bestuurslid Jeugdfonds Sport & Cultuur Friesland). Benodigd: cheque (totaalbedrag staat op cheque). Justin heeft het bedrag.",
+      "script": "Cheque-overhandiging Jeugdfonds Sport & Cultuur Friesland.\n\nUitreiker: Lieuwe Krol, bestuurslid.\n\nHet Jeugdfonds Sport & Cultuur Friesland is dit jaar het goede doel van LOOP Leeuwarden. Deelnemers, vrijwilligers en anderen konden vrijwillig een donatie doen.\n\nWat doet het Jeugdfonds: betaalt contributie en lesgeld voor kinderen en jongeren uit gezinnen waar te weinig geld is voor een sportclub, muziek- of dansles, schilderen, theaterschool of een andere creatieve cursus. Voor die kinderen betalen zij de benodigde contributie en lesgelden, en eventuele kleding en attributen. Meerdere kinderen per gezin mag. Aanvragen via ouders of intermediairs (gebiedsteammedewerker, buurtsportcoach, leerkracht, huisarts, schuldhulpverlener) op www.samenvoorallekinderen.nl.\n\nSpeaker-zin: 'En het bedrag is ……… (staat op de cheque).'\n\nTotaalbedrag staat op de cheque. Justin heeft het bedrag.",
+      "techniek": "",
+      "dj": "Podiummuziek, ingehouden — feestelijk maar niet luid.",
+      "checklist": {},
+      "fin": {},
+      "id": 3122
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 5km — heren 1, 2, 3",
+      "start": "13:05",
+      "eind": "13:15",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Pytrik Zwaagstra (Garmin Nederland). Benodigd: bloemen, prijzen.",
+      "script": "Prijsuitreiking heren 5km, 1-2-3.\n\nUitreiker: Pytrik Zwaagstra (Garmin Nederland).\n\nGarmin Nederland is voor editie 2026 verbonden aan LOOP Leeuwarden. Eerste jaar samenwerking — ontdekken hoe Garmin het evenement kan versterken.\n\nPytrik heeft eerder vandaag het startschot van de 5k verricht en gaat zo zelf voor de 10k. Speaker-vraag: 'Maakt hij ook kans op de prijzen?'\n\nPytrik komt uit Leeuwarden, kent LOOP Leeuwarden, de verbintenis met dit evenement komt echt uit zijn koker. Mogelijke vraag: waarom vindt hij het zo tof om juist hier Garmin aan te verbinden?\n\nDirect aansluitend om 13:15 de huldiging dames 5km.",
+      "techniek": "",
+      "dj": "Podiummuziek + applausgeluid.",
+      "checklist": {},
+      "fin": {},
+      "id": 3123
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 5km — dames 1, 2, 3",
+      "start": "13:15",
+      "eind": "13:25",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Pytrik Zwaagstra (Garmin Nederland). Benodigd: bloemen, prijzen.",
+      "script": "Prijsuitreiking dames 5km, 1-2-3.\n\nUitreiker: Pytrik Zwaagstra (Garmin Nederland).",
+      "techniek": "",
+      "dj": "Podiummuziek + applausgeluid.",
+      "checklist": {},
+      "fin": {},
+      "id": 3124
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 5km — Business Team",
+      "start": "13:30",
+      "eind": "13:40",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Kees van Anken (voorzitter Stichting Gezonde Stad Leeuwarden). Benodigd: wisselbokaal Bentacera Business LOOP.",
+      "script": "Prijsuitreiking snelste Business Team 5km.\n\nUitreiker: Kees van Anken.\n\nWisselbokaal Bentacera Business LOOP voor het winnende team.",
+      "techniek": "",
+      "dj": "Podiummuziek + applaus.",
+      "checklist": {},
+      "fin": {},
+      "id": 3125
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 10km — heren 1, 2, 3",
+      "start": "14:50",
+      "eind": "14:55",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreikers: Gerrit-Jan Faber (Intersport Luxen) & Dennis Frankfort (Sales & Marketingmanager Mizuno). Benodigd: bloemen, prijzen.",
+      "script": "Prijsuitreiking heren 10km, 1-2-3.\n\nUitreikers: Gerrit-Jan Faber (Intersport Luxen) & Dennis Frankfort (Mizuno).\n\nIntersport Luxen is opnieuw afstandsponsor. Samenwerking gaat verder dan alleen sponsorschap — via Intersport komen ook nieuwe partners aan boord, zoals dit jaar Mizuno. Gerrit-Jan heeft de 10km vandaag overgelaten aan Dennis Frankfort.\n\nMizuno-shirts: schitterende gesublimeerde shirts die we de hele dag al op het evenement zien. LOOP Leeuwarden heeft zich kunnen uitleven op het design.\n\nMogelijke vragen aan Dennis: wat maakt het voor Mizuno interessant om zich te verbinden aan LOOP Leeuwarden? Dennis komt speciaal uit het zuiden van het land — wat heeft hij gezien? Wat vindt hij van de uitstraling van het evenement?\n\nDirect aansluitend om 14:55 de huldiging dames 10km.",
+      "techniek": "",
+      "dj": "Podiummuziek + applausgeluid.",
+      "checklist": {},
+      "fin": {},
+      "id": 3126
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 10km — dames 1, 2, 3",
+      "start": "14:55",
+      "eind": "15:00",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreikers: Gerrit-Jan Faber (Intersport Luxen) & Dennis Frankfort (Sales & Marketingmanager Mizuno). Benodigd: bloemen, prijzen.",
+      "script": "Prijsuitreiking dames 10km, 1-2-3.\n\nUitreikers: Gerrit-Jan Faber (Intersport Luxen) & Dennis Frankfort (Mizuno).",
+      "techniek": "",
+      "dj": "Podiummuziek + applausgeluid.",
+      "checklist": {},
+      "fin": {},
+      "id": 3127
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 10km — Studentenprijs",
+      "start": "15:00",
+      "eind": "15:15",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreiker: Mascotte LSC (Leeuwarden Student City). Informatie is bij Justin.",
+      "script": "Prijsuitreiking 10km studentenprijs.\n\nUitreiker: Mascotte LSC.\n\nInformatie over deze prijs is bij Justin op te vragen.",
+      "techniek": "",
+      "dj": "Podiummuziek + applaus.",
+      "checklist": {},
+      "fin": {},
+      "id": 3128
+    },
+    {
+      "type": "item",
+      "omschrijving": "Huldiging 10km — Business Team",
+      "start": "15:15",
+      "eind": "15:25",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": true,
+      "bijzonderheden": "Uitreikers: Gerrit-Jan Faber (Intersport Luxen) & Dennis Frankfort (Sales & Marketingmanager Mizuno). Benodigd: wisselbokaal Bentacera Business LOOP.",
+      "script": "Prijsuitreiking snelste Business Team 10km.\n\nUitreikers: Gerrit-Jan Faber (Intersport Luxen) & Dennis Frankfort (Mizuno).\n\nWisselbokaal Bentacera Business LOOP voor het winnende team.",
+      "techniek": "",
+      "dj": "Podiummuziek + applaus.",
+      "checklist": {},
+      "fin": {},
+      "id": 3129
+    },
+    {
+      "type": "cue",
+      "omschrijving": "Warming-up wave 1 kidsrun 1km",
+      "start": "08:55",
+      "wie": "DJ",
+      "bijzonderheden": "DJ-cue voor warming-up wave 1 van de 1km kidsrun. DJ staat op Oldehoofsterkerkhof, geluid is gekoppeld aan Groeneweg waar de kinderen warming-up doen.",
+      "id": 3130
+    },
+    {
+      "type": "cue",
+      "omschrijving": "Warming-up wave 2 kidsrun 1km",
+      "start": "09:20",
+      "wie": "DJ",
+      "bijzonderheden": "DJ-cue voor warming-up wave 2 van de 1km kidsrun (zowel de aangepaste-sporters-wave 9:24 als de algemene wave 9:25). DJ staat op Oldehoofsterkerkhof, geluid gekoppeld aan Groeneweg.",
+      "id": 3131
+    },
+    {
+      "type": "cue",
+      "omschrijving": "Warming-up kidsrun 2,5km",
+      "start": "09:55",
+      "wie": "DJ",
+      "bijzonderheden": "DJ-cue voor warming-up van de 2,5km kidsrun (start 10:00). DJ staat op Oldehoofsterkerkhof, geluid gekoppeld aan Groeneweg.",
+      "id": 3132
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste man halve marathon",
+      "start": "10:37",
+      "eind": "10:42",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
       "fixed": false,
-      "checklist": {
-        "persoon": false,
-        "script": false,
-        "slide": false,
-        "techniek": false
-      },
+      "bijzonderheden": "Verwachting, geen vast moment. Speaker reageert zodra de eerste man finisht.",
+      "script": "Aankondiging eerste man halve marathon over de finish. Speaker brengt de prestatie naar voren — tijd, naam (indien bekend), eventueel club/team.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst, zodat de speaker hoorbaar is.",
+      "checklist": {},
       "fin": {
         "bedrag": "",
         "korting": ""
-      }
+      },
+      "id": 3133,
+      "label": ""
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste vrouw halve marathon",
+      "start": "10:50",
+      "eind": "10:55",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": false,
+      "bijzonderheden": "Verwachting, geen vast moment. Speaker reageert zodra de eerste vrouw finisht.",
+      "script": "Aankondiging eerste vrouw halve marathon over de finish.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst.",
+      "checklist": {},
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      },
+      "id": 3134,
+      "label": ""
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste wandelaars (6km)",
+      "start": "12:00",
+      "eind": "12:10",
+      "wie": "Justin van Zutphen",
+      "locatie": "Oldehoofsterkerkhof",
+      "fixed": false,
+      "bijzonderheden": "Verwachting eerste wandelaars 6km terug bij de finish. Afstand maakt verder niet uit voor speaker.",
+      "script": "Aankondiging eerste wandelaars terug bij de finish (waarschijnlijk 6km). Speaker waarderend over de prestatie en de wandelaars in het algemeen.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst.",
+      "checklist": {},
+      "fin": {},
+      "id": 3135
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste man 5km",
+      "start": "12:45",
+      "eind": "12:50",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": false,
+      "bijzonderheden": "Verwachting, geen vast moment. Speaker reageert zodra de eerste man finisht.",
+      "script": "Aankondiging eerste man 5km over de finish.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst.",
+      "checklist": {},
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      },
+      "id": 3136,
+      "label": ""
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste vrouw 5km",
+      "start": "12:47",
+      "eind": "12:52",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": false,
+      "bijzonderheden": "Verwachting, geen vast moment. Speaker reageert zodra de eerste vrouw finisht.",
+      "script": "Aankondiging eerste vrouw 5km over de finish.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst.",
+      "checklist": {},
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      },
+      "id": 3137,
+      "label": ""
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste man 10km",
+      "start": "14:02",
+      "eind": "14:07",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": false,
+      "bijzonderheden": "Verwachting, geen vast moment. Speaker reageert zodra de eerste man finisht.",
+      "script": "Aankondiging eerste man 10km over de finish.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst.",
+      "checklist": {},
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      },
+      "id": 3138,
+      "label": ""
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachte finish — eerste vrouw 10km",
+      "start": "14:08",
+      "eind": "14:13",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": false,
+      "bijzonderheden": "Verwachting, geen vast moment. Speaker reageert zodra de eerste vrouw finisht.",
+      "script": "Aankondiging eerste vrouw 10km over de finish.",
+      "techniek": "",
+      "dj": "Sfeermuziek dempen bij aankomst.",
+      "checklist": {},
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      },
+      "id": 3139,
+      "label": ""
+    },
+    {
+      "type": "item",
+      "omschrijving": "Verwachting laatste lopers 10km",
+      "start": "15:30",
+      "eind": "15:40",
+      "wie": "Paul Clement & Henk Kooi",
+      "locatie": "Groeneweg",
+      "fixed": false,
+      "bijzonderheden": "Verwachting laatste lopers van de 10km. Speaker geeft een warme afsluiting voor de hekkensluiters.",
+      "script": "Speaker zorgt voor een warm slot voor de laatste lopers van de 10km. Iedere finisher verdient gehoord te worden.",
+      "techniek": "",
+      "dj": "Feestelijke afsluitende muziek na laatste finisher.",
+      "checklist": {},
+      "fin": {
+        "bedrag": "",
+        "korting": ""
+      },
+      "id": 3140,
+      "label": ""
     }
   ],
   "labels": [
@@ -552,7 +618,14 @@
       "48": [],
       "49": [],
       "50": [],
-      "51": []
+      "51": [],
+      "3133": [],
+      "3134": [],
+      "3136": [],
+      "3137": [],
+      "3138": [],
+      "3139": [],
+      "3140": []
     }
   },
   "entertainment": [
@@ -755,46 +828,9 @@
       "korting": ""
     }
   ],
-  "huldigingen": [
-    {
-      "id": 22,
-      "naam": "21km Mannen & Vrouwen",
-      "wieReiktUit": "Justin | Jan",
-      "locatie": "Podium",
-      "items": "Medailles, bloemen, trofee winnaar",
-      "sponsor": "",
-      "bijzonderheden": "Check procedure van tevoren"
-    },
-    {
-      "id": 23,
-      "naam": "21km Student & Business",
-      "wieReiktUit": "Justin | Jan",
-      "locatie": "Podium",
-      "items": "Medailles, bloemen",
-      "sponsor": "",
-      "bijzonderheden": ""
-    },
-    {
-      "id": 24,
-      "naam": "5km Mannen & Vrouwen",
-      "wieReiktUit": "Justin | Jan",
-      "locatie": "Podium",
-      "items": "Medailles, bloemen",
-      "sponsor": "",
-      "bijzonderheden": ""
-    },
-    {
-      "id": 25,
-      "naam": "10km Mannen & Vrouwen",
-      "wieReiktUit": "Justin | Jan",
-      "locatie": "Podium",
-      "items": "Medailles, bloemen",
-      "sponsor": "",
-      "bijzonderheden": ""
-    }
-  ],
+  "huldigingen": [],
   "vrijwilligers": [],
-  "nextId": 3100,
+  "nextId": 3141,
   "eventInfo": {
     "naam": "",
     "datum": "",
