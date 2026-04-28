@@ -2,7 +2,7 @@
   "_meta": {
     "versie": "1.0",
     "app": "Regie",
-    "exportDatum": "27-4-2026, 11:32:53",
+    "exportDatum": "28-4-2026, 16:17:25",
     "event": "Loop Leeuwarden 2026"
   },
   "event": {
@@ -992,33 +992,6 @@
     }
   ],
   "contacten": [],
-  "leveranciers": [
-    {
-      "id": 52,
-      "naam": "Jan Dupon",
-      "contactPersoon": "Jan Dupon",
-      "rol": "DJ",
-      "telefoon": "",
-      "email": "",
-      "locNaam": "Oldehove",
-      "locAdres": "",
-      "locMaps": "",
-      "meldenBij": "",
-      "tijdAanwezig": "",
-      "tijdStart": "",
-      "tijdEinde": "",
-      "catering": "Beschikbaar",
-      "stroom": "Geregeld",
-      "opdracht": "",
-      "gage": "",
-      "notities": "",
-      "orgNaam": "",
-      "orgTel": "",
-      "orgEmail": "",
-      "noodNaam": "",
-      "noodTel": ""
-    }
-  ],
   "locaties": [
     {
       "id": 55,
@@ -1067,6 +1040,33 @@
       "naam": "Event Office, Gemeentehuis Leeuwarden",
       "adres": "Gemeentehuis Leeuwarden",
       "mapsUrl": "https://maps.app.goo.gl/Tp2WTCW42Fk6hEDv6"
+    }
+  ],
+  "leveranciers": [
+    {
+      "id": 52,
+      "naam": "Jan Dupon",
+      "contactPersoon": "Jan Dupon",
+      "rol": "DJ",
+      "telefoon": "",
+      "email": "",
+      "locNaam": "Oldehove",
+      "locAdres": "",
+      "locMaps": "",
+      "meldenBij": "",
+      "tijdAanwezig": "",
+      "tijdStart": "",
+      "tijdEinde": "",
+      "catering": "Beschikbaar",
+      "stroom": "Geregeld",
+      "opdracht": "",
+      "gage": "",
+      "notities": "",
+      "orgNaam": "",
+      "orgTel": "",
+      "orgEmail": "",
+      "noodNaam": "",
+      "noodTel": ""
     }
   ]
 }
