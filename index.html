@@ -70,6 +70,7 @@
       ⬆ data.json importeren
       <input type="file" accept=".json" style="display:none" onchange="importData(event)">
     </label>
+    <button class="sb-btn" onclick="openClaudeImportModal()" title="Plak JSON van Claude om data toe te voegen aan bestaande lijsten">🤖 Importeer uit Claude</button>
     <button class="sb-print" onclick="window.print()">🖨 &nbsp;Print regiepad</button>
   </div>
 </nav>
@@ -649,6 +650,28 @@
     <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
       <button class="btn btn-out btn-sm" onclick="closeEcModal()">Annuleren</button>
       <button class="btn btn-y btn-sm" onclick="genereerEenmaligeCallsheet()">👁 Voorbeeld</button>
+    </div>
+  </div>
+</div>
+
+<!-- CLAUDE IMPORT MODAL — plak JSON, voegt toe aan bestaande arrays -->
+<div class="ovl" id="ci-ovl">
+  <div class="modal-box" style="max-width:680px">
+    <div class="modal-hd"><h3>🤖 Importeer uit Claude</h3></div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+
+      <div style="background:var(--bg);border-left:3px solid var(--y);padding:10px 14px;font-size:12px;color:var(--t2);margin-bottom:14px;border-radius:4px">
+        Plak JSON met <b>items</b>, <b>entertainment</b>, <b>huldigingen</b>, <b>vrijwilligers</b> en/of <b>callsheets</b>. Alle keys zijn optioneel. Bestaande data blijft staan — nieuwe records worden toegevoegd met een nieuw id.
+      </div>
+
+      <div class="fg"><label>JSON</label><textarea id="ci-json" style="min-height:280px;font-family:var(--fm);font-size:12px" placeholder='{"items":[…], "entertainment":[…], "callsheets":[{"actNaam":"DJ Pieter","callsheet":{…}}]}'></textarea></div>
+
+      <div id="ci-result" style="display:none"></div>
+
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-out btn-sm" onclick="closeClaudeImportModal()">Sluiten</button>
+      <button class="btn btn-y btn-sm" onclick="confirmClaudeImport()">Importeren</button>
     </div>
   </div>
 </div>

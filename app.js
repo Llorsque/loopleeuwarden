@@ -3761,3 +3761,167 @@ function ecMeldToggle() {
   if (!cb || !block) return;
   block.style.display = cb.checked ? 'block' : 'none';
 }
+
+/* ═══════════════════════════════════════════════════════════════
+   IMPORTEER UIT CLAUDE — plak JSON, voegt toe aan bestaande arrays
+   Bestaande records worden niet aangeraakt; alle nieuwe records
+   krijgen een nieuw id via S.nextId++. Callsheets worden gekoppeld
+   aan een bestaande act via exacte naam-match.
+   ═══════════════════════════════════════════════════════════════ */
+function openClaudeImportModal() {
+  const ta = document.getElementById('ci-json');
+  const res = document.getElementById('ci-result');
+  if (ta) ta.value = '';
+  if (res) { res.style.display = 'none'; res.innerHTML = ''; }
+  document.getElementById('ci-ovl').classList.add('open');
+  setTimeout(() => { if (ta) ta.focus(); }, 80);
+}
+
+function closeClaudeImportModal() {
+  document.getElementById('ci-ovl').classList.remove('open');
+}
+
+function confirmClaudeImport() {
+  const ta = document.getElementById('ci-json');
+  const raw = (ta && ta.value || '').trim();
+  if (!raw) { alert('Plak eerst JSON in het tekstvak.'); return; }
+
+  // Parse — harde fout
+  let data;
+  try {
+    data = JSON.parse(raw);
+  } catch (err) {
+    alert('Ongeldige JSON.\n\nFoutmelding: ' + err.message);
+    return;
+  }
+
+  // Top-level structuur — harde fout
+  if (!data || typeof data !== 'object' || Array.isArray(data)) {
+    alert('Top-level moet een JSON-object zijn met optionele keys: items, entertainment, huldigingen, vrijwilligers, callsheets.');
+    return;
+  }
+
+  const known = ['items','entertainment','huldigingen','vrijwilligers','callsheets'];
+  const arrayKeys = ['items','entertainment','huldigingen','vrijwilligers','callsheets'];
+
+  // Elke aanwezige bekende key moet een array zijn — harde fout
+  for (const k of arrayKeys) {
+    if (data[k] !== undefined && data[k] !== null && !Array.isArray(data[k])) {
+      alert('Veld "' + k + '" moet een array zijn (of weggelaten worden).');
+      return;
+    }
+  }
+
+  // Verzamel waarschuwingen voor onbekende top-level keys
+  const warnings = [];
+  Object.keys(data).forEach(k => {
+    if (!known.includes(k)) warnings.push('Onbekende key "' + k + '" genegeerd.');
+  });
+
+  // Append-loops
+  const validItemTypes = ['item','sep','cue'];
+  let nItems = 0, nEnt = 0, nHul = 0, nVrij = 0, nCsKoppel = 0;
+
+  (data.items || []).forEach((rec, i) => {
+    if (!rec || typeof rec !== 'object') {
+      warnings.push('items[' + i + ']: geen object, overgeslagen.');
+      return;
+    }
+    if (!validItemTypes.includes(rec.type)) {
+      warnings.push('items[' + i + ']: ongeldig of ontbrekend type "' + (rec.type || '') + '" (verwacht item/sep/cue), overgeslagen.');
+      return;
+    }
+    const { id, ...rest } = rec;
+    S.items.push({ ...rest, id: S.nextId++ });
+    nItems++;
+  });
+
+  (data.entertainment || []).forEach((rec, i) => {
+    if (!rec || typeof rec !== 'object') {
+      warnings.push('entertainment[' + i + ']: geen object, overgeslagen.');
+      return;
+    }
+    const { id, ...rest } = rec;
+    if (!S.entertainment) S.entertainment = [];
+    S.entertainment.push({ ...rest, id: S.nextId++ });
+    nEnt++;
+  });
+
+  (data.huldigingen || []).forEach((rec, i) => {
+    if (!rec || typeof rec !== 'object') {
+      warnings.push('huldigingen[' + i + ']: geen object, overgeslagen.');
+      return;
+    }
+    const { id, ...rest } = rec;
+    if (!S.huldigingen) S.huldigingen = [];
+    S.huldigingen.push({ ...rest, id: S.nextId++ });
+    nHul++;
+  });
+
+  (data.vrijwilligers || []).forEach((rec, i) => {
+    if (!rec || typeof rec !== 'object') {
+      warnings.push('vrijwilligers[' + i + ']: geen object, overgeslagen.');
+      return;
+    }
+    const { id, ...rest } = rec;
+    if (!S.vrijwilligers) S.vrijwilligers = [];
+    S.vrijwilligers.push({ ...rest, id: S.nextId++ });
+    nVrij++;
+  });
+
+  (data.callsheets || []).forEach((rec, i) => {
+    if (!rec || typeof rec !== 'object') {
+      warnings.push('callsheets[' + i + ']: geen object, overgeslagen.');
+      return;
+    }
+    const naam = (rec.actNaam || '').trim();
+    if (!naam) {
+      warnings.push('callsheets[' + i + ']: "actNaam" ontbreekt, overgeslagen.');
+      return;
+    }
+    if (!rec.callsheet || typeof rec.callsheet !== 'object') {
+      warnings.push('callsheets[' + i + '] ("' + naam + '"): "callsheet" ontbreekt of is geen object, overgeslagen.');
+      return;
+    }
+    const act = (S.entertainment || []).find(e => e.naam === naam);
+    if (!act) {
+      warnings.push('callsheets[' + i + ']: act "' + naam + '" niet gevonden in entertainment, overgeslagen.');
+      return;
+    }
+    act.callsheet = rec.callsheet;
+    nCsKoppel++;
+  });
+
+  // Opslaan + UI verversen (zelfde patroon als importData + lib's)
+  save();
+  renderBoList();
+  if (typeof renderLib === 'function') { renderLib('ent'); renderLib('hul'); }
+  if (typeof renderVrij === 'function') renderVrij();
+  updateBadges();
+
+  // Samenvatting in modal tonen
+  const res = document.getElementById('ci-result');
+  if (res) {
+    const totals = [
+      nItems + ' items',
+      nEnt + ' entertainment',
+      nHul + ' huldigingen',
+      nVrij + ' vrijwilligers',
+      nCsKoppel + ' callsheets gekoppeld'
+    ].join(' · ');
+    let html = '<div style="margin-top:14px;padding:12px 14px;background:var(--bg);border-left:3px solid var(--green);border-radius:4px">'
+      + '<div style="font-size:12px;font-weight:700;color:var(--t1);margin-bottom:6px">✓ Import klaar</div>'
+      + '<div style="font-size:12px;color:var(--t2)">' + escHtml(totals) + '</div>';
+    if (warnings.length) {
+      html += '<div style="font-size:11px;font-weight:700;color:var(--t3);margin-top:10px;text-transform:uppercase;letter-spacing:1px">' + warnings.length + ' waarschuwing' + (warnings.length === 1 ? '' : 'en') + '</div>'
+        + '<ul style="font-size:12px;color:var(--t2);margin:6px 0 0 18px;padding:0">'
+        + warnings.map(w => '<li style="margin-bottom:3px">' + escHtml(w) + '</li>').join('')
+        + '</ul>';
+    }
+    html += '</div>';
+    res.innerHTML = html;
+    res.style.display = 'block';
+  }
+
+  showToast('✓ Import klaar — ' + (nItems + nEnt + nHul + nVrij) + ' nieuwe records, ' + nCsKoppel + ' callsheets gekoppeld' + (warnings.length ? ', ' + warnings.length + ' waarschuwing' + (warnings.length === 1 ? '' : 'en') : ''));
+}
