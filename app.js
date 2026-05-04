@@ -2401,7 +2401,604 @@ function delCont() { if(!confirm('Contact verwijderen?'))return; S.contacten=S.c
    Genereert een compleet draaiboek uit alle data in S
    ═══════════════════════════════════════════════════════════════ */
 
+/* ═══════════════════════════════════════════════════════════════
+   DRAAIBOEK — chronologisch in vier delen
+   Deel 1: voorwoord/event-info  Deel 2: tijdlijn  Deel 3: huldigingen
+   Deel 4: naslag (sponsoren, parcoursen, entertainment, locaties)
+   ═══════════════════════════════════════════════════════════════ */
 async function genereerDraaiboek() {
+  showToast('📄 Draaiboek wordt voorbereid…');
+
+  try {
+    await window.loadDocxLibrary();
+  } catch (e) {
+    alert('Kon Word-library niet laden:\n\n' + e.message + '\n\nCheck je internet of probeer opnieuw.');
+    return;
+  }
+
+  if (typeof docx === 'undefined') {
+    alert('Word-library niet beschikbaar. Probeer de pagina te verversen (Cmd+Shift+R) en opnieuw.');
+    return;
+  }
+
+  showToast('📄 Draaiboek wordt gegenereerd…');
+
+  try {
+    const {
+      Document, Packer, Paragraph, TextRun, HeadingLevel, AlignmentType,
+      Table, TableRow, TableCell, WidthType, PageBreak,
+      Header, Footer, PageNumber
+    } = docx;
+
+    // ── helpers ──────────────────────────────────────────────────
+    const ev = S.event || {};
+    const evi = S.eventInfo || {};
+    const datumStr = ev.date || evi.datum || '';
+    const naamStr = ev.name || evi.naam || 'Draaiboek';
+
+    const T = (text, opts={}) => new TextRun({ text: String(text||''), ...opts });
+    const P = (children, opts={}) => new Paragraph({ children: Array.isArray(children) ? children : [children], ...opts });
+    const empty = () => new Paragraph({ children: [new TextRun('')] });
+
+    const H1 = (text) => new Paragraph({
+      heading: HeadingLevel.HEADING_1,
+      children: [new TextRun({ text: String(text||''), bold: true, size: 36 })],
+      spacing: { before: 400, after: 200 },
+      pageBreakBefore: true
+    });
+    const H2 = (text) => new Paragraph({
+      heading: HeadingLevel.HEADING_2,
+      children: [new TextRun({ text: String(text||''), bold: true, size: 28 })],
+      spacing: { before: 300, after: 150 }
+    });
+    const H3 = (text) => new Paragraph({
+      heading: HeadingLevel.HEADING_3,
+      children: [new TextRun({ text: String(text||''), bold: true, size: 22 })],
+      spacing: { before: 200, after: 100 }
+    });
+
+    const labelValue = (label, value) => new Paragraph({
+      children: [
+        new TextRun({ text: label + ': ', bold: true }),
+        new TextRun({ text: String(value || '—') })
+      ],
+      spacing: { after: 60 }
+    });
+
+    // Multi-line label: eerste regel met bold label, daarna paragraaf per regel
+    const labelMulti = (label, value) => {
+      const out = [P([new TextRun({ text: label + ':', bold: true })], { spacing: { after: 40 } })];
+      String(value || '').split(/\n+/).filter(Boolean).forEach(p => out.push(P(T(p))));
+      return out;
+    };
+
+    const tableCell = (content, opts={}) => new TableCell({
+      width: opts.width ? { size: opts.width, type: WidthType.PERCENTAGE } : undefined,
+      shading: opts.shading ? { fill: opts.shading } : undefined,
+      children: [new Paragraph({
+        children: [new TextRun({ text: String(content||''), bold: !!opts.bold, size: opts.size || 18 })],
+        alignment: opts.align || AlignmentType.LEFT
+      })]
+    });
+
+    const t2m = (t) => { if(!t) return 9999; const [h,m] = t.split(':').map(Number); return (h||0)*60+(m||0); };
+
+    // ── afstand-matching ─────────────────────────────────────────
+    const AFSTANDEN = [
+      { key:'hm',   afstand:'21,1km', naam:'Halve Marathon', cat:'hardlopen',
+        parcoursAfstand:'21,1 km', triggers:['halve marathon','hm','21km','21,1km','21.1km'] },
+      { key:'kr1',  afstand:'1km',    naam:'Kidsrun',        cat:'kidsrun',
+        parcoursAfstand:'1 km',    triggers:['1km','kidsrun 1'] },
+      { key:'kr25', afstand:'2,5km',  naam:'Kidsrun',        cat:'kidsrun',
+        parcoursAfstand:'2,5 km',  triggers:['2,5km','2.5km','kidsrun 2'] },
+      { key:'5k',   afstand:'5km',    naam:'Hardlopen',      cat:'hardlopen',
+        parcoursAfstand:'5 km',    triggers:['5km'] },
+      { key:'10k',  afstand:'10km',   naam:'Hardlopen',      cat:'hardlopen',
+        parcoursAfstand:'10 km',   triggers:['10km'] },
+      { key:'18k',  afstand:'18km',   naam:'Wandelen',       cat:'wandelen',
+        parcoursAfstand:'18 km',   triggers:['18km'] },
+      { key:'12k',  afstand:'12km',   naam:'Wandelen',       cat:'wandelen',
+        parcoursAfstand:'12 km',   triggers:['12km'] },
+      { key:'6k',   afstand:'6km',    naam:'Wandelen',       cat:'wandelen',
+        parcoursAfstand:'6 km',    triggers:['6km'] }
+    ];
+
+    // Eén match = anker, anders niet (multi of geen → null)
+    const matchAfstand = (oms) => {
+      const o = (oms || '').toLowerCase();
+      const hits = AFSTANDEN.filter(a => a.triggers.some(t => o.includes(t)));
+      return hits.length === 1 ? hits[0] : null;
+    };
+
+    // TODO: na 4 mei verplaatsen naar S.eventInfo of een eigen S.hoofdsponsoren[]-array
+    const HOOFDSPONSOREN = [
+      { categorie:'Hardlopen', sponsor:'Bouwgroep Dijkstra Draisma', afstandKey:'hm'  },
+      { categorie:'Kidsrun',   sponsor:'Kinderopvang Friesland',     afstandKey:'kr1' },
+      { categorie:'Wandelen',  sponsor:'DeFriesland',                afstandKey:'6k'  }
+    ];
+
+    const HOOFDLOCATIES = ['Wilhelminaplein', 'Groeneweg', 'Oldehoofsterkerkhof'];
+
+    // ── context bouwen ───────────────────────────────────────────
+    const parcoursen = S.parcoursen || [];
+    const normAfstand = (s) => (s || '').toString().toLowerCase().replace(/\s+/g, '');
+    const parcoursByKey = {};
+    AFSTANDEN.forEach(a => {
+      const want = normAfstand(a.parcoursAfstand);
+      const p = parcoursen.find(x => normAfstand(x.afstand) === want);
+      if (p) parcoursByKey[a.key] = p;
+    });
+
+    const isWandelenMatch = (a) => {
+      if (!a) return false;
+      const p = parcoursByKey[a.key];
+      return !!(p && /wandelen/i.test(p.naam || ''));
+    };
+
+    const allEvents = (S.items || []).filter(i => i.type === 'item' || i.type === 'cue');
+    const itemAfstandMap = new Map();
+    allEvents.forEach(i => itemAfstandMap.set(i.id, matchAfstand(i.omschrijving)));
+
+    // Sortering: op start, tiebreak hardlopen/kidsrun (0) vóór wandelen (1)
+    const itemsSorted = allEvents.slice().sort((a, b) => {
+      const ta = t2m(a.start), tb = t2m(b.start);
+      if (ta !== tb) return ta - tb;
+      const wa = isWandelenMatch(itemAfstandMap.get(a.id)) ? 1 : 0;
+      const wb = isWandelenMatch(itemAfstandMap.get(b.id)) ? 1 : 0;
+      return wa - wb;
+    });
+
+    // Eerste item per afstand (chronologisch) → trigger voor briefing
+    const firstItemPerAfstand = new Map();
+    itemsSorted.forEach(i => {
+      const a = itemAfstandMap.get(i.id);
+      if (a && !firstItemPerAfstand.has(a.key)) firstItemPerAfstand.set(a.key, i.id);
+    });
+
+    // Sprekers per locatie + fallback via items
+    const entertainment = S.entertainment || [];
+    const sprekersOpLocatie = (loc) => {
+      const lk = loc.toLowerCase();
+      return entertainment.filter(e => e.type === 'Spreker' && (e.locatie || '').toLowerCase().includes(lk));
+    };
+    const wieFallbackOpLocatie = (loc) => {
+      const lk = loc.toLowerCase();
+      const wie = new Set();
+      (S.items || []).forEach(i => {
+        if ((i.type === 'item' || i.type === 'cue') && (i.locatie || '').toLowerCase().includes(lk) && i.wie) {
+          wie.add(i.wie);
+        }
+      });
+      return [...wie];
+    };
+
+    // ── 0. VOORPAGINA ────────────────────────────────────────────
+    const voorpagina = [
+      new Paragraph({ children: [new TextRun('')], spacing: { before: 2000 } }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'DRAAIBOEK', bold: true, size: 56, color: '666666' })],
+        spacing: { after: 400 }
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: naamStr, bold: true, size: 72 })],
+        spacing: { after: 200 }
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: datumStr, size: 32 })],
+        spacing: { after: 1200 }
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'Status: concept', size: 20, color: '888888' })]
+      }),
+      new Paragraph({
+        alignment: AlignmentType.CENTER,
+        children: [new TextRun({ text: 'Gegenereerd op ' + new Date().toLocaleString('nl-NL', { timeZone: 'Europe/Amsterdam' }), size: 18, color: '888888' })]
+      })
+    ];
+
+    // ── DEEL 1: VOORWOORD / EVENT-INFO ───────────────────────────
+    const deel1 = [H1('Deel 1 — Voorwoord')];
+    deel1.push(labelValue('Evenement', naamStr));
+    if (datumStr)     deel1.push(labelValue('Datum', datumStr));
+    if (evi.locatie)  deel1.push(labelValue('Locatie', evi.locatie));
+    if (evi.editie)   deel1.push(labelValue('Editie', evi.editie));
+
+    if (evi.inleiding) {
+      deel1.push(empty());
+      deel1.push(H3('Inleiding'));
+      evi.inleiding.split(/\n+/).filter(Boolean).forEach(p => deel1.push(P(T(p))));
+    }
+    if (evi.startInfo) {
+      deel1.push(empty());
+      deel1.push(H3('Start-info'));
+      evi.startInfo.split(/\n+/).filter(Boolean).forEach(p => deel1.push(P(T(p))));
+    }
+    if (evi.noemen) {
+      deel1.push(empty());
+      deel1.push(H3('Noemenswaardig'));
+      evi.noemen.split(/\n+/).filter(Boolean).forEach(p => deel1.push(P(T(p))));
+    }
+
+    deel1.push(empty());
+    deel1.push(H2('Hoofdsponsoren'));
+    HOOFDSPONSOREN.forEach(hs => {
+      const p = parcoursByKey[hs.afstandKey];
+      const sub = p ? `${p.afstand || ''} ${p.naam || ''}`.trim() : hs.categorie;
+      deel1.push(P([
+        new TextRun({ text: hs.categorie + ' — ', bold: true }),
+        new TextRun({ text: hs.sponsor, bold: true }),
+        new TextRun({ text: sub ? '   (' + sub + ')' : '' })
+      ]));
+    });
+
+    deel1.push(empty());
+    deel1.push(H2('Hoofdlocaties'));
+    HOOFDLOCATIES.forEach(loc => {
+      let sprekers = sprekersOpLocatie(loc).map(s => s.naam);
+      if (!sprekers.length) sprekers = wieFallbackOpLocatie(loc);
+      deel1.push(P([
+        new TextRun({ text: loc, bold: true }),
+        new TextRun({ text: sprekers.length ? ' — spreker(s): ' + sprekers.join(', ') : ' — geen spreker bekend' })
+      ]));
+    });
+
+    // ── DEEL 2: TIJDLIJN ─────────────────────────────────────────
+    const deel2 = [H1('Deel 2 — Tijdlijn van de dag')];
+    deel2.push(P(T('Alle onderdelen en cues, chronologisch op start. Bij gelijke tijd: hardlopen vóór wandelen.', { italics: true })));
+    deel2.push(empty());
+
+    itemsSorted.forEach(item => {
+      const a = itemAfstandMap.get(item.id);
+      const isCue = item.type === 'cue';
+      const tijd = (item.start || '?') + (!isCue && item.eind ? '–' + item.eind : '');
+
+      deel2.push(new Paragraph({
+        heading: HeadingLevel.HEADING_3,
+        children: [
+          new TextRun({ text: tijd + '  ', bold: true, font: 'JetBrains Mono', size: 22 }),
+          new TextRun({ text: (isCue ? '[CUE] ' : '') + (item.omschrijving || 'Onderdeel'), bold: true, size: 22 })
+        ],
+        spacing: { before: 240, after: 80 }
+      }));
+
+      const subParts = [];
+      if (item.locatie) subParts.push(item.locatie);
+      if (item.wie)     subParts.push(item.wie);
+      if (subParts.length) {
+        deel2.push(P([new TextRun({ text: subParts.join(' · '), color: '555555' })]));
+      }
+
+      if (a) {
+        const p = parcoursByKey[a.key];
+        const sponsorNm = p ? (p.sponsorNaam || '') : '';
+        const ankerTxt = `Afstand: ${a.afstand} ${a.naam}${sponsorNm ? ' — ' + sponsorNm : ''}`;
+        deel2.push(P([new TextRun({ text: ankerTxt, italics: true, color: '7A7A7A', size: 18 })]));
+      }
+
+      // Briefing alleen bij eerste item van een afstand
+      if (a && firstItemPerAfstand.get(a.key) === item.id) {
+        const p = parcoursByKey[a.key];
+        if (p) {
+          deel2.push(empty());
+          deel2.push(P([new TextRun({ text: 'Afstandsbriefing', bold: true, size: 20 })]));
+          if (p.route) labelMulti('Route', p.route).forEach(x => deel2.push(x));
+          const wavesTxt = [p.wavesAantal && (p.wavesAantal + ' waves'), p.wavesBijzonderheden]
+            .filter(Boolean).join(' — ');
+          if (wavesTxt) deel2.push(labelValue('Waves', wavesTxt));
+          if (p.klassementen) labelMulti('Klassementen', p.klassementen).forEach(x => deel2.push(x));
+          if (p.deelnemers)   deel2.push(labelValue('Deelnemers', p.deelnemers));
+          const vorigeTxt = [p.vorigJaar, p.winnaarstijd && ('winnaarstijd ' + p.winnaarstijd)]
+            .filter(Boolean).join(' — ');
+          if (vorigeTxt) deel2.push(labelValue('Vorige editie', vorigeTxt));
+          if (p.atleten && p.atleten.length) {
+            const atl = p.atleten.map(at => typeof at === 'object' ? (at.naam || JSON.stringify(at)) : at).join(', ');
+            deel2.push(labelValue('Atleten', atl));
+          }
+        }
+      }
+
+      if (item.bijzonderheden) labelMulti('Bijzonderheden', item.bijzonderheden).forEach(x => deel2.push(x));
+      if (item.script)         labelMulti('Script',         item.script).forEach(x => deel2.push(x));
+      if (item.dj)             labelMulti('DJ',             item.dj).forEach(x => deel2.push(x));
+      if (item.techniek)       labelMulti('Techniek',       item.techniek).forEach(x => deel2.push(x));
+    });
+
+    // ── DEEL 3: HULDIGINGEN ──────────────────────────────────────
+    const deel3 = [H1('Deel 3 — Huldigingen')];
+    deel3.push(P(T('Alle huldigingen, prijsuitreikingen en cheque-momenten op één plek voor de huldigingspodium-speaker.', { italics: true })));
+    deel3.push(empty());
+
+    const reHuldiging = /huldiging|prijsuitreiking|cheque/i;
+    const huldigingen = itemsSorted.filter(i => reHuldiging.test(i.omschrijving || ''));
+    if (!huldigingen.length) {
+      deel3.push(P(T('Geen huldigingen of prijsuitreikingen gevonden.', { italics: true })));
+    }
+    huldigingen.forEach(item => {
+      const a = itemAfstandMap.get(item.id);
+      const tijd = (item.start || '?') + (item.eind ? '–' + item.eind : '');
+      deel3.push(new Paragraph({
+        heading: HeadingLevel.HEADING_3,
+        children: [
+          new TextRun({ text: tijd + '  ', bold: true, font: 'JetBrains Mono', size: 22 }),
+          new TextRun({ text: item.omschrijving || 'Huldiging', bold: true, size: 22 })
+        ],
+        spacing: { before: 240, after: 80 }
+      }));
+      if (item.locatie) deel3.push(labelValue('Locatie', item.locatie));
+      if (item.wie)     deel3.push(labelValue('Uitreiker / spreker', item.wie));
+      if (a) {
+        const p = parcoursByKey[a.key];
+        const sponsorNm = p ? (p.sponsorNaam || '') : '';
+        if (sponsorNm) deel3.push(labelValue('Sponsor-link', `${a.afstand} ${a.naam} — ${sponsorNm}`));
+      }
+      if (item.bijzonderheden) labelMulti('Benodigdheden / bijzonderheden', item.bijzonderheden).forEach(x => deel3.push(x));
+      if (item.script)         labelMulti('Script',   item.script).forEach(x => deel3.push(x));
+      if (item.dj)             labelMulti('DJ',       item.dj).forEach(x => deel3.push(x));
+      if (item.techniek)       labelMulti('Techniek', item.techniek).forEach(x => deel3.push(x));
+    });
+
+    // ── DEEL 4: NASLAG ───────────────────────────────────────────
+    const deel4 = [H1('Deel 4 — Naslag')];
+
+    // Sponsoren-overzicht
+    deel4.push(H2('Sponsoren-overzicht'));
+    const sponsorMap = new Map();
+    parcoursen.forEach(p => {
+      if (p.sponsorNaam) {
+        if (!sponsorMap.has(p.sponsorNaam)) sponsorMap.set(p.sponsorNaam, []);
+        sponsorMap.get(p.sponsorNaam).push(`${p.afstand || ''} ${p.naam || ''}`.trim());
+      }
+    });
+    if (sponsorMap.size) {
+      sponsorMap.forEach((afstanden, naam) => {
+        deel4.push(P([
+          new TextRun({ text: naam, bold: true }),
+          new TextRun({ text: ' — ' + afstanden.join('; ') })
+        ]));
+      });
+    } else {
+      deel4.push(P(T('Geen sponsoren in parcoursen.', { italics: true })));
+    }
+    if (S.sponsoren && S.sponsoren.length) {
+      deel4.push(empty());
+      deel4.push(H3('Aanvullende sponsoren'));
+      S.sponsoren.forEach(s => {
+        deel4.push(P([
+          new TextRun({ text: (s.naam || 'Sponsor'), bold: true }),
+          new TextRun({ text: (s.categorie ? ' (' + s.categorie + ')' : '') + (s.bijdrage ? ' — ' + s.bijdrage : '') })
+        ]));
+      });
+    }
+
+    // Parcoursen-tabel
+    deel4.push(empty());
+    deel4.push(H2('Parcoursen'));
+    if (parcoursen.length) {
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Afstand',   { bold: true, shading: 'D0D0D0', width: 9 }),
+          tableCell('Naam',      { bold: true, shading: 'D0D0D0', width: 18 }),
+          tableCell('Start',     { bold: true, shading: 'D0D0D0', width: 8 }),
+          tableCell('Sponsor',   { bold: true, shading: 'D0D0D0', width: 15 }),
+          tableCell('Startloc',  { bold: true, shading: 'D0D0D0', width: 12 }),
+          tableCell('Finishloc', { bold: true, shading: 'D0D0D0', width: 12 }),
+          tableCell('Route',     { bold: true, shading: 'D0D0D0', width: 16 }),
+          tableCell('Waves',     { bold: true, shading: 'D0D0D0', width: 10 })
+        ]
+      });
+      const rows = [headerRow];
+      parcoursen.forEach(p => {
+        rows.push(new TableRow({
+          children: [
+            tableCell(p.afstand || '',     { size: 16 }),
+            tableCell(p.naam || '',        { size: 16 }),
+            tableCell(p.starttijd || '',   { size: 16 }),
+            tableCell(p.sponsorNaam || '', { size: 16 }),
+            tableCell(p.startLoc || '',    { size: 16 }),
+            tableCell(p.finishLoc || '',   { size: 16 }),
+            tableCell(p.route || '',       { size: 14 }),
+            tableCell(p.wavesAantal || '', { size: 16 })
+          ]
+        }));
+      });
+      deel4.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+    } else {
+      deel4.push(P(T('Geen parcoursen geregistreerd.', { italics: true })));
+    }
+
+    // Entertainment, gegroepeerd op locatie
+    deel4.push(empty());
+    deel4.push(H2('Entertainment'));
+    if (entertainment.length) {
+      const groepen = new Map();
+      entertainment.forEach(e => {
+        const loc = e.locatie || 'Onbekende locatie';
+        if (!groepen.has(loc)) groepen.set(loc, []);
+        groepen.get(loc).push(e);
+      });
+      groepen.forEach((acts, loc) => {
+        deel4.push(H3(loc));
+        acts.forEach(e => {
+          deel4.push(P([
+            new TextRun({ text: e.naam || 'Entertainment', bold: true }),
+            new TextRun({ text: e.type ? ' — ' + e.type : '' })
+          ]));
+        });
+      });
+    } else {
+      deel4.push(P(T('Geen entertainment geregistreerd.', { italics: true })));
+    }
+
+    // Locaties
+    deel4.push(empty());
+    deel4.push(H2('Locaties'));
+    if (S.locaties && S.locaties.length) {
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Naam',     { bold: true, shading: 'D0D0D0', width: 30 }),
+          tableCell('Adres',    { bold: true, shading: 'D0D0D0', width: 35 }),
+          tableCell('Maps-URL', { bold: true, shading: 'D0D0D0', width: 35 })
+        ]
+      });
+      const rows = [headerRow];
+      S.locaties.forEach(l => {
+        rows.push(new TableRow({
+          children: [
+            tableCell(l.naam || '',    { size: 16 }),
+            tableCell(l.adres || '',   { size: 16 }),
+            tableCell(l.mapsUrl || '', { size: 14 })
+          ]
+        }));
+      });
+      deel4.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+    } else {
+      deel4.push(P(T('Geen locaties geregistreerd.', { italics: true })));
+    }
+
+    // Contacten — alleen tonen als gevuld
+    if (S.contacten && S.contacten.length) {
+      deel4.push(empty());
+      deel4.push(H2('Contacten'));
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Naam',     { bold: true, shading: 'D0D0D0', width: 25 }),
+          tableCell('Functie',  { bold: true, shading: 'D0D0D0', width: 25 }),
+          tableCell('Telefoon', { bold: true, shading: 'D0D0D0', width: 20 }),
+          tableCell('E-mail',   { bold: true, shading: 'D0D0D0', width: 30 })
+        ]
+      });
+      const rows = [headerRow];
+      S.contacten.forEach(c => {
+        rows.push(new TableRow({
+          children: [
+            tableCell(c.naam || '',     { size: 16 }),
+            tableCell((c.functie || '') + (c.organisatie ? ' — ' + c.organisatie : ''), { size: 16 }),
+            tableCell(c.telefoon || '', { size: 16 }),
+            tableCell(c.email || '',    { size: 16 })
+          ]
+        }));
+      });
+      deel4.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+    }
+
+    // Leveranciers — alleen tonen als gevuld
+    if (S.leveranciers && S.leveranciers.length) {
+      deel4.push(empty());
+      deel4.push(H2('Leveranciers'));
+      const headerRow = new TableRow({
+        tableHeader: true,
+        children: [
+          tableCell('Naam',     { bold: true, shading: 'D0D0D0', width: 25 }),
+          tableCell('Rol',      { bold: true, shading: 'D0D0D0', width: 20 }),
+          tableCell('Contact',  { bold: true, shading: 'D0D0D0', width: 25 }),
+          tableCell('Telefoon', { bold: true, shading: 'D0D0D0', width: 15 }),
+          tableCell('E-mail',   { bold: true, shading: 'D0D0D0', width: 15 })
+        ]
+      });
+      const rows = [headerRow];
+      S.leveranciers.forEach(l => {
+        rows.push(new TableRow({
+          children: [
+            tableCell(l.naam || '',           { size: 16 }),
+            tableCell(l.rol || '',            { size: 16 }),
+            tableCell(l.contactPersoon || '', { size: 16 }),
+            tableCell(l.telefoon || '',       { size: 16 }),
+            tableCell(l.email || '',          { size: 14 })
+          ]
+        }));
+      });
+      deel4.push(new Table({ rows, width: { size: 100, type: WidthType.PERCENTAGE } }));
+    }
+
+    // ── ALLE SECTIES SAMENVOEGEN ────────────────────────────────
+    const allChildren = [
+      ...voorpagina,
+      ...deel1,
+      ...deel2,
+      ...deel3,
+      ...deel4
+    ];
+
+    const doc = new Document({
+      creator: 'Regie',
+      title: naamStr + ' — Draaiboek',
+      description: 'Gegenereerd draaiboek',
+      styles: {
+        default: {
+          document: {
+            run: { font: 'Calibri', size: 20 }
+          }
+        }
+      },
+      sections: [{
+        properties: {
+          page: {
+            margin: { top: 1000, right: 1000, bottom: 1000, left: 1000 }
+          }
+        },
+        headers: {
+          default: new Header({
+            children: [new Paragraph({
+              alignment: AlignmentType.RIGHT,
+              children: [new TextRun({ text: naamStr + ' — Draaiboek', size: 16, color: '888888' })]
+            })]
+          })
+        },
+        footers: {
+          default: new Footer({
+            children: [new Paragraph({
+              alignment: AlignmentType.CENTER,
+              children: [
+                new TextRun({ text: 'pagina ', size: 16, color: '888888' }),
+                new TextRun({ children: [PageNumber.CURRENT], size: 16, color: '888888' }),
+                new TextRun({ text: ' van ', size: 16, color: '888888' }),
+                new TextRun({ children: [PageNumber.TOTAL_PAGES], size: 16, color: '888888' })
+              ]
+            })]
+          })
+        },
+        children: allChildren
+      }]
+    });
+
+    const blob = await Packer.toBlob(doc);
+    const eventSlug = (naamStr || 'draaiboek').toLowerCase()
+      .replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '').slice(0, 30);
+    const datumSlug = new Date().toISOString().slice(0, 10);
+    const filename = `draaiboek-${eventSlug}-${datumSlug}.docx`;
+
+    if (typeof saveAs !== 'undefined') {
+      saveAs(blob, filename);
+    } else {
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    showToast('✓ Draaiboek gedownload: ' + filename);
+
+  } catch (err) {
+    console.error('Draaiboek-fout:', err);
+    alert('Fout bij genereren draaiboek:\n\n' + err.message + '\n\nCheck de browser-console (Cmd+Opt+I) voor details.');
+  }
+}
+
+
+/* ═══════════════════════════════════════════════════════════════
+   DRAAIBOEK OUD — fallback als de nieuwe versie niet bevalt
+   Niet aangeroepen vanuit UI; handmatig via console: genereerDraaiboekOud()
+   ═══════════════════════════════════════════════════════════════ */
+async function genereerDraaiboekOud() {
   showToast('📄 Draaiboek wordt voorbereid…');
 
   // Lazy-load docx library bij eerste klik
