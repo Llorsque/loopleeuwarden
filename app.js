@@ -2483,32 +2483,7 @@ async function genereerDraaiboek() {
 
     const t2m = (t) => { if(!t) return 9999; const [h,m] = t.split(':').map(Number); return (h||0)*60+(m||0); };
 
-    // ── afstand-matching ─────────────────────────────────────────
-    const AFSTANDEN = [
-      { key:'hm',   afstand:'21,1km', naam:'Halve Marathon', cat:'hardlopen',
-        parcoursAfstand:'21,1 km', triggers:['halve marathon','hm','21km','21,1km','21.1km'] },
-      { key:'kr1',  afstand:'1km',    naam:'Kidsrun',        cat:'kidsrun',
-        parcoursAfstand:'1 km',    triggers:['1km','kidsrun 1'] },
-      { key:'kr25', afstand:'2,5km',  naam:'Kidsrun',        cat:'kidsrun',
-        parcoursAfstand:'2,5 km',  triggers:['2,5km','2.5km','kidsrun 2'] },
-      { key:'5k',   afstand:'5km',    naam:'Hardlopen',      cat:'hardlopen',
-        parcoursAfstand:'5 km',    triggers:['5km'] },
-      { key:'10k',  afstand:'10km',   naam:'Hardlopen',      cat:'hardlopen',
-        parcoursAfstand:'10 km',   triggers:['10km'] },
-      { key:'18k',  afstand:'18km',   naam:'Wandelen',       cat:'wandelen',
-        parcoursAfstand:'18 km',   triggers:['18km'] },
-      { key:'12k',  afstand:'12km',   naam:'Wandelen',       cat:'wandelen',
-        parcoursAfstand:'12 km',   triggers:['12km'] },
-      { key:'6k',   afstand:'6km',    naam:'Wandelen',       cat:'wandelen',
-        parcoursAfstand:'6 km',    triggers:['6km'] }
-    ];
-
-    // Eén match = anker, anders niet (multi of geen → null)
-    const matchAfstand = (oms) => {
-      const o = (oms || '').toLowerCase();
-      const hits = AFSTANDEN.filter(a => a.triggers.some(t => o.includes(t)));
-      return hits.length === 1 ? hits[0] : null;
-    };
+    // afstand-matching: AFSTANDEN + matchAfstand staan op module-scope (onderaan app.js)
 
     // TODO: na 4 mei verplaatsen naar S.eventInfo of een eigen S.hoofdsponsoren[]-array
     const HOOFDSPONSOREN = [
@@ -2539,14 +2514,34 @@ async function genereerDraaiboek() {
     const itemAfstandMap = new Map();
     allEvents.forEach(i => itemAfstandMap.set(i.id, matchAfstand(i.omschrijving)));
 
-    // Sortering: op start, tiebreak hardlopen/kidsrun (0) vóór wandelen (1)
-    const itemsSorted = allEvents.slice().sort((a, b) => {
+    // Sortering: op start, tiebreak hardlopen/kidsrun (0) vóór wandelen (1).
+    // Flex-cues (auto:true + lege start) sorteren we apart: direct ná hun parent-anker.
+    const isFlexCue = (i) => i.type === 'cue' && i.auto && !i.start;
+    const baseEvents = allEvents.filter(i => !isFlexCue(i));
+    const flexCues   = allEvents.filter(isFlexCue);
+    const baseSorted = baseEvents.slice().sort((a, b) => {
       const ta = t2m(a.start), tb = t2m(b.start);
       if (ta !== tb) return ta - tb;
       const wa = isWandelenMatch(itemAfstandMap.get(a.id)) ? 1 : 0;
       const wb = isWandelenMatch(itemAfstandMap.get(b.id)) ? 1 : 0;
       return wa - wb;
     });
+    const flexByParent = new Map();
+    flexCues.forEach(c => {
+      const k = c.parentAnkerId != null ? c.parentAnkerId : '_orphan';
+      if (!flexByParent.has(k)) flexByParent.set(k, []);
+      flexByParent.get(k).push(c);
+    });
+    const itemsSorted = [];
+    baseSorted.forEach(item => {
+      itemsSorted.push(item);
+      if (flexByParent.has(item.id)) {
+        flexByParent.get(item.id).forEach(c => itemsSorted.push(c));
+        flexByParent.delete(item.id);
+      }
+    });
+    // Flex-cues zonder bestaande parent (orphan of verwijderd anker) achteraan
+    flexByParent.forEach(arr => arr.forEach(c => itemsSorted.push(c)));
 
     // Eerste item per afstand (chronologisch) → trigger voor briefing
     const firstItemPerAfstand = new Map();
@@ -4521,4 +4516,333 @@ function confirmClaudeImport() {
   }
 
   showToast('✓ Import klaar — ' + (nItems + nEnt + nHul + nVrij) + ' nieuwe records, ' + nCsKoppel + ' callsheets gekoppeld' + (warnings.length ? ', ' + warnings.length + ' waarschuwing' + (warnings.length === 1 ? '' : 'en') : ''));
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AFSTANDEN — module-scope config (gebruikt door genereerDraaiboek
+   en door de aanloop-cues-generator hieronder).
+   ═══════════════════════════════════════════════════════════════ */
+const AFSTANDEN = [
+  { key:'hm',   afstand:'21,1km', naam:'Halve Marathon', cat:'hardlopen',
+    parcoursAfstand:'21,1 km', triggers:['halve marathon','hm','21km','21,1km','21.1km'] },
+  { key:'kr1',  afstand:'1km',    naam:'Kidsrun',        cat:'kidsrun',
+    parcoursAfstand:'1 km',    triggers:['1km','kidsrun 1'] },
+  { key:'kr25', afstand:'2,5km',  naam:'Kidsrun',        cat:'kidsrun',
+    parcoursAfstand:'2,5 km',  triggers:['2,5km','2.5km','kidsrun 2'] },
+  { key:'5k',   afstand:'5km',    naam:'Hardlopen',      cat:'hardlopen',
+    parcoursAfstand:'5 km',    triggers:['5km'] },
+  { key:'10k',  afstand:'10km',   naam:'Hardlopen',      cat:'hardlopen',
+    parcoursAfstand:'10 km',   triggers:['10km'] },
+  { key:'18k',  afstand:'18km',   naam:'Wandelen',       cat:'wandelen',
+    parcoursAfstand:'18 km',   triggers:['18km'] },
+  { key:'12k',  afstand:'12km',   naam:'Wandelen',       cat:'wandelen',
+    parcoursAfstand:'12 km',   triggers:['12km'] },
+  { key:'6k',   afstand:'6km',    naam:'Wandelen',       cat:'wandelen',
+    parcoursAfstand:'6 km',    triggers:['6km'] }
+];
+
+// Langste-trigger-wint. Bij gelijk-lange triggers van verschillende afstanden → null.
+function matchAfstand(oms) {
+  const o = (oms || '').toLowerCase();
+  const alle = [];
+  AFSTANDEN.forEach(a => a.triggers.forEach(t => alle.push({ trigger: t, afstand: a })));
+  alle.sort((x, y) => y.trigger.length - x.trigger.length);
+
+  let maxLen = 0;
+  const matches = [];
+  for (const m of alle) {
+    if (m.trigger.length < maxLen) break;
+    if (o.includes(m.trigger)) {
+      maxLen = m.trigger.length;
+      if (!matches.includes(m.afstand)) matches.push(m.afstand);
+    }
+  }
+  return matches.length === 1 ? matches[0] : null;
+}
+
+/* ═══════════════════════════════════════════════════════════════
+   AANLOOP-CUES — automatisch T-30/T-15/etc. rondom start-ankers
+   ═══════════════════════════════════════════════════════════════ */
+
+const RITMES = {
+  // A — Hardloop-start (HM)
+  A: {
+    naam: 'Hardloop-start (HM)',
+    cues: [
+      { offset: 30, omschrijving: 'Omroep startvakken open' },
+      { offset: 20, omschrijving: 'Oproep naar startvak' },
+      { offset: 15, omschrijving: 'Aankondiging: nog 15 minuten tot start' },
+      { offset: 12, omschrijving: 'Interview hoofdsponsor afstand' },
+      { offset: 7,  omschrijving: 'Interview kanshebber of bijzonder verhaal' },
+      { offset: 3,  omschrijving: 'Opbouw, DJ erbij' },
+      { offset: 1,  omschrijving: 'Stilte / klaarmaken' }
+    ],
+    vervolgFlex: true
+  },
+  // A+ — Hardloop-start (5km/10km): T-1 vervangen door T-2 + T-1 (aangepaste sport)
+  Aplus: {
+    naam: 'Hardloop-start (5km/10km)',
+    cues: [
+      { offset: 30, omschrijving: 'Omroep startvakken open' },
+      { offset: 20, omschrijving: 'Oproep naar startvak' },
+      { offset: 15, omschrijving: 'Aankondiging: nog 15 minuten tot start' },
+      { offset: 12, omschrijving: 'Interview hoofdsponsor afstand' },
+      { offset: 7,  omschrijving: 'Interview kanshebber of bijzonder verhaal' },
+      { offset: 3,  omschrijving: 'Opbouw, DJ erbij' },
+      { offset: 2,  omschrijving: 'Aankondiging: aangepaste-sport-start volgt' },
+      { offset: 1,  omschrijving: 'START aangepaste sport' }
+    ],
+    vervolgFlex: true
+  },
+  // B1 — Kidsrun 1km: vervolgwave wacht tot vorige binnen is (geen klok-cue)
+  B1: {
+    naam: 'Kidsrun 1km',
+    cues: [
+      { offset: 20, omschrijving: 'Startvak open' },
+      { offset: 5,  omschrijving: 'Warming-up begint',
+        bijzonderheden: "DJ-cue: dansers geven 'DJ, hit it!' tussen T-3 en T-2" }
+    ],
+    vervolgFlex: false,
+    vervolgInstructie: 'Vervolgwaves Kidsrun 1km: wacht tot vorige wave binnen is voordat volgende start. Geen vast interval.'
+  },
+  // B25 — Kidsrun 2,5km: vervolgwaves op vast interval (zit al in parcours.wavesInterval)
+  B25: {
+    naam: 'Kidsrun 2,5km',
+    cues: [
+      { offset: 20, omschrijving: 'Startvak open' },
+      { offset: 5,  omschrijving: 'Warming-up begint',
+        bijzonderheden: "DJ-cue: dansers geven 'DJ, hit it!' tussen T-3 en T-2" }
+    ],
+    vervolgFlex: false
+  },
+  // C — Wandel-start
+  C: {
+    naam: 'Wandel-start',
+    cues: [
+      { offset: 30, omschrijving: 'Omroep: startblok komt eraan' },
+      { offset: 15, omschrijving: 'Herhaling omroep' },
+      { offset: 7,  omschrijving: 'Praatje sponsor' }
+    ],
+    vervolgFlex: false
+  }
+};
+
+const HARDLOOP_VERVOLG_INSTRUCTIE = 'Vervolgwaves: interval flexibel — per wave ophypen + countdown. DJ en speaker beslissen samen wanneer volgende wave gaat, gebaseerd op vertrek vorige wave.';
+const STUDENTENWAVE_INSTRUCTIE     = 'Studentenwave 10km (wave 2): officieel maken met eigen ophyp-moment vóór start.';
+
+// Ritme-keuze per AFSTANDEN.key
+function ritmeVoorAfstand(afstandKey) {
+  switch (afstandKey) {
+    case 'hm':                return 'A';
+    case '5k': case '10k':    return 'Aplus';
+    case 'kr1':               return 'B1';
+    case 'kr25':              return 'B25';
+    case '18k': case '12k': case '6k': return 'C';
+    default:                  return null;
+  }
+}
+
+// HH:MM minus N minuten, blijft in 24-uurs venster
+function tijdMinusMinuten(start, minuten) {
+  if (!start || !/^\d{1,2}:\d{2}$/.test(start)) return '';
+  const [h, m] = start.split(':').map(Number);
+  let total = h * 60 + m - minuten;
+  while (total < 0) total += 24 * 60;
+  total = total % (24 * 60);
+  return String(Math.floor(total / 60)).padStart(2, '0') + ':' + String(total % 60).padStart(2, '0');
+}
+
+function geldigeStarttijd(s) {
+  return !!s && /^\d{1,2}:\d{2}$/.test(s);
+}
+
+// Anker = item-type met omschrijving die begint met "Start "
+function isStartAnker(item) {
+  if (!item || item.type !== 'item') return false;
+  const o = (item.omschrijving || '').toLowerCase().trim();
+  if (!o) return false;
+  return o.startsWith('start ');
+}
+
+// Huldiging-anker: omschrijving bevat huldiging / prijsuitreiking / cheque
+function isHuldigingAnker(item) {
+  if (!item || item.type !== 'item') return false;
+  const o = (item.omschrijving || '').toLowerCase();
+  if (!o) return false;
+  return /huldiging|prijsuitreiking|cheque/.test(o);
+}
+
+// Bestaat al een auto-cue voor dit anker?
+function heeftAlAutoCues(ankerId) {
+  return (S.items || []).some(i =>
+    i.type === 'cue' && i.auto && i.parentAnkerId === ankerId
+  );
+}
+
+// Bouw alle cues voor één anker (zonder id, klaar om straks op confirm te pushen)
+function buildAanloopCues(anker, ritme, afstandKey) {
+  const wie = anker.wie || '';
+  const locatie = anker.locatie || '';
+  const cues = [];
+  ritme.cues.forEach(c => {
+    cues.push({
+      type: 'cue', auto: true, parentAnkerId: anker.id,
+      omschrijving: c.omschrijving,
+      start: tijdMinusMinuten(anker.start, c.offset),
+      wie, locatie,
+      bijzonderheden: c.bijzonderheden || ''
+    });
+  });
+  if (ritme.vervolgFlex) {
+    cues.push({
+      type: 'cue', auto: true, parentAnkerId: anker.id,
+      omschrijving: 'Vervolgwaves — interval flexibel',
+      start: '', wie, locatie,
+      bijzonderheden: HARDLOOP_VERVOLG_INSTRUCTIE
+    });
+  }
+  if (ritme.vervolgInstructie) {
+    cues.push({
+      type: 'cue', auto: true, parentAnkerId: anker.id,
+      omschrijving: 'Vervolgwaves — instructie',
+      start: '', wie, locatie,
+      bijzonderheden: ritme.vervolgInstructie
+    });
+  }
+  if (afstandKey === '10k') {
+    cues.push({
+      type: 'cue', auto: true, parentAnkerId: anker.id,
+      omschrijving: 'Studentenwave 10km — extra',
+      start: '', wie, locatie,
+      bijzonderheden: STUDENTENWAVE_INSTRUCTIE
+    });
+  }
+  return cues;
+}
+
+// Tijdelijke staging tot de gebruiker op Toevoegen klikt
+let _aanloopStaged = [];
+
+function openAanloopModal() {
+  _aanloopStaged = [];
+  const groups = []; // { anker, status, a?, ritmeNaam?, cues? }
+
+  (S.items || []).forEach(item => {
+    // Huldiging-ankers eerst — apart blok, geen ritme
+    if (isHuldigingAnker(item)) {
+      groups.push({ anker: item, status: 'huldiging' });
+      return;
+    }
+    // Alleen items die met "Start " beginnen zijn start-ankers
+    if (!isStartAnker(item)) return;
+
+    const anker = item;
+    const a = matchAfstand(anker.omschrijving);
+    if (!a) { groups.push({ anker, status: 'no-match' }); return; }
+    if (!geldigeStarttijd(anker.start)) { groups.push({ anker, status: 'no-time', a }); return; }
+    if (heeftAlAutoCues(anker.id))      { groups.push({ anker, status: 'duplicate', a }); return; }
+    const ritmeKey = ritmeVoorAfstand(a.key);
+    const ritme    = ritmeKey ? RITMES[ritmeKey] : null;
+    if (!ritme) { groups.push({ anker, status: 'no-match', a }); return; }
+    const cues = buildAanloopCues(anker, ritme, a.key);
+    groups.push({ anker, status: 'ok', a, ritmeNaam: ritme.naam, cues });
+    cues.forEach(c => _aanloopStaged.push(c));
+  });
+
+  renderAanloopPreview(groups);
+  document.getElementById('aanloop-ovl').classList.add('open');
+}
+
+function renderAanloopPreview(groups) {
+  const ok        = groups.filter(g => g.status === 'ok');
+  const dup       = groups.filter(g => g.status === 'duplicate');
+  const noTime    = groups.filter(g => g.status === 'no-time');
+  const noMatch   = groups.filter(g => g.status === 'no-match');
+  const huldiging = groups.filter(g => g.status === 'huldiging');
+  const totalCues = _aanloopStaged.length;
+
+  let html = '';
+
+  if (!groups.length) {
+    html += '<div style="padding:30px;text-align:center;color:var(--t3);font-size:13px">Geen start-ankers gevonden in het regiepad. Items moeten van type \'onderdeel\' zijn en een omschrijving hebben die begint met "Start ".</div>';
+  }
+
+  if (ok.length) {
+    html += '<div style="background:var(--bg);border-left:3px solid var(--y);padding:10px 14px;font-size:12px;color:var(--t2);margin-bottom:14px;border-radius:4px"><b>'
+         + totalCues + ' cue' + (totalCues !== 1 ? 's' : '')
+         + '</b> klaar voor ' + ok.length + ' anker' + (ok.length !== 1 ? 's' : '')
+         + '. Pas bij <b>Toevoegen</b> worden ze opgeslagen — niets wijzigt nog.</div>';
+    ok.forEach(g => {
+      html += '<div style="border:1px solid var(--border);border-radius:6px;padding:12px;margin-bottom:10px;background:#fff">'
+           +  '<div style="font-weight:600;margin-bottom:4px"><span style="font-family:var(--fm);color:var(--acc);margin-right:8px">' + escHtml(g.anker.start) + '</span>' + escHtml(g.anker.omschrijving || '') + '</div>'
+           +  '<div style="font-size:11px;color:var(--t3);margin-bottom:8px">Ritme: ' + escHtml(g.ritmeNaam) + '</div>'
+           +  '<ul style="margin:0;padding-left:18px;font-size:12px;line-height:1.5">';
+      g.cues.forEach(c => {
+        const tijdTxt = c.start
+          ? '<span style="font-family:var(--fm);color:var(--acc)">' + escHtml(c.start) + '</span>'
+          : '<span style="color:var(--t3);font-style:italic">flex</span>';
+        const biz = c.bijzonderheden
+          ? '<div style="color:var(--t3);font-size:11px;margin-top:2px;padding-left:8px">↳ ' + escHtml(c.bijzonderheden) + '</div>'
+          : '';
+        html += '<li style="margin-bottom:4px">' + tijdTxt + ' &nbsp;' + escHtml(c.omschrijving) + biz + '</li>';
+      });
+      html += '</ul></div>';
+    });
+  }
+
+  const renderSkipBlok = (lijst, kleur, kop) => {
+    if (!lijst.length) return '';
+    let h = '<div style="background:var(--bg);border-left:3px solid ' + kleur + ';padding:10px 14px;font-size:12px;color:var(--t2);margin:14px 0 6px;border-radius:4px"><b>'
+          + lijst.length + ' anker' + (lijst.length !== 1 ? 's' : '') + '</b> overgeslagen — ' + kop + '</div>';
+    h += '<ul style="margin:0 0 14px 18px;font-size:12px;color:var(--t3)">';
+    lijst.forEach(g => {
+      const t = g.anker.start ? escHtml(g.anker.start) + ' — ' : '';
+      h += '<li>' + t + escHtml(g.anker.omschrijving || '(geen omschrijving)') + '</li>';
+    });
+    h += '</ul>';
+    return h;
+  };
+
+  if (huldiging.length) {
+    html += '<div style="background:var(--bg);border-left:3px solid #888;padding:10px 14px;font-size:12px;color:var(--t2);margin:14px 0 6px;border-radius:4px"><b>'
+          + huldiging.length + ' huldiging-anker' + (huldiging.length !== 1 ? 's' : '')
+          + '</b> gevonden — geen ritme beschikbaar, overgeslagen.</div>';
+    html += '<ul style="margin:0 0 14px 18px;font-size:12px;color:var(--t3)">';
+    huldiging.forEach(g => {
+      const t = g.anker.start ? escHtml(g.anker.start) + ' — ' : '';
+      html += '<li>' + t + escHtml(g.anker.omschrijving || '(geen omschrijving)') + '</li>';
+    });
+    html += '</ul>';
+  }
+
+  html += renderSkipBlok(dup,     '#888',       'er bestaan al auto-cues voor deze ankers.');
+  html += renderSkipBlok(noTime,  'var(--red)', 'geen geldige starttijd ingevuld.');
+  html += renderSkipBlok(noMatch, 'var(--red)', 'afstand niet herkend.');
+
+  document.getElementById('aanloop-content').innerHTML = html;
+  const btn = document.getElementById('aanloop-add-btn');
+  btn.textContent = totalCues
+    ? 'Toevoegen (' + totalCues + ' cue' + (totalCues !== 1 ? 's' : '') + ')'
+    : 'Toevoegen';
+  btn.disabled = !totalCues;
+  btn.style.opacity = totalCues ? '1' : '.5';
+  btn.style.cursor  = totalCues ? 'pointer' : 'not-allowed';
+}
+
+function confirmAanloopCues() {
+  if (!_aanloopStaged.length) { closeAanloopModal(); return; }
+  const n = _aanloopStaged.length;
+  _aanloopStaged.forEach(c => { S.items.push({ id: S.nextId++, ...c }); });
+  _aanloopStaged = [];
+  save();
+  closeAanloopModal();
+  if (typeof renderBoList  === 'function') renderBoList();
+  if (typeof renderRPTable === 'function') renderRPTable();
+  if (typeof updateBadges  === 'function') updateBadges();
+  showToast('🎬 ' + n + ' aanloop-cue' + (n !== 1 ? 's' : '') + ' toegevoegd');
+}
+
+function closeAanloopModal() {
+  _aanloopStaged = [];
+  document.getElementById('aanloop-ovl').classList.remove('open');
 }

@@ -71,6 +71,7 @@
       <input type="file" accept=".json" style="display:none" onchange="importData(event)">
     </label>
     <button class="sb-btn" onclick="openClaudeImportModal()" title="Plak JSON van Claude om data toe te voegen aan bestaande lijsten">🤖 Importeer uit Claude</button>
+    <button class="sb-btn" onclick="openAanloopModal()" title="Genereer aanloop-cues (T-30, T-15, etc.) rondom bestaande start-items">🎬 Genereer aanloop-cues</button>
     <button class="sb-print" onclick="window.print()">🖨 &nbsp;Print regiepad</button>
   </div>
 </nav>
@@ -672,6 +673,20 @@
     <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
       <button class="btn btn-out btn-sm" onclick="closeClaudeImportModal()">Sluiten</button>
       <button class="btn btn-y btn-sm" onclick="confirmClaudeImport()">Importeren</button>
+    </div>
+  </div>
+</div>
+
+<!-- AANLOOP-CUES MODAL — preview van automatisch gegenereerde cues vóór toevoegen -->
+<div class="ovl" id="aanloop-ovl">
+  <div class="modal-box" style="max-width:760px">
+    <div class="modal-hd"><h3>🎬 Aanloop-cues genereren</h3></div>
+    <div class="modal-body" style="max-height:70vh;overflow-y:auto">
+      <div id="aanloop-content"></div>
+    </div>
+    <div class="modal-foot" style="background:var(--bg);border-top:1px solid var(--border);border-radius:0 0 14px 14px;padding:12px 26px 18px">
+      <button class="btn btn-out btn-sm" onclick="closeAanloopModal()">Annuleren</button>
+      <button class="btn btn-y btn-sm" id="aanloop-add-btn" onclick="confirmAanloopCues()">Toevoegen</button>
     </div>
   </div>
 </div>
